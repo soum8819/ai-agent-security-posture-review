@@ -59,26 +59,31 @@ In code, the overview lives in `app/page.tsx` and everything under the
 reviewer app lives in the `app/app/` folder.
 
 # Build guide: 17 steps
-<!-- TODO: paste the step titles from the build guide -->
-1. [to fill in]
-2. [to fill in]
-3. [to fill in]
-4. [to fill in]
-5. [to fill in]
-6. [to fill in]
-7. [to fill in]
-8. [to fill in]
-9. [to fill in]
-10. [to fill in]
-11. [to fill in]
-12. [to fill in]
-13. [to fill in]
-14. [to fill in]
-15. [to fill in]
-16. [to fill in]
-17. [to fill in]
+1. Freeze the scenario
+2. Accounts and access
+3. Hello deploy
+4. One model call through AI Gateway
+5. A workflow that waits for a person
+6. The agent profile and 12 test cases
+7. The rules that set a floor
+8. The first model reviews each profile
+9. A second model checks the first
+10. The human approval gate and reviewer screens (10b: UX and design polish)
+11. Enterprise controls
+12. Securing the reviewer (12b: optional front door for sensitive routes)
+13. The evaluation
+14. Cost, speed and what the platform shows
+15. README, decision log and code tour (15b: my feedback for Vercel)
+16. The deck and PDF (16b: the one-page site)
+17. Dry runs and submission
+    - Checks must test both `/` and `/app` in a private browser window.
+
+Running notes on each Vercel product used go in `docs/builder-feedback.md`
+(feeds step 15b).
 
 # Progress
 Updated by the project owner after each step.
 
-- [x] Project setup: Next.js app created (TypeScript, App Router, Tailwind), home page at `/`, placeholder at `/app`, CLAUDE.md added, first local commit. Not pushed yet.
+- [x] Step 1: done
+- [x] Step 2: done
+- [ ] Step 3: in progress (app created, not yet pushed or deployed)
