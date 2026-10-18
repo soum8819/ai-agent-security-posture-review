@@ -6,7 +6,7 @@ export default function Home() {
       </h1>
       <p className="text-lg text-zinc-600 dark:text-zinc-400">
         Harborline Financial Group, a fictional global bank and insurer, plans
-        to launch dozens of internal AI agents this year and needs every one
+        to launch about 40 internal AI agents this year and needs every one
         security-reviewed before launch without waiting 15 business days.
       </p>
     </main>
