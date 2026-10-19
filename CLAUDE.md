@@ -86,4 +86,6 @@ Updated by the project owner after each step.
 
 - [x] Step 1: done
 - [x] Step 2: done
-- [ ] Step 3: in progress (app created, not yet pushed or deployed)
+- [x] Step 3: done (live at ai-agent-security-posture-review.vercel.app)
+- [x] Step 4: done
+- [ ] Step 5: next (A workflow that waits for a person)
