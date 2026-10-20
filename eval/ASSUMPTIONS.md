@@ -50,7 +50,7 @@ reason says so.
 | profile-03 | credentials | shared_token | Not in AgentArmor. Only two choices exist; research tools often use a team's shared CRM API key |
 | profile-03 | untrustedInputs | web | Implied: AgentArmor lists web search and a news API |
 | profile-06 | credentials | own_scoped_token | Not in AgentArmor. Only two choices exist; a single read-only wiki connection usually has its own token |
-| profile-06 | untrustedInputs | none (empty list) | Implied: AgentArmor says vetted documents only and no external tool calls |
+| profile-06 | untrustedInputs | chat | Implied: AgentArmor calls it a chatbot that answers employee questions. Its sources are vetted documents only, so chat is its one untrusted input. Changed from none by the chat rule below |
 | profile-06 | memory | session | AgentArmor says "memory or RAG: yes" but describes only RAG. Session is the middle of none, session, persistent |
 | profile-08 | credentials | own_scoped_token | Not in AgentArmor. Only two choices exist; an automation service account is the common setup. Its admin rights are described separately |
 | profile-08 | untrustedInputs | logs_or_alerts | Implied: AgentArmor says it monitors production clusters and diagnoses incidents, so it reads logs and alerts |
@@ -81,9 +81,24 @@ Profiles 02, 04, 05, 07, 09 and 11 were written fresh from the step 6 spec.
 Every value in them is a choice made for this project, using the same middle
 value rule where the spec gave no detail.
 
+## Chat rule, applied to all 12 profiles
+
+If people send the agent messages in a chat, "chat" is listed as an untrusted
+input. If the agent only posts to a chat, it is not, because that is covered
+by the tool's "send messages" permission.
+
+| Profile | Field | Value | Reason |
+|---|---|---|---|
+| profile-02 | untrustedInputs | chat (was none) | Description: "Employees ask questions in the intranet chat window." |
+| profile-06 | untrustedInputs | chat (was none) | Description: "Single-tenant internal chatbot that answers employee questions from a curated, access-controlled internal wiki." |
+| profile-09 | untrustedInputs | uploaded_files, chat (was uploaded_files) | Description: "Staff ask it questions in the procurement team chat and it searches signed vendor contracts, ..." |
+
+Unchanged under the rule: profile-10 already lists chat (customers send it
+messages). Profiles 04, 05 and 12 only post to team chat, so they list no chat
+input. Profiles 01, 03, 07, 08 and 11 do not mention chat.
+
 ## Open questions
 
 1. Resolved: "chat" and "logs or alerts" were added to the untrusted input
    choices. Profile-10 now uses chat and profile-08 uses logs or alerts.
-2. Profiles 02, 06 and 09 also take questions typed by staff into a chat
-   window, but still list no chat input. Should they?
+2. Resolved: profiles 02, 06 and 09 now list chat, under the chat rule above.

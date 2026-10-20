@@ -15,7 +15,9 @@
     }
   ],
   "humanConfirmsActions": false,
-  "untrustedInputs": [],
+  "untrustedInputs": [
+    "chat"
+  ],
   "credentials": "own_scoped_token",
   "model": {
     "provider": "OpenAI",

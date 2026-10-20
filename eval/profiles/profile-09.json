@@ -23,7 +23,8 @@
   ],
   "humanConfirmsActions": false,
   "untrustedInputs": [
-    "uploaded_files"
+    "uploaded_files",
+    "chat"
   ],
   "credentials": "shared_token",
   "model": {

@@ -15,7 +15,9 @@
     }
   ],
   "humanConfirmsActions": true,
-  "untrustedInputs": [],
+  "untrustedInputs": [
+    "chat"
+  ],
   "credentials": "own_scoped_token",
   "model": {
     "provider": "Anthropic",
