@@ -64,6 +64,9 @@ reviewer app lives in the `app/app/` folder.
   and a submitter must be blocked from approving their own review.
 - At the end of step 6, draft docs/CODE_TOUR.md: one plain sentence per file
   saying what it does and why, written for a non-coder, reused later in step 15.
+- The answer key (eval/labels/, filled in by the project owner, with 4 profiles
+  marked held out) is committed separately, in its own commit, before step 7
+  starts. Nothing may be tuned against the held-out profiles.
 
 # Build guide: 17 steps
 1. Freeze the scenario
@@ -96,4 +99,4 @@ Updated by the project owner after each step.
 - [x] Step 3: done (live at ai-agent-security-posture-review.vercel.app)
 - [x] Step 4: done
 - [x] Step 5: done
-- [ ] Step 6: next (The agent profile and 12 test cases)
+- [ ] Step 6: scaffold built, answer key pending (not done)

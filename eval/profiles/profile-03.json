@@ -1,0 +1,49 @@
+{
+  "id": "profile-03",
+  "name": "Account Research Agent",
+  "owner": "Commercial Banking Sales",
+  "businessPurpose": "Prepare short account briefs on corporate clients before relationship managers meet them.",
+  "dataReads": [
+    "public",
+    "internal"
+  ],
+  "tools": [
+    {
+      "name": "Web search",
+      "permissions": [
+        "read"
+      ]
+    },
+    {
+      "name": "News search API",
+      "permissions": [
+        "read"
+      ]
+    },
+    {
+      "name": "Sales CRM",
+      "permissions": [
+        "read"
+      ]
+    }
+  ],
+  "humanConfirmsActions": false,
+  "untrustedInputs": [
+    "web"
+  ],
+  "credentials": "shared_token",
+  "model": {
+    "provider": "Anthropic",
+    "name": "Claude Sonnet (version not specified)"
+  },
+  "memory": "none",
+  "logging": {
+    "enabled": true,
+    "destination": "Application logs, not yet forwarded to the SIEM"
+  },
+  "killSwitch": {
+    "available": true,
+    "description": "Manual: the on-call engineer disables the agent's service account. No tested runbook."
+  },
+  "description": "Pulls public web and news data plus read-only CRM context about a client and summarizes it into a brief for the relationship manager. It has no write access to any system. The brief is advisory only and a person reads it before using it."
+}

@@ -1,0 +1,49 @@
+{
+  "id": "profile-10",
+  "name": "Customer Support Triage Agent",
+  "owner": "Retail Banking Customer Service",
+  "businessPurpose": "Resolve simple customer support requests in chat and route the rest to human agents.",
+  "dataReads": [
+    "confidential"
+  ],
+  "tools": [
+    {
+      "name": "Customer support CRM",
+      "permissions": [
+        "read",
+        "write"
+      ]
+    },
+    {
+      "name": "Order and transaction history",
+      "permissions": [
+        "read"
+      ]
+    },
+    {
+      "name": "Refund issuance API",
+      "permissions": [
+        "move_money"
+      ]
+    }
+  ],
+  "humanConfirmsActions": true,
+  "untrustedInputs": [
+    "chat"
+  ],
+  "credentials": "own_scoped_token",
+  "model": {
+    "provider": "Anthropic",
+    "name": "Claude Sonnet (version not specified)"
+  },
+  "memory": "session",
+  "logging": {
+    "enabled": true,
+    "destination": "Application logs, not yet forwarded to the SIEM"
+  },
+  "killSwitch": {
+    "available": true,
+    "description": "Manual: the on-call engineer disables the agent's service account. No tested runbook."
+  },
+  "description": "Customer-facing chat agent. It looks up order and transaction history using support documents and the CRM, drafts replies, and issues refunds of up to $50 automatically. Refunds above $50 need human approval. Conversation history is kept for each customer session."
+}

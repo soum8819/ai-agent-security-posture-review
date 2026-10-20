@@ -1,0 +1,46 @@
+{
+  "id": "profile-12",
+  "name": "Multi-Agent Client Engagement Orchestrator",
+  "owner": "Corporate Banking Strategy",
+  "businessPurpose": "Produce account strategy recommendations for large corporate clients by combining several specialist views.",
+  "dataReads": [
+    "confidential"
+  ],
+  "tools": [
+    {
+      "name": "Engagement tooling API",
+      "permissions": [
+        "read"
+      ]
+    },
+    {
+      "name": "Internal security knowledge base",
+      "permissions": [
+        "read"
+      ]
+    },
+    {
+      "name": "Team chat notification",
+      "permissions": [
+        "send_messages"
+      ]
+    }
+  ],
+  "humanConfirmsActions": true,
+  "untrustedInputs": [],
+  "credentials": "shared_token",
+  "model": {
+    "provider": "Anthropic",
+    "name": "Claude Sonnet (version not specified)"
+  },
+  "memory": "persistent",
+  "logging": {
+    "enabled": true,
+    "destination": "Application logs, not yet forwarded to the SIEM"
+  },
+  "killSwitch": {
+    "available": true,
+    "description": "Manual: the on-call engineer disables the agent's service account. No tested runbook."
+  },
+  "description": "An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations. Each sub-agent has scoped read-only tool access. The orchestrator can post summaries to team chat. No agent has write access to production systems."
+}

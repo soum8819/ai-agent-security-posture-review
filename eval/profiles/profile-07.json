@@ -1,0 +1,49 @@
+{
+  "id": "profile-07",
+  "name": "Payments Operations Assistant",
+  "owner": "Payments Operations",
+  "businessPurpose": "Help payments analysts clear the queue of payments held for repair, such as missing or mismatched beneficiary details.",
+  "dataReads": [
+    "confidential",
+    "customer_financial",
+    "personal"
+  ],
+  "tools": [
+    {
+      "name": "Payment exceptions queue",
+      "permissions": [
+        "read",
+        "write"
+      ]
+    },
+    {
+      "name": "Beneficiary lookup service",
+      "permissions": [
+        "read"
+      ]
+    },
+    {
+      "name": "Payment release API",
+      "permissions": [
+        "move_money"
+      ]
+    }
+  ],
+  "humanConfirmsActions": true,
+  "untrustedInputs": [],
+  "credentials": "own_scoped_token",
+  "model": {
+    "provider": "OpenAI",
+    "name": "gpt-5-mini"
+  },
+  "memory": "session",
+  "logging": {
+    "enabled": true,
+    "destination": "Harborline SIEM"
+  },
+  "killSwitch": {
+    "available": true,
+    "description": "Payments Operations can disable the release API connection from the operations console."
+  },
+  "description": "For each held payment, the assistant looks up the beneficiary record, proposes a corrected field, and writes the proposal to the exception record. An analyst reviews the proposal, and after the analyst clicks confirm the assistant calls the release API to send the payment. Payments above the analyst's own limit still need a second analyst."
+}

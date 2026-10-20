@@ -1,0 +1,51 @@
+{
+  "id": "profile-01",
+  "name": "Vendor Invoice Approval Agent",
+  "owner": "Finance Operations",
+  "businessPurpose": "Speed up vendor invoice processing by matching invoices to purchase orders and paying approved vendors.",
+  "dataReads": [
+    "confidential",
+    "customer_financial"
+  ],
+  "tools": [
+    {
+      "name": "ERP financial system",
+      "permissions": [
+        "read",
+        "write"
+      ]
+    },
+    {
+      "name": "Vendor invoices email inbox",
+      "permissions": [
+        "read",
+        "write"
+      ]
+    },
+    {
+      "name": "Wire transfer API",
+      "permissions": [
+        "move_money"
+      ]
+    }
+  ],
+  "humanConfirmsActions": false,
+  "untrustedInputs": [
+    "email"
+  ],
+  "credentials": "own_scoped_token",
+  "model": {
+    "provider": "Self-hosted",
+    "name": "Llama (version not specified)"
+  },
+  "memory": "persistent",
+  "logging": {
+    "enabled": true,
+    "destination": "Application logs, not yet forwarded to the SIEM"
+  },
+  "killSwitch": {
+    "available": true,
+    "description": "Manual: the on-call engineer disables the agent's service account. No tested runbook."
+  },
+  "description": "Reads vendor invoices from an email inbox, including attachments, extracts payment details, matches them against purchase orders in the ERP, and approves and initiates wire transfers of up to $25,000 without human review. It keeps a memory of vendor history to spot anomalies, but that memory store is shared across all vendor accounts with no per-vendor separation."
+}

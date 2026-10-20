@@ -1,0 +1,51 @@
+{
+  "id": "profile-04",
+  "name": "Claims Intake Triage Agent",
+  "owner": "Claims Operations",
+  "businessPurpose": "Sort incoming insurance claim emails by type and urgency so adjusters see urgent claims first.",
+  "dataReads": [
+    "confidential",
+    "personal"
+  ],
+  "tools": [
+    {
+      "name": "Claims intake email inbox",
+      "permissions": [
+        "read"
+      ]
+    },
+    {
+      "name": "Claims management system",
+      "permissions": [
+        "read",
+        "write"
+      ]
+    },
+    {
+      "name": "Team chat notification",
+      "permissions": [
+        "send_messages"
+      ]
+    }
+  ],
+  "humanConfirmsActions": false,
+  "untrustedInputs": [
+    "email",
+    "uploaded_files"
+  ],
+  "credentials": "own_scoped_token",
+  "model": {
+    "provider": "Google",
+    "name": "gemini-2.5-flash"
+  },
+  "memory": "none",
+  "logging": {
+    "enabled": true,
+    "destination": "Harborline SIEM"
+  },
+  "killSwitch": {
+    "available": true,
+    "description": "Claims Operations can pause the inbox connection from an admin page."
+  },
+  "description": "Reads each new email sent to the public claims address, including attached photos and PDFs, extracts the policy number and claim type, sets a priority and queue on the claim record, and posts urgent claims to the adjusters' team channel. It does not approve or pay claims. Adjusters can change any priority the agent sets."
+}

@@ -1,0 +1,34 @@
+{
+  "id": "profile-06",
+  "name": "Internal Knowledge Base Assistant",
+  "owner": "Group IT Service Desk",
+  "businessPurpose": "Answer employee questions from the internal IT and operations wiki.",
+  "dataReads": [
+    "internal"
+  ],
+  "tools": [
+    {
+      "name": "Internal wiki search",
+      "permissions": [
+        "read"
+      ]
+    }
+  ],
+  "humanConfirmsActions": true,
+  "untrustedInputs": [],
+  "credentials": "own_scoped_token",
+  "model": {
+    "provider": "Anthropic",
+    "name": "Claude Sonnet (version not specified)"
+  },
+  "memory": "session",
+  "logging": {
+    "enabled": true,
+    "destination": "Application logs, not yet forwarded to the SIEM"
+  },
+  "killSwitch": {
+    "available": true,
+    "description": "Manual: the on-call engineer disables the agent's service account. No tested runbook."
+  },
+  "description": "Single-tenant internal chatbot that answers employee questions from a curated, access-controlled internal wiki. It has no write access and makes no external tool calls, and the knowledge base holds no personal data. It retrieves only from vetted documents."
+}

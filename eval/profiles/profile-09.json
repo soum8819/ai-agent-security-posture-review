@@ -1,0 +1,43 @@
+{
+  "id": "profile-09",
+  "name": "Vendor Contract Lookup Assistant",
+  "owner": "Procurement",
+  "businessPurpose": "Let procurement staff find clauses and renewal dates in vendor contracts quickly.",
+  "dataReads": [
+    "confidential"
+  ],
+  "tools": [
+    {
+      "name": "Contract repository",
+      "permissions": [
+        "read",
+        "write"
+      ]
+    },
+    {
+      "name": "Procurement team chat",
+      "permissions": [
+        "read"
+      ]
+    }
+  ],
+  "humanConfirmsActions": false,
+  "untrustedInputs": [
+    "uploaded_files"
+  ],
+  "credentials": "shared_token",
+  "model": {
+    "provider": "Google",
+    "name": "gemini-2.5-flash"
+  },
+  "memory": "none",
+  "logging": {
+    "enabled": true,
+    "destination": "Application logs, not yet forwarded to the SIEM"
+  },
+  "killSwitch": {
+    "available": true,
+    "description": "Procurement IT can disable the assistant in the team chat settings."
+  },
+  "description": "This assistant is strictly read-only. Staff ask it questions in the procurement team chat and it searches signed vendor contracts, including contracts vendors upload through the supplier portal, and replies with the matching clause and its location. It cannot change anything, so there is nothing for a person to confirm."
+}

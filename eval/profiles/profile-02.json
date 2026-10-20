@@ -1,0 +1,34 @@
+{
+  "id": "profile-02",
+  "name": "HR Policy Q&A Bot",
+  "owner": "People Technology",
+  "businessPurpose": "Answer employee questions about HR policies such as leave, benefits and travel, so the HR helpdesk handles fewer routine tickets.",
+  "dataReads": [
+    "internal"
+  ],
+  "tools": [
+    {
+      "name": "HR policy library search",
+      "permissions": [
+        "read"
+      ]
+    }
+  ],
+  "humanConfirmsActions": false,
+  "untrustedInputs": [],
+  "credentials": "own_scoped_token",
+  "model": {
+    "provider": "OpenAI",
+    "name": "gpt-5-mini"
+  },
+  "memory": "session",
+  "logging": {
+    "enabled": true,
+    "destination": "Harborline SIEM"
+  },
+  "killSwitch": {
+    "available": true,
+    "description": "Feature flag owned by People Technology turns the bot off for all employees."
+  },
+  "description": "Employees ask questions in the intranet chat window. The bot searches the published HR policy library and answers with links to the source policy. It cannot see any employee's personal records, cannot open HR cases, and does not change any system. Conversation history is kept only for the current session."
+}

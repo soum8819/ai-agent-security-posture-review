@@ -1,0 +1,44 @@
+{
+  "id": "profile-11",
+  "name": "KYC Document Summarizer",
+  "owner": "Financial Crime Compliance",
+  "businessPurpose": "Cut the time analysts spend reading onboarding documents by summarizing them for the KYC case file.",
+  "dataReads": [
+    "personal",
+    "customer_financial"
+  ],
+  "tools": [
+    {
+      "name": "KYC document store",
+      "permissions": [
+        "read"
+      ]
+    },
+    {
+      "name": "KYC case management system",
+      "permissions": [
+        "read",
+        "write"
+      ]
+    }
+  ],
+  "humanConfirmsActions": true,
+  "untrustedInputs": [
+    "uploaded_files"
+  ],
+  "credentials": "own_scoped_token",
+  "model": {
+    "provider": "OpenAI",
+    "name": "gpt-5-mini"
+  },
+  "memory": "none",
+  "logging": {
+    "enabled": true,
+    "destination": "Harborline SIEM"
+  },
+  "killSwitch": {
+    "available": true,
+    "description": "Compliance IT can switch the summarizer off per business line from the case system."
+  },
+  "description": "When a new onboarding case opens, the agent reads the documents the customer uploaded, such as passports, proof of address and company registration papers, and writes a draft summary note with any gaps it sees. A KYC analyst must review and accept the note before it is saved to the case. The agent never approves or rejects a customer."
+}

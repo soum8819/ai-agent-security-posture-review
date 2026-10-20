@@ -1,0 +1,50 @@
+{
+  "id": "profile-08",
+  "name": "Platform Incident Remediation Agent",
+  "owner": "Cloud Platform Engineering",
+  "businessPurpose": "Reduce outage time by diagnosing and fixing common production incidents automatically.",
+  "dataReads": [
+    "confidential"
+  ],
+  "tools": [
+    {
+      "name": "Kubernetes API",
+      "permissions": [
+        "read",
+        "write"
+      ]
+    },
+    {
+      "name": "Shell on production nodes",
+      "permissions": [
+        "run_code"
+      ]
+    },
+    {
+      "name": "On-call paging service",
+      "permissions": [
+        "read",
+        "write"
+      ]
+    }
+  ],
+  "humanConfirmsActions": false,
+  "untrustedInputs": [
+    "logs_or_alerts"
+  ],
+  "credentials": "own_scoped_token",
+  "model": {
+    "provider": "Anthropic",
+    "name": "Claude Sonnet (version not specified)"
+  },
+  "memory": "persistent",
+  "logging": {
+    "enabled": true,
+    "destination": "Application logs, not yet forwarded to the SIEM"
+  },
+  "killSwitch": {
+    "available": true,
+    "description": "Manual: the on-call engineer disables the agent's service account. No tested runbook."
+  },
+  "description": "Monitors production Kubernetes clusters, diagnoses incidents using runbooks it retrieves, and fixes them by restarting pods, scaling deployments, or running any shell command on nodes with admin Kubernetes permissions. It coordinates with a separate log-analysis agent through shared memory. No action needs human approval, including destructive ones."
+}
