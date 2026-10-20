@@ -58,6 +58,13 @@ these by hand, and a review takes about 15 business days.
 In code, the overview lives in `app/page.tsx` and everything under the
 reviewer app lives in the `app/app/` folder.
 
+# Open decisions and known gaps
+- Approver identity is self-declared in the step 5 spike (`approver` is just a
+  name in the request). In the role steps it must come from the signed-in user,
+  and a submitter must be blocked from approving their own review.
+- At the end of step 6, draft docs/CODE_TOUR.md: one plain sentence per file
+  saying what it does and why, written for a non-coder, reused later in step 15.
+
 # Build guide: 17 steps
 1. Freeze the scenario
 2. Accounts and access
@@ -88,4 +95,5 @@ Updated by the project owner after each step.
 - [x] Step 2: done
 - [x] Step 3: done (live at ai-agent-security-posture-review.vercel.app)
 - [x] Step 4: done
-- [ ] Step 5: next (A workflow that waits for a person)
+- [x] Step 5: done
+- [ ] Step 6: next (The agent profile and 12 test cases)

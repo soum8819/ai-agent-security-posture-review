@@ -12,7 +12,8 @@
     "ai": "^7.0.143",
     "next": "16.4.2",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "workflow": "^5.2.2"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
