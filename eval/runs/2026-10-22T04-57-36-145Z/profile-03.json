@@ -1,0 +1,273 @@
+{
+  "profileId": "profile-03",
+  "tiers": {
+    "rule": 1,
+    "reviewer": 2,
+    "checker": 1,
+    "final": 2,
+    "setBy": [
+      "reviewer"
+    ],
+    "ruleReasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "A shared credential increases the blast radius if the token is compromised or reused by other services, allowing attackers to access the read-only CRM and other tools the agent uses without per-agent least-privilege controls.",
+      "recommendedControl": "Replace the shared_token with a per-agent, scoped credential that enforces least privilege and short lifetime, and rotate and audit the credential usage regularly.",
+      "modelSeverity": "high",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The finding accurately identifies the risk of using a shared credential, its category, and severity.",
+      "contested": false
+    },
+    {
+      "category": "ASI01",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [ \"web\" ]",
+      "whyItMatters": "The agent consumes untrusted web content which can include prompt-injection or malicious artifacts that alter planning or outputs, causing the agent to produce misleading or unsafe briefs.",
+      "recommendedControl": "Implement input sanitization and content provenance checks, restrict or sandbox retrieved web content, and apply prompt-level defenses and allowlists before incorporating external content into the agent's reasoning.",
+      "modelSeverity": "medium",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The finding correctly points out the risk of untrusted web inputs leading to agent goal hijack, with appropriate severity.",
+      "contested": false
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "\"model\": {\"provider\": \"Anthropic\", \"name\": \"Claude Sonnet (version not specified)\"}",
+      "whyItMatters": "The agent depends on a third-party model with an unspecified version, creating supply chain risk from model updates, hidden behavior changes, or malicious/compromised model variants that could alter outputs or leak sensitive context.",
+      "recommendedControl": "Pin the model to an explicit vetted version, perform change monitoring and testing for new model releases, and require attestation or vendor security documentation before model upgrades.",
+      "modelSeverity": "medium",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The finding correctly identifies the supply chain risk associated with an unspecified model version and its potential impact.",
+      "contested": false
+    },
+    {
+      "category": "ASI09",
+      "severity": "medium",
+      "evidenceQuote": "\"humanConfirmsActions\": false",
+      "whyItMatters": "The profile shows no enforced human confirmation while the agent generates advisory briefs consumed by relationship managers, so the agent's outputs may be trusted and acted upon even if they are incorrect or biased, enabling human-agent trust exploitation.",
+      "recommendedControl": "Enforce an explicit human-in-the-loop confirmation step for any brief used to influence client interactions, add provenance and confidence indicators in outputs, and log reviewer acknowledgement before use.",
+      "modelSeverity": "medium",
+      "id": "F4",
+      "secondModelVerdict": "disagree",
+      "secondModelReason": "The finding's severity is too high because the profile explicitly states 'a person reads it before using it', which mitigates the risk of direct exploitation of human trust, even if not system-enforced.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"logging\": {\"enabled\": true, \"destination\": \"Application logs, not yet forwarded to the SIEM\"}",
+      "whyItMatters": "Without forwarding logs to a SIEM, security teams lack centralized visibility into agent activity, making it difficult to detect and respond to incidents or cascading failures effectively. This could allow issues to propagate unnoticed.",
+      "recommendedControl": "Configure logging to forward all agent activity to the central SIEM for real-time monitoring and analysis.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"killSwitch\": {\"available\": true, \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"}",
+      "whyItMatters": "A manual kill switch without a tested runbook introduces delays and potential errors during an emergency, increasing the risk of harm from a rogue or compromised agent. This could lead to cascading failures if not quickly contained.",
+      "recommendedControl": "Develop and regularly test a clear, documented runbook for the kill switch procedure to ensure rapid and effective response.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This agent reads internal CRM and untrusted web data and uses a shared credential and a third-party model with no pinned version, creating moderate to high risks. Require scoped credentials, input sanitization for web sources, model version pinning and human-in-the-loop confirmation before briefs are used.",
+  "checkerSummary": "The agent is a read-only system that processes internal and public documents to generate advisory briefs, which are reviewed by a human. While there are several security weaknesses, such as shared credentials and untrusted inputs, these do not elevate its risk tier beyond Tier 1. The human review step is a critical control that prevents the agent from taking unconfirmed actions.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1881,
+      "inputTokenDetails": {
+        "noCacheTokens": 89,
+        "cacheReadTokens": 1792,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1800,
+      "outputTokenDetails": {
+        "textTokens": 648,
+        "reasoningTokens": 1152
+      },
+      "totalTokens": 3681,
+      "raw": {
+        "input_tokens": 1881,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 1792
+        },
+        "output_tokens": 1800,
+        "output_tokens_details": {
+          "reasoning_tokens": 1152
+        },
+        "total_tokens": 3681
+      }
+    },
+    "latencyMs": 24460,
+    "generationId": "gen_01M5GWM4MTP0NKNH2HFPWTZNAQ",
+    "costUsd": null
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2698,
+      "inputTokenDetails": {
+        "noCacheTokens": 1013,
+        "cacheReadTokens": 1685
+      },
+      "outputTokens": 1461,
+      "outputTokenDetails": {
+        "textTokens": 611,
+        "reasoningTokens": 850
+      },
+      "totalTokens": 4159,
+      "raw": {
+        "cachedContentTokenCount": 1685,
+        "thoughtsTokenCount": 850,
+        "promptTokenCount": 2698,
+        "candidatesTokenCount": 611,
+        "totalTokenCount": 4159,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2698
+          }
+        ],
+        "cacheTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 1685
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 611
+          }
+        ]
+      }
+    },
+    "latencyMs": 8191,
+    "generationId": "gen_01M5GZJ375EM0C699BME10DSWC",
+    "costUsd": 0.00400695
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 2,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "A shared credential increases the blast radius if the token is compromised or reused by other services, allowing attackers to access the read-only CRM and other tools the agent uses without per-agent least-privilege controls.",
+        "recommendedControl": "Replace the shared_token with a per-agent, scoped credential that enforces least privilege and short lifetime, and rotate and audit the credential usage regularly."
+      },
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [ \"web\" ]",
+        "whyItMatters": "The agent consumes untrusted web content which can include prompt-injection or malicious artifacts that alter planning or outputs, causing the agent to produce misleading or unsafe briefs.",
+        "recommendedControl": "Implement input sanitization and content provenance checks, restrict or sandbox retrieved web content, and apply prompt-level defenses and allowlists before incorporating external content into the agent's reasoning."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"model\": {\"provider\": \"Anthropic\", \"name\": \"Claude Sonnet (version not specified)\"}",
+        "whyItMatters": "The agent depends on a third-party model with an unspecified version, creating supply chain risk from model updates, hidden behavior changes, or malicious/compromised model variants that could alter outputs or leak sensitive context.",
+        "recommendedControl": "Pin the model to an explicit vetted version, perform change monitoring and testing for new model releases, and require attestation or vendor security documentation before model upgrades."
+      },
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "\"humanConfirmsActions\": false",
+        "whyItMatters": "The profile shows no enforced human confirmation while the agent generates advisory briefs consumed by relationship managers, so the agent's outputs may be trusted and acted upon even if they are incorrect or biased, enabling human-agent trust exploitation.",
+        "recommendedControl": "Enforce an explicit human-in-the-loop confirmation step for any brief used to influence client interactions, add provenance and confidence indicators in outputs, and log reviewer acknowledgement before use."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent reads internal CRM and untrusted web data and uses a shared credential and a third-party model with no pinned version, creating moderate to high risks. Require scoped credentials, input sanitization for web sources, model version pinning and human-in-the-loop confirmation before briefs are used."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The finding accurately identifies the risk of using a shared credential, its category, and severity."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The finding correctly points out the risk of untrusted web inputs leading to agent goal hijack, with appropriate severity."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The finding correctly identifies the supply chain risk associated with an unspecified model version and its potential impact."
+      },
+      {
+        "findingId": "F4",
+        "verdict": "disagree",
+        "reason": "The finding's severity is too high because the profile explicitly states 'a person reads it before using it', which mitigates the risk of direct exploitation of human trust, even if not system-enforced."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"logging\": {\"enabled\": true, \"destination\": \"Application logs, not yet forwarded to the SIEM\"}",
+        "whyItMatters": "Without forwarding logs to a SIEM, security teams lack centralized visibility into agent activity, making it difficult to detect and respond to incidents or cascading failures effectively. This could allow issues to propagate unnoticed.",
+        "recommendedControl": "Configure logging to forward all agent activity to the central SIEM for real-time monitoring and analysis."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"killSwitch\": {\"available\": true, \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"}",
+        "whyItMatters": "A manual kill switch without a tested runbook introduces delays and potential errors during an emergency, increasing the risk of harm from a rogue or compromised agent. This could lead to cascading failures if not quickly contained.",
+        "recommendedControl": "Develop and regularly test a clear, documented runbook for the kill switch procedure to ensure rapid and effective response."
+      }
+    ],
+    "proposedTier": 1,
+    "summary": "The agent is a read-only system that processes internal and public documents to generate advisory briefs, which are reviewed by a human. While there are several security weaknesses, such as shared credentials and untrusted inputs, these do not elevate its risk tier beyond Tier 1. The human review step is a critical control that prevents the agent from taking unconfirmed actions."
+  }
+}

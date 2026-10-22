@@ -211,3 +211,13 @@ export function assignTier(p: AgentProfile): { tier: Tier; reasons: string[] } {
   if (reasons.length === 0) reasons.push("Tier 1: read-only, public or internal data only");
   return { tier, reasons };
 }
+
+export type TierSource = "rule" | "reviewer" | "checker";
+
+// Step 9: the final tier is the highest of the rule tier and the two models'
+// proposed tiers. The models can raise the rule tier, never lower it.
+export function finalTier(tiers: Record<TierSource, Tier>): { final: Tier; setBy: TierSource[] } {
+  const final = Math.max(tiers.rule, tiers.reviewer, tiers.checker) as Tier;
+  const setBy = (Object.keys(tiers) as TierSource[]).filter((k) => tiers[k] === final);
+  return { final, setBy };
+}

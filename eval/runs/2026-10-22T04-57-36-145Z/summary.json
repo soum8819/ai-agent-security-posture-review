@@ -1,0 +1,292 @@
+{
+  "runId": "2026-10-22T04-57-36-145Z",
+  "set": "tuning",
+  "mode": "checker-only",
+  "reviewerResultsFrom": "2026-10-22T04-05-56-336Z",
+  "reviewerPromptVersion": "v4",
+  "checkerPromptVersion": "c1",
+  "reviewerSettings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "checkerSettings": {
+    "model": "google/gemini-2.5-flash",
+    "temperature": 0.2,
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "profiles": [
+    {
+      "id": "profile-01",
+      "ok": true,
+      "note": "tiers rule 4 reviewer 4 checker 4 final 4 (rule+reviewer+checker) | contested none | missed 3 kept, 0 dropped"
+    },
+    {
+      "id": "profile-02",
+      "ok": true,
+      "note": "tiers rule 1 reviewer 1 checker 1 final 1 (rule+reviewer+checker) | contested none | missed 2 kept, 0 dropped"
+    },
+    {
+      "id": "profile-03",
+      "ok": true,
+      "note": "tiers rule 1 reviewer 2 checker 1 final 2 (reviewer) | contested none | missed 2 kept, 0 dropped"
+    },
+    {
+      "id": "profile-05",
+      "ok": true,
+      "note": "tiers rule 3 reviewer 3 checker 3 final 3 (rule+reviewer+checker) | contested none | missed 2 kept, 0 dropped"
+    },
+    {
+      "id": "profile-07",
+      "ok": true,
+      "note": "tiers rule 3 reviewer 3 checker 3 final 3 (rule+reviewer+checker) | contested none | missed 3 kept, 0 dropped"
+    },
+    {
+      "id": "profile-09",
+      "ok": true,
+      "note": "tiers rule 4 reviewer 4 checker 4 final 4 (rule+reviewer+checker) | contested none | missed 2 kept, 0 dropped"
+    },
+    {
+      "id": "profile-10",
+      "ok": true,
+      "note": "tiers rule 2 reviewer 4 checker 4 final 4 (reviewer+checker) | contested none | missed 2 kept, 0 dropped"
+    },
+    {
+      "id": "profile-12",
+      "ok": true,
+      "note": "tiers rule 2 reviewer 2 checker 3 final 3 (checker) | contested none | missed 2 kept, 0 dropped"
+    }
+  ],
+  "costUsd": {
+    "reviewer": 0,
+    "checker": 0.036133,
+    "total": 0.036133
+  },
+  "gatewayGenerations": {
+    "profile-01": {
+      "reviewer": null,
+      "checker": {
+        "id": "gen_01M5GZHJ2TDB4JFWV8M2JXTZJA",
+        "total_cost": 0.0049292,
+        "market_cost": 0.0049292,
+        "surcharge_cost": 0,
+        "gateway_cost": 0.0049292,
+        "upstream_inference_cost": 0,
+        "usage": 0.0049292,
+        "created_at": "2026-10-22T04:57:36.000Z",
+        "model": "google/gemini-2.5-flash",
+        "is_byok": false,
+        "provider_name": "vertex",
+        "streamed": false,
+        "finish_reason": "stop",
+        "latency": 9717,
+        "generation_time": 9717,
+        "tokens_prompt": 2864,
+        "tokens_completion": 804,
+        "native_tokens_prompt": 2864,
+        "native_tokens_completion": 804,
+        "native_tokens_reasoning": 824,
+        "native_tokens_cached": 0,
+        "native_tokens_cache_creation": 0,
+        "billable_web_search_calls": 0
+      }
+    },
+    "profile-02": {
+      "reviewer": null,
+      "checker": {
+        "id": "gen_01M5GZHVQK3FVBPBFFRNQRAEXM",
+        "total_cost": 0.003899,
+        "market_cost": 0.003899,
+        "surcharge_cost": 0,
+        "gateway_cost": 0.003899,
+        "upstream_inference_cost": 0,
+        "usage": 0.003899,
+        "created_at": "2026-10-22T04:57:46.000Z",
+        "model": "google/gemini-2.5-flash",
+        "is_byok": false,
+        "provider_name": "vertex",
+        "streamed": false,
+        "finish_reason": "stop",
+        "latency": 7542,
+        "generation_time": 7542,
+        "tokens_prompt": 2255,
+        "tokens_completion": 510,
+        "native_tokens_prompt": 2255,
+        "native_tokens_completion": 510,
+        "native_tokens_reasoning": 779,
+        "native_tokens_cached": 0,
+        "native_tokens_cache_creation": 0,
+        "billable_web_search_calls": 0
+      }
+    },
+    "profile-03": {
+      "reviewer": null,
+      "checker": {
+        "id": "gen_01M5GZJ375EM0C699BME10DSWC",
+        "total_cost": 0.00400695,
+        "market_cost": 0.00400695,
+        "surcharge_cost": 0,
+        "gateway_cost": 0.00400695,
+        "upstream_inference_cost": 0,
+        "usage": 0.00400695,
+        "created_at": "2026-10-22T04:57:54.000Z",
+        "model": "google/gemini-2.5-flash",
+        "is_byok": false,
+        "provider_name": "vertex",
+        "streamed": false,
+        "finish_reason": "stop",
+        "latency": 8068,
+        "generation_time": 8068,
+        "tokens_prompt": 1013,
+        "tokens_completion": 611,
+        "native_tokens_prompt": 1013,
+        "native_tokens_completion": 611,
+        "native_tokens_reasoning": 850,
+        "native_tokens_cached": 1685,
+        "native_tokens_cache_creation": 0,
+        "billable_web_search_calls": 0
+      }
+    },
+    "profile-05": {
+      "reviewer": null,
+      "checker": {
+        "id": "gen_01M5GZJB6FZQDDRJ6Q1SW2XNGB",
+        "total_cost": 0.0043421,
+        "market_cost": 0.0043421,
+        "surcharge_cost": 0,
+        "gateway_cost": 0.0043421,
+        "upstream_inference_cost": 0,
+        "usage": 0.0043421,
+        "created_at": "2026-10-22T04:58:02.000Z",
+        "model": "google/gemini-2.5-flash",
+        "is_byok": false,
+        "provider_name": "vertex",
+        "streamed": false,
+        "finish_reason": "stop",
+        "latency": 7287,
+        "generation_time": 7287,
+        "tokens_prompt": 2707,
+        "tokens_completion": 647,
+        "native_tokens_prompt": 2707,
+        "native_tokens_completion": 647,
+        "native_tokens_reasoning": 765,
+        "native_tokens_cached": 0,
+        "native_tokens_cache_creation": 0,
+        "billable_web_search_calls": 0
+      }
+    },
+    "profile-07": {
+      "reviewer": null,
+      "checker": {
+        "id": "gen_01M5GZJJDD7B11C5B4M0QXXQVS",
+        "total_cost": 0.0050391,
+        "market_cost": 0.0050391,
+        "surcharge_cost": 0,
+        "gateway_cost": 0.0050391,
+        "upstream_inference_cost": 0,
+        "usage": 0.0050391,
+        "created_at": "2026-10-22T04:58:09.000Z",
+        "model": "google/gemini-2.5-flash",
+        "is_byok": false,
+        "provider_name": "vertex",
+        "streamed": false,
+        "finish_reason": "stop",
+        "latency": 8911,
+        "generation_time": 8911,
+        "tokens_prompt": 2872,
+        "tokens_completion": 849,
+        "native_tokens_prompt": 2872,
+        "native_tokens_completion": 849,
+        "native_tokens_reasoning": 822,
+        "native_tokens_cached": 0,
+        "native_tokens_cache_creation": 0,
+        "billable_web_search_calls": 0
+      }
+    },
+    "profile-09": {
+      "reviewer": null,
+      "checker": {
+        "id": "gen_01M5GZJV96VWCQ1RE08MVV09EY",
+        "total_cost": 0.0044898,
+        "market_cost": 0.0044898,
+        "surcharge_cost": 0,
+        "gateway_cost": 0.0044898,
+        "upstream_inference_cost": 0,
+        "usage": 0.0044898,
+        "created_at": "2026-10-22T04:58:18.000Z",
+        "model": "google/gemini-2.5-flash",
+        "is_byok": false,
+        "provider_name": "vertex",
+        "streamed": false,
+        "finish_reason": "stop",
+        "latency": 11108,
+        "generation_time": 11108,
+        "tokens_prompt": 2541,
+        "tokens_completion": 536,
+        "native_tokens_prompt": 2541,
+        "native_tokens_completion": 536,
+        "native_tokens_reasoning": 955,
+        "native_tokens_cached": 0,
+        "native_tokens_cache_creation": 0,
+        "billable_web_search_calls": 0
+      }
+    },
+    "profile-10": {
+      "reviewer": null,
+      "checker": {
+        "id": "gen_01M5GZK6A1TR6EY9BT925ERZSD",
+        "total_cost": 0.0048962,
+        "market_cost": 0.0048962,
+        "surcharge_cost": 0,
+        "gateway_cost": 0.0048962,
+        "upstream_inference_cost": 0,
+        "usage": 0.0048962,
+        "created_at": "2026-10-22T04:58:30.000Z",
+        "model": "google/gemini-2.5-flash",
+        "is_byok": false,
+        "provider_name": "vertex",
+        "streamed": false,
+        "finish_reason": "stop",
+        "latency": 9313,
+        "generation_time": 9313,
+        "tokens_prompt": 3179,
+        "tokens_completion": 725,
+        "native_tokens_prompt": 3179,
+        "native_tokens_completion": 725,
+        "native_tokens_reasoning": 852,
+        "native_tokens_cached": 0,
+        "native_tokens_cache_creation": 0,
+        "billable_web_search_calls": 0
+      }
+    },
+    "profile-12": {
+      "reviewer": null,
+      "checker": {
+        "id": "gen_01M5GZKFJ5NXNDCG2JCWVSRNXG",
+        "total_cost": 0.0045308,
+        "market_cost": 0.0045308,
+        "surcharge_cost": 0,
+        "gateway_cost": 0.0045308,
+        "upstream_inference_cost": 0,
+        "usage": 0.0045308,
+        "created_at": "2026-10-22T04:58:39.000Z",
+        "model": "google/gemini-2.5-flash",
+        "is_byok": false,
+        "provider_name": "google",
+        "streamed": false,
+        "finish_reason": "stop",
+        "latency": 10149,
+        "generation_time": 10149,
+        "tokens_prompt": 2411,
+        "tokens_completion": 622,
+        "native_tokens_prompt": 2411,
+        "native_tokens_completion": 622,
+        "native_tokens_reasoning": 901,
+        "native_tokens_cached": 0,
+        "native_tokens_cache_creation": 0,
+        "billable_web_search_calls": 0
+      }
+    }
+  }
+}

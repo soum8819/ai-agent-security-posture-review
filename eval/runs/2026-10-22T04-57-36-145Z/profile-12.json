@@ -1,0 +1,261 @@
+{
+  "profileId": "profile-12",
+  "tiers": {
+    "rule": 2,
+    "reviewer": 2,
+    "checker": 3,
+    "final": 3,
+    "setBy": [
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 2: can act beyond reading (Team chat notification)",
+      "Tier 2: reads confidential data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "A shared token implies credential reuse across agents or personnel, enabling lateral privilege escalation and making it hard to revoke or audit individual agent actions.",
+      "recommendedControl": "Replace the shared token with per-agent scoped credentials and implement short-lived tokens plus an automated rotation and revocation process.",
+      "modelSeverity": "high",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly states \"shared_token\", which is a clear vulnerability for identity and privilege abuse as described.",
+      "contested": false
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations.",
+      "whyItMatters": "Persistent, shared memory between multiple sub-agents lets corrupted or malicious inputs persist and influence future decisions, increasing the chance of biased or unsafe recommendations.",
+      "recommendedControl": "Segment memory per agent role with integrity checks, implement input validation and provenance tagging, and add periodic automated sanitization and review of persistent memory contents.",
+      "modelSeverity": "medium",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile states the orchestrator uses \"shared memory\" with sub-agents, which presents a risk for memory and context poisoning.",
+      "contested": false
+    },
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "The orchestrator can post summaries to team chat.",
+      "whyItMatters": "Ability to post summaries to team chat can be abused to exfiltrate confidential data or propagate malicious content, especially if posting is not strictly audited or restricted to sanitized outputs.",
+      "recommendedControl": "Require explicit human confirmation and automated content filtering before any message is posted, and log all posted messages to a monitored SIEM stream for audit.",
+      "modelSeverity": "medium",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile states the orchestrator \"can post summaries to team chat\", which is a valid concern for tool misuse and data exfiltration.",
+      "contested": false
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+      "whyItMatters": "Logs not forwarded to the SIEM and a kill switch described as manual with no tested runbook reduce monitoring and incident response capability, enabling faults or misuse to propagate longer before detection and containment.",
+      "recommendedControl": "Forward logs to the enterprise SIEM with alerting for anomalous agent behavior, and implement a tested, documented automated shutdown/runbook for the kill switch to ensure rapid containment.",
+      "modelSeverity": "medium",
+      "id": "F4",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile clearly states logs are \"not yet forwarded to the SIEM\" and the kill switch is \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\", supporting the finding on cascading failures due to poor observability and response.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI09",
+      "severity": "medium",
+      "evidenceQuote": "Produce account strategy recommendations for large corporate clients by combining several specialist views.",
+      "whyItMatters": "The agent produces recommendations for human users, which could be exploited if the agent generates misleading or biased advice, influencing critical business decisions.",
+      "recommendedControl": "Implement a robust human-in-the-loop review process for all recommendations, including clear disclaimers about the AI's role and limitations.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI07",
+      "severity": "medium",
+      "evidenceQuote": "An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations.",
+      "whyItMatters": "The profile describes inter-agent communication via shared memory without specifying controls, which could allow malicious data or instructions to be passed between agents, compromising their integrity.",
+      "recommendedControl": "Implement strict validation and sanitization of data written to and read from shared memory, along with access controls to prevent unauthorized modification.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This orchestrator handles confidential data and coordinates multiple persistent sub-agents, which raises risks from shared credentials, persistent shared memory, and outbound messaging. Mitigations should include per-agent credentials, segmented and validated memory, enforced message approval and SIEM integration plus a tested kill procedure before approval to operate.",
+  "checkerSummary": "The agent handles confidential data and produces account strategy recommendations for large corporate clients, warranting a Tier 3 classification. While the first reviewer identified critical issues like shared credentials and inadequate logging, I also found risks related to human-agent trust exploitation and insecure inter-agent communication that need addressing. Stronger controls are needed for memory integrity, communication security, and human oversight of recommendations.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1895,
+      "inputTokenDetails": {
+        "noCacheTokens": 103,
+        "cacheReadTokens": 1792,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1763,
+      "outputTokenDetails": {
+        "textTokens": 611,
+        "reasoningTokens": 1152
+      },
+      "totalTokens": 3658,
+      "raw": {
+        "input_tokens": 1895,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 1792
+        },
+        "output_tokens": 1763,
+        "output_tokens_details": {
+          "reasoning_tokens": 1152
+        },
+        "total_tokens": 3658
+      }
+    },
+    "latencyMs": 20875,
+    "generationId": "gen_01M5GWT4YGH0WR24SYS9DBYQVZ",
+    "costUsd": null
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2411,
+      "inputTokenDetails": {
+        "noCacheTokens": 2411,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1523,
+      "outputTokenDetails": {
+        "textTokens": 622,
+        "reasoningTokens": 901
+      },
+      "totalTokens": 3934,
+      "raw": {
+        "thoughtsTokenCount": 901,
+        "promptTokenCount": 2411,
+        "candidatesTokenCount": 622,
+        "totalTokenCount": 3934,
+        "serviceTier": "standard",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2411
+          }
+        ]
+      }
+    },
+    "latencyMs": 10413,
+    "generationId": "gen_01M5GZKFJ5NXNDCG2JCWVSRNXG",
+    "costUsd": 0.0045308
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 2,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "A shared token implies credential reuse across agents or personnel, enabling lateral privilege escalation and making it hard to revoke or audit individual agent actions.",
+        "recommendedControl": "Replace the shared token with per-agent scoped credentials and implement short-lived tokens plus an automated rotation and revocation process."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations.",
+        "whyItMatters": "Persistent, shared memory between multiple sub-agents lets corrupted or malicious inputs persist and influence future decisions, increasing the chance of biased or unsafe recommendations.",
+        "recommendedControl": "Segment memory per agent role with integrity checks, implement input validation and provenance tagging, and add periodic automated sanitization and review of persistent memory contents."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "The orchestrator can post summaries to team chat.",
+        "whyItMatters": "Ability to post summaries to team chat can be abused to exfiltrate confidential data or propagate malicious content, especially if posting is not strictly audited or restricted to sanitized outputs.",
+        "recommendedControl": "Require explicit human confirmation and automated content filtering before any message is posted, and log all posted messages to a monitored SIEM stream for audit."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+        "whyItMatters": "Logs not forwarded to the SIEM and a kill switch described as manual with no tested runbook reduce monitoring and incident response capability, enabling faults or misuse to propagate longer before detection and containment.",
+        "recommendedControl": "Forward logs to the enterprise SIEM with alerting for anomalous agent behavior, and implement a tested, documented automated shutdown/runbook for the kill switch to ensure rapid containment."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This orchestrator handles confidential data and coordinates multiple persistent sub-agents, which raises risks from shared credentials, persistent shared memory, and outbound messaging. Mitigations should include per-agent credentials, segmented and validated memory, enforced message approval and SIEM integration plus a tested kill procedure before approval to operate."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile explicitly states \"shared_token\", which is a clear vulnerability for identity and privilege abuse as described."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The profile states the orchestrator uses \"shared memory\" with sub-agents, which presents a risk for memory and context poisoning."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The profile states the orchestrator \"can post summaries to team chat\", which is a valid concern for tool misuse and data exfiltration."
+      },
+      {
+        "findingId": "F4",
+        "verdict": "agree",
+        "reason": "The profile clearly states logs are \"not yet forwarded to the SIEM\" and the kill switch is \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\", supporting the finding on cascading failures due to poor observability and response."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "Produce account strategy recommendations for large corporate clients by combining several specialist views.",
+        "whyItMatters": "The agent produces recommendations for human users, which could be exploited if the agent generates misleading or biased advice, influencing critical business decisions.",
+        "recommendedControl": "Implement a robust human-in-the-loop review process for all recommendations, including clear disclaimers about the AI's role and limitations."
+      },
+      {
+        "category": "ASI07",
+        "severity": "medium",
+        "evidenceQuote": "An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations.",
+        "whyItMatters": "The profile describes inter-agent communication via shared memory without specifying controls, which could allow malicious data or instructions to be passed between agents, compromising their integrity.",
+        "recommendedControl": "Implement strict validation and sanitization of data written to and read from shared memory, along with access controls to prevent unauthorized modification."
+      }
+    ],
+    "proposedTier": 3,
+    "summary": "The agent handles confidential data and produces account strategy recommendations for large corporate clients, warranting a Tier 3 classification. While the first reviewer identified critical issues like shared credentials and inadequate logging, I also found risks related to human-agent trust exploitation and insecure inter-agent communication that need addressing. Stronger controls are needed for memory integrity, communication security, and human oversight of recommendations."
+  }
+}

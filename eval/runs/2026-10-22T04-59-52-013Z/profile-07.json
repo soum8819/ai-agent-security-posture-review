@@ -1,0 +1,238 @@
+{
+  "profileId": "profile-07",
+  "tiers": {
+    "rule": 3,
+    "reviewer": 3,
+    "checker": 3,
+    "final": 3,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (Payment exceptions queue, Payment release API)",
+      "Tier 2: reads confidential, customer_financial, personal data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "{      \"name\": \"Payment release API\",      \"permissions\": [        \"move_money\"      ]    }",
+      "whyItMatters": "The agent has a direct capability to move money, so if its credentials or approval flow are compromised or bypassed, funds can be transferred improperly. Human confirmation reduces risk but does not eliminate it if the token, API connection, or confirmation workflow can be abused.",
+      "recommendedControl": "Require transaction-level cryptographic authorization tied to a human operator (for example a signed, single-use approval token), rotate and scope the agent token to the minimum necessary, and enforce anomaly detection and immediate blocking for unusual payment requests.",
+      "modelSeverity": "high",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly states the agent has 'move_money' permissions, which is a critical capability even with human confirmation.",
+      "contested": false
+    },
+    {
+      "category": "ASI01",
+      "severity": "medium",
+      "evidenceQuote": "For each held payment, the assistant looks up the beneficiary record, proposes a corrected field, and writes the proposal to the exception record. An analyst reviews the proposal, and after the analyst clicks confirm the assistant calls the release API to send the payment.",
+      "whyItMatters": "The agent autonomously generates and writes proposed corrections that humans rely on, so an attacker who manipulates the agent's objectives or inputs could cause biased or malicious proposals to be written and then approved. This could lead to incorrect beneficiary details being used despite human review.",
+      "recommendedControl": "Add strict validation rules and automated cross-checks on proposed corrections before they are written, label proposals clearly as machine-generated, and require secondary independent checks for high-risk fields or unusual changes.",
+      "modelSeverity": "medium",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile indicates the agent proposes and writes corrections, creating a risk that manipulated proposals could be approved by analysts.",
+      "contested": false
+    },
+    {
+      "category": "ASI09",
+      "severity": "high",
+      "evidenceQuote": "For each held payment, the assistant looks up the beneficiary record, proposes a corrected field, and writes the proposal to the exception record. An analyst reviews the proposal, and after the analyst clicks confirm the assistant calls the release API to send the payment.",
+      "whyItMatters": "The workflow explicitly relies on analysts trusting the assistant's proposals, this creates an opportunity for the agent to influence human decisions and for attackers to craft suggestions that exploit human trust and cause erroneous approvals.",
+      "recommendedControl": "Introduce UI affordances that highlight agent suggestions, show provenance and confidence scores, require analysts to perform explicit checks of key fields, and mandate independent secondary review for sensitive or high-value payments.",
+      "modelSeverity": "high",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile describes a workflow where analysts review agent proposals, which inherently relies on human trust in the agent's suggestions.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI02",
+      "severity": "high",
+      "evidenceQuote": "{      \"name\": \"Payment exceptions queue\",      \"permissions\": [        \"read\",        \"write\"      ]    }",
+      "whyItMatters": "The agent has write access to the payment exceptions queue, meaning it can directly modify records that analysts rely on, potentially introducing incorrect data or obscuring issues before human review.",
+      "recommendedControl": "Implement strict input validation and anomaly detection on all write operations to the payment exceptions queue, and ensure all agent-made changes are clearly auditable and reversible.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "Payments above the analyst's own limit still need a second analyst.",
+      "whyItMatters": "While a second analyst review is a control, if the initial agent proposal is flawed or malicious, this error could propagate to the second reviewer, leading to a cascading failure where both analysts are influenced by the same incorrect information.",
+      "recommendedControl": "Ensure that the second analyst review is independent and includes a fresh assessment of the original payment details, not just the agent's proposed correction.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This agent reads customer financial and personal data and can move money via a release API, with human confirmation in the loop. Key risks: the agent holds a direct move_money capability that could be abused, the agent autonomously writes correction proposals which could be hijacked, and the design encourages human trust in agent suggestions that attackers could exploit. Implement transaction-level human authorization, stronger validation/auditing of proposals, and UI/operational controls to reduce inappropriate approvals.",
+  "checkerSummary": "The agent handles customer financial data and has the ability to initiate money movement, albeit with human confirmation. While the first reviewer identified key risks related to trust and privilege, the direct write access to payment exceptions and the potential for cascading errors in multi-analyst workflows were missed. The human confirmation step is a crucial control, but the agent's capabilities warrant careful oversight.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1901,
+      "inputTokenDetails": {
+        "noCacheTokens": 1901,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1741,
+      "outputTokenDetails": {
+        "textTokens": 653,
+        "reasoningTokens": 1088
+      },
+      "totalTokens": 3642,
+      "raw": {
+        "input_tokens": 1901,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1741,
+        "output_tokens_details": {
+          "reasoning_tokens": 1088
+        },
+        "total_tokens": 3642
+      }
+    },
+    "latencyMs": 17340,
+    "generationId": "gen_01M5GZT8AHJAF4PBDNPMBDA9VD",
+    "costUsd": 0.00395725
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2705,
+      "inputTokenDetails": {
+        "noCacheTokens": 2705,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1366,
+      "outputTokenDetails": {
+        "textTokens": 547,
+        "reasoningTokens": 819
+      },
+      "totalTokens": 4071,
+      "raw": {
+        "thoughtsTokenCount": 819,
+        "promptTokenCount": 2705,
+        "candidatesTokenCount": 547,
+        "totalTokenCount": 4071,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2705
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 547
+          }
+        ]
+      }
+    },
+    "latencyMs": 10634,
+    "generationId": "gen_01M5GZTS8RDGF7WJTV735JFTHZ",
+    "costUsd": 0.0042265
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "{      \"name\": \"Payment release API\",      \"permissions\": [        \"move_money\"      ]    }",
+        "whyItMatters": "The agent has a direct capability to move money, so if its credentials or approval flow are compromised or bypassed, funds can be transferred improperly. Human confirmation reduces risk but does not eliminate it if the token, API connection, or confirmation workflow can be abused.",
+        "recommendedControl": "Require transaction-level cryptographic authorization tied to a human operator (for example a signed, single-use approval token), rotate and scope the agent token to the minimum necessary, and enforce anomaly detection and immediate blocking for unusual payment requests."
+      },
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "For each held payment, the assistant looks up the beneficiary record, proposes a corrected field, and writes the proposal to the exception record. An analyst reviews the proposal, and after the analyst clicks confirm the assistant calls the release API to send the payment.",
+        "whyItMatters": "The agent autonomously generates and writes proposed corrections that humans rely on, so an attacker who manipulates the agent's objectives or inputs could cause biased or malicious proposals to be written and then approved. This could lead to incorrect beneficiary details being used despite human review.",
+        "recommendedControl": "Add strict validation rules and automated cross-checks on proposed corrections before they are written, label proposals clearly as machine-generated, and require secondary independent checks for high-risk fields or unusual changes."
+      },
+      {
+        "category": "ASI09",
+        "severity": "high",
+        "evidenceQuote": "For each held payment, the assistant looks up the beneficiary record, proposes a corrected field, and writes the proposal to the exception record. An analyst reviews the proposal, and after the analyst clicks confirm the assistant calls the release API to send the payment.",
+        "whyItMatters": "The workflow explicitly relies on analysts trusting the assistant's proposals, this creates an opportunity for the agent to influence human decisions and for attackers to craft suggestions that exploit human trust and cause erroneous approvals.",
+        "recommendedControl": "Introduce UI affordances that highlight agent suggestions, show provenance and confidence scores, require analysts to perform explicit checks of key fields, and mandate independent secondary review for sensitive or high-value payments."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent reads customer financial and personal data and can move money via a release API, with human confirmation in the loop. Key risks: the agent holds a direct move_money capability that could be abused, the agent autonomously writes correction proposals which could be hijacked, and the design encourages human trust in agent suggestions that attackers could exploit. Implement transaction-level human authorization, stronger validation/auditing of proposals, and UI/operational controls to reduce inappropriate approvals."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile explicitly states the agent has 'move_money' permissions, which is a critical capability even with human confirmation."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The profile indicates the agent proposes and writes corrections, creating a risk that manipulated proposals could be approved by analysts."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The profile describes a workflow where analysts review agent proposals, which inherently relies on human trust in the agent's suggestions."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "{      \"name\": \"Payment exceptions queue\",      \"permissions\": [        \"read\",        \"write\"      ]    }",
+        "whyItMatters": "The agent has write access to the payment exceptions queue, meaning it can directly modify records that analysts rely on, potentially introducing incorrect data or obscuring issues before human review.",
+        "recommendedControl": "Implement strict input validation and anomaly detection on all write operations to the payment exceptions queue, and ensure all agent-made changes are clearly auditable and reversible."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "Payments above the analyst's own limit still need a second analyst.",
+        "whyItMatters": "While a second analyst review is a control, if the initial agent proposal is flawed or malicious, this error could propagate to the second reviewer, leading to a cascading failure where both analysts are influenced by the same incorrect information.",
+        "recommendedControl": "Ensure that the second analyst review is independent and includes a fresh assessment of the original payment details, not just the agent's proposed correction."
+      }
+    ],
+    "proposedTier": 3,
+    "summary": "The agent handles customer financial data and has the ability to initiate money movement, albeit with human confirmation. While the first reviewer identified key risks related to trust and privilege, the direct write access to payment exceptions and the potential for cascading errors in multi-analyst workflows were missed. The human confirmation step is a crucial control, but the agent's capabilities warrant careful oversight."
+  }
+}

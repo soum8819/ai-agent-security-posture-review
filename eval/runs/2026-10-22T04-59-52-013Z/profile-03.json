@@ -1,0 +1,234 @@
+{
+  "profileId": "profile-03",
+  "tiers": {
+    "rule": 1,
+    "reviewer": 3,
+    "checker": 1,
+    "final": 3,
+    "setBy": [
+      "reviewer"
+    ],
+    "ruleReasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI02",
+      "severity": "high",
+      "evidenceQuote": "\"untrustedInputs\": [ \"web\" ]",
+      "whyItMatters": "The agent ingests untrusted web content via its web and news tools, so an attacker can supply or bias external data that the agent will summarize, causing misinformation or accidental leakage of sensitive context from CRM through crafted inputs.",
+      "recommendedControl": "Restrict or sanitize web-derived inputs: add a validated source allowlist, perform automated provenance checks and content-safety filtering on web/news results before they are used in briefs, and surface provenance in the output.",
+      "modelSeverity": "high",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly states \"untrustedInputs\": [\"web\"], which directly supports the risk of tool misuse via malicious web content influencing the agent's output.",
+      "contested": false
+    },
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "A shared credential increases the blast radius if the token is compromised or misused, and it prevents fine-grained per-agent auditing and least-privilege enforcement for CRM reads.",
+      "recommendedControl": "Replace the shared_token with scoped, per-agent service credentials that enforce least privilege and short lifetimes, and enable credential rotation and per-credential audit logging.",
+      "modelSeverity": "medium",
+      "raisedByRule": "R4",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile clearly states \"credentials\": \"shared_token\", which inherently poses risks related to blast radius, auditing, and least privilege.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"model\": { \"provider\": \"Anthropic\", \"name\": \"Claude Sonnet (version not specified)\" }",
+      "whyItMatters": "Using an unspecified model version introduces instability and makes it difficult to track and mitigate known vulnerabilities or behavioral changes in the underlying LLM, potentially leading to unexpected outputs or security regressions.",
+      "recommendedControl": "Specify and pin the exact model version used to ensure consistent behavior and allow for proper security assessment and tracking of model updates.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"logging\": { \"enabled\": true, \"destination\": \"Application logs, not yet forwarded to the SIEM\" }",
+      "whyItMatters": "Logs not being forwarded to a SIEM means security teams lack centralized visibility into agent activities, making it harder to detect and respond to security incidents, misuse, or anomalous behavior in a timely manner.",
+      "recommendedControl": "Configure logging to forward all agent activity logs to the central SIEM for real-time monitoring, alerting, and forensic analysis.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"killSwitch\": { \"available\": true, \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\" }",
+      "whyItMatters": "The lack of a tested runbook for the kill switch introduces uncertainty and potential delays in disabling a misbehaving agent, increasing the window for harm during an incident.",
+      "recommendedControl": "Develop and regularly test a runbook for the kill switch procedure to ensure it can be executed quickly and reliably in an emergency.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This read-only agent accesses internal CRM data and untrusted web sources, which warrants Tier 3 because it deals with customer data. Key risks are ingestion of untrusted web content that can bias or manipulate briefs, and use of a shared credential that hinders auditing and containment. Address these by enforcing source validation and provenance filtering, and switching to scoped, rotatable credentials.",
+  "checkerSummary": "The Account Research Agent is a read-only agent that processes public and internal documents to create client briefs. While it has no write access, it uses untrusted web inputs and shared credentials, posing risks of misinformation and privilege escalation. The agent's logging and kill switch mechanisms also have weaknesses that could hinder incident response.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1881,
+      "inputTokenDetails": {
+        "noCacheTokens": 1881,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 977,
+      "outputTokenDetails": {
+        "textTokens": 337,
+        "reasoningTokens": 640
+      },
+      "totalTokens": 2858,
+      "raw": {
+        "input_tokens": 1881,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 977,
+        "output_tokens_details": {
+          "reasoning_tokens": 640
+        },
+        "total_tokens": 2858
+      }
+    },
+    "latencyMs": 10638,
+    "generationId": "gen_01M5GZQ6CCCNWDQDGDTQ7M5ZFC",
+    "costUsd": 0.00242425
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2413,
+      "inputTokenDetails": {
+        "noCacheTokens": 2413,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1497,
+      "outputTokenDetails": {
+        "textTokens": 632,
+        "reasoningTokens": 865
+      },
+      "totalTokens": 3910,
+      "raw": {
+        "thoughtsTokenCount": 865,
+        "promptTokenCount": 2413,
+        "candidatesTokenCount": 632,
+        "totalTokenCount": 3910,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2413
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 632
+          }
+        ]
+      }
+    },
+    "latencyMs": 10793,
+    "generationId": "gen_01M5GZQGT0QNH51314WNR80KR2",
+    "costUsd": 0.0044664
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "\"untrustedInputs\": [ \"web\" ]",
+        "whyItMatters": "The agent ingests untrusted web content via its web and news tools, so an attacker can supply or bias external data that the agent will summarize, causing misinformation or accidental leakage of sensitive context from CRM through crafted inputs.",
+        "recommendedControl": "Restrict or sanitize web-derived inputs: add a validated source allowlist, perform automated provenance checks and content-safety filtering on web/news results before they are used in briefs, and surface provenance in the output."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "A shared credential increases the blast radius if the token is compromised or misused, and it prevents fine-grained per-agent auditing and least-privilege enforcement for CRM reads.",
+        "recommendedControl": "Replace the shared_token with scoped, per-agent service credentials that enforce least privilege and short lifetimes, and enable credential rotation and per-credential audit logging."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This read-only agent accesses internal CRM data and untrusted web sources, which warrants Tier 3 because it deals with customer data. Key risks are ingestion of untrusted web content that can bias or manipulate briefs, and use of a shared credential that hinders auditing and containment. Address these by enforcing source validation and provenance filtering, and switching to scoped, rotatable credentials."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile explicitly states \"untrustedInputs\": [\"web\"], which directly supports the risk of tool misuse via malicious web content influencing the agent's output."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The profile clearly states \"credentials\": \"shared_token\", which inherently poses risks related to blast radius, auditing, and least privilege."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"model\": { \"provider\": \"Anthropic\", \"name\": \"Claude Sonnet (version not specified)\" }",
+        "whyItMatters": "Using an unspecified model version introduces instability and makes it difficult to track and mitigate known vulnerabilities or behavioral changes in the underlying LLM, potentially leading to unexpected outputs or security regressions.",
+        "recommendedControl": "Specify and pin the exact model version used to ensure consistent behavior and allow for proper security assessment and tracking of model updates."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"logging\": { \"enabled\": true, \"destination\": \"Application logs, not yet forwarded to the SIEM\" }",
+        "whyItMatters": "Logs not being forwarded to a SIEM means security teams lack centralized visibility into agent activities, making it harder to detect and respond to security incidents, misuse, or anomalous behavior in a timely manner.",
+        "recommendedControl": "Configure logging to forward all agent activity logs to the central SIEM for real-time monitoring, alerting, and forensic analysis."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"killSwitch\": { \"available\": true, \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\" }",
+        "whyItMatters": "The lack of a tested runbook for the kill switch introduces uncertainty and potential delays in disabling a misbehaving agent, increasing the window for harm during an incident.",
+        "recommendedControl": "Develop and regularly test a runbook for the kill switch procedure to ensure it can be executed quickly and reliably in an emergency."
+      }
+    ],
+    "proposedTier": 1,
+    "summary": "The Account Research Agent is a read-only agent that processes public and internal documents to create client briefs. While it has no write access, it uses untrusted web inputs and shared credentials, posing risks of misinformation and privilege escalation. The agent's logging and kill switch mechanisms also have weaknesses that could hinder incident response."
+  }
+}

@@ -42,7 +42,10 @@ of step 6, to be updated and reused in step 15.
 - `lib/sample-profiles.ts`: loads the 12 test profiles so the form can offer them as samples.
 - `lib/review-prompt.ts`: the reviewer model's instructions, with the profile placed between clearly marked lines as data, never as instructions.
 - `lib/analyze.ts`: sends one profile to the reviewer model through AI Gateway, throws away findings whose evidence quote is not in the profile, and applies the rule floor.
-- `lib/rules.ts`: eight fixed rules that set a minimum severity from what a profile lists, the tier assignment, and the check that a model can never lower a rule's severity.
+- `lib/crosscheck-prompt.ts`: the checker model's instructions, sharing the reviewer's rules and showing the profile and the first model's findings as data.
+- `lib/crosscheck.ts`: sends the profile and the first model's findings to the checker model, gets a verdict for each finding plus anything missed, drops missed findings with no real quote, and marks contested findings.
+- `lib/review.ts`: one full review: reviewer, then checker, then contested marking and the final tier, saving both models' names, tokens, time and cost.
+- `lib/rules.ts`: eight fixed rules that set a minimum severity from what a profile lists, the tier assignment, the check that a model can never lower a rule's severity, and the final tier (the highest of the rule tier and both models' tiers).
 - `lib/local-only.ts`: the lock that makes test routes answer "not found" anywhere except on this computer under `npm run dev`.
 
 ## Temporary spikes (to be replaced)
@@ -64,7 +67,8 @@ of step 6, to be updated and reused in step 15.
 
 - `tests/rules.test.ts`: one test for each rule, for tier assignment and for the severity floor, using made-up profiles; run with `npm test`.
 - `tests/analyze.test.ts`: proves the evidence check drops a made-up finding and the rule floor raises a severity that is too low; calls no model.
-- `scripts/run-reviews.ts`: a developer tool that runs the reviewer model over the evaluation profiles and saves raw results and actual cost to `eval/runs`; run with `npm run reviews -- --set tuning` or `--set all`.
+- `scripts/run-reviews.ts`: a developer tool that runs full reviews (both models) over the evaluation profiles and saves raw results and actual cost to `eval/runs`; run with `npm run reviews -- --set tuning` or `--set all`, or `--checker-only --from <run folder>` to test the checker on saved reviewer results.
+- `tests/crosscheck.test.ts`: proves contested marking, kept floors, the evidence check on missed findings, the final tier, and that the checker never sees a rule floor; calls no model.
 - `scripts/compare-rules.ts`: a developer tool, not part of the app, that compares the rules' tier with the answer key and lists the held-out profiles separately; run with `npm run compare-rules`.
 
 ## Known limits
@@ -72,6 +76,7 @@ of step 6, to be updated and reused in step 15.
 - Rule 2 (runs code with no sandbox): the profile has no sandbox field, so any tool with run-code permission fires this rule, even if the team has a sandbox.
 - Rule 7 (customer financial data with no logging): weak OWASP fit. No category is mainly about missing logs; it is mapped to ASI10 Rogue Agents because that category's official mitigations call for audit logs of all agent actions.
 - ASI01 versus ASI06: the reviewer model often files untrusted-input risks under ASI06 (Memory & Context Poisoning) where the answer key expects ASI01 (Agent Goal Hijack). Prompt v4 added OWASP's own descriptions, but in its full run ASI01 matched the answer key on only one profile. See eval/runs/README.md.
+- Checker anchoring: the checker sees the first model's findings before forming its own view, so it tends to agree (48 of 49 findings in the step 9 record run). A blind first review by the checker would reduce this, at about $0.005 more per review.
 - Reviewer model: openai/gpt-5-mini does not accept a temperature setting, so its answers vary between runs even with the same prompt; reasoning effort is fixed at low instead.
 - Tier 4 and money: an agent that moves money only after a person confirms is not Tier 4 by itself. This is the project owner's reading of ambiguous customer card wording, to be confirmed with the customer.
 

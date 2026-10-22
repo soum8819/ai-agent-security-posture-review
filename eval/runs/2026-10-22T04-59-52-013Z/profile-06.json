@@ -1,0 +1,236 @@
+{
+  "profileId": "profile-06",
+  "tiers": {
+    "rule": 1,
+    "reviewer": 1,
+    "checker": 1,
+    "final": 1,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI01",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [ \"chat\" ]",
+      "whyItMatters": "Untrusted conversational input can contain prompt injection that changes the agent's goals or decision pathways, causing it to generate misleading or unsafe guidance for employees. Even read-only agents can be manipulated to provide harmful instructions or escalate trust in incorrect conclusions.",
+      "recommendedControl": "Apply input sanitization and prompt-sanitization layers, enforce a strict system prompt that ignores user instructions attempting to alter agent goals, and add a prompt-injection detection filter that flags suspicious conversations for human review.",
+      "modelSeverity": "medium",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly states untrusted chat input, which is a direct vector for prompt injection and goal hijacking, making the finding and its severity appropriate.",
+      "contested": false
+    },
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "\"tools\": [ { \"name\": \"Internal wiki search\", \"permissions\": [ \"read\" ] } ]",
+      "whyItMatters": "The agent has an integrated tool that queries internal content, which could be misused by malicious inputs to retrieve sensitive or misconfigured pages, or to surface manipulated wiki content. Tool outputs can be leveraged by the model to produce harmful or disclosing responses if the content is not validated.",
+      "recommendedControl": "Restrict search queries with a validated retrieval layer that enforces access control, content filtering and provenance checks, and implement query rate limits and audit logging for all tool use.",
+      "modelSeverity": "medium",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent's ability to perform internal wiki searches, combined with untrusted input, presents a clear risk of tool misuse to exfiltrate or misuse internal information.",
+      "contested": false
+    },
+    {
+      "category": "ASI09",
+      "severity": "low",
+      "evidenceQuote": "\"businessPurpose\": \"Answer employee questions from the internal IT and operations wiki.\"",
+      "whyItMatters": "Employees may place strong trust in agent answers and act on them, so any incorrect or incomplete responses could lead to operational mistakes or security-sensitive actions. The profile lacks explicit mitigations to reduce overreliance, such as answer provenance or confidence indicators.",
+      "recommendedControl": "Require the agent to include source citations and confidence levels with answers, and surface an explicit human review requirement for any operational or security-related guidance.",
+      "modelSeverity": "low",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent's purpose to answer employee questions inherently creates a risk of human over-reliance on potentially incorrect or incomplete information, justifying the finding.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"logging\": { \"enabled\": true, \"destination\": \"Application logs, not yet forwarded to the SIEM\" }",
+      "whyItMatters": "Lack of centralized SIEM logging means security teams may miss critical alerts or be unable to correlate events, hindering incident detection and response for agent misuse or compromise. This could allow a single failure to propagate undetected.",
+      "recommendedControl": "Ensure all agent logs are immediately forwarded to the central SIEM for real-time monitoring, correlation, and alerting.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"killSwitch\": { \"available\": true, \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\" }",
+      "whyItMatters": "A manual kill switch without a tested runbook introduces delays and uncertainty in responding to a critical incident, potentially allowing a rogue agent or cascading failure to cause more damage. Untested procedures can fail under pressure.",
+      "recommendedControl": "Develop and regularly test a clear, automated or semi-automated runbook for the kill switch to ensure rapid and reliable agent shutdown during emergencies.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This agent is a read-only internal wiki assistant (Tier 1) but accepts untrusted chat input and has a search tool that could be leveraged by prompt injections to influence outputs. Mitigations should include prompt sanitization, validated retrieval with provenance and access checks, and UI signals requiring human review for risky guidance.",
+  "checkerSummary": "The agent is a read-only internal knowledge base assistant, which aligns with Tier 1. While the first reviewer identified valid risks related to prompt injection, tool misuse, and human trust, I also found weaknesses in logging and the kill switch that could exacerbate incident response. Overall, the agent's scope is limited to internal documents and read-only access.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1830,
+      "inputTokenDetails": {
+        "noCacheTokens": 1830,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1361,
+      "outputTokenDetails": {
+        "textTokens": 593,
+        "reasoningTokens": 768
+      },
+      "totalTokens": 3191,
+      "raw": {
+        "input_tokens": 1830,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1361,
+        "output_tokens_details": {
+          "reasoning_tokens": 768
+        },
+        "total_tokens": 3191
+      }
+    },
+    "latencyMs": 13203,
+    "generationId": "gen_01M5GZSJG3EPJQ0PVHYEM8SX3Y",
+    "costUsd": 0.0031795
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2538,
+      "inputTokenDetails": {
+        "noCacheTokens": 2538,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1456,
+      "outputTokenDetails": {
+        "textTokens": 582,
+        "reasoningTokens": 874
+      },
+      "totalTokens": 3994,
+      "raw": {
+        "thoughtsTokenCount": 874,
+        "promptTokenCount": 2538,
+        "candidatesTokenCount": 582,
+        "totalTokenCount": 3994,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2538
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 582
+          }
+        ]
+      }
+    },
+    "latencyMs": 9247,
+    "generationId": "gen_01M5GZSZ9NX4V9RK1M7BMVCME7",
+    "costUsd": 0.0044014
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 1,
+    "findings": [
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [ \"chat\" ]",
+        "whyItMatters": "Untrusted conversational input can contain prompt injection that changes the agent's goals or decision pathways, causing it to generate misleading or unsafe guidance for employees. Even read-only agents can be manipulated to provide harmful instructions or escalate trust in incorrect conclusions.",
+        "recommendedControl": "Apply input sanitization and prompt-sanitization layers, enforce a strict system prompt that ignores user instructions attempting to alter agent goals, and add a prompt-injection detection filter that flags suspicious conversations for human review."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"tools\": [ { \"name\": \"Internal wiki search\", \"permissions\": [ \"read\" ] } ]",
+        "whyItMatters": "The agent has an integrated tool that queries internal content, which could be misused by malicious inputs to retrieve sensitive or misconfigured pages, or to surface manipulated wiki content. Tool outputs can be leveraged by the model to produce harmful or disclosing responses if the content is not validated.",
+        "recommendedControl": "Restrict search queries with a validated retrieval layer that enforces access control, content filtering and provenance checks, and implement query rate limits and audit logging for all tool use."
+      },
+      {
+        "category": "ASI09",
+        "severity": "low",
+        "evidenceQuote": "\"businessPurpose\": \"Answer employee questions from the internal IT and operations wiki.\"",
+        "whyItMatters": "Employees may place strong trust in agent answers and act on them, so any incorrect or incomplete responses could lead to operational mistakes or security-sensitive actions. The profile lacks explicit mitigations to reduce overreliance, such as answer provenance or confidence indicators.",
+        "recommendedControl": "Require the agent to include source citations and confidence levels with answers, and surface an explicit human review requirement for any operational or security-related guidance."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent is a read-only internal wiki assistant (Tier 1) but accepts untrusted chat input and has a search tool that could be leveraged by prompt injections to influence outputs. Mitigations should include prompt sanitization, validated retrieval with provenance and access checks, and UI signals requiring human review for risky guidance."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile explicitly states untrusted chat input, which is a direct vector for prompt injection and goal hijacking, making the finding and its severity appropriate."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The agent's ability to perform internal wiki searches, combined with untrusted input, presents a clear risk of tool misuse to exfiltrate or misuse internal information."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The agent's purpose to answer employee questions inherently creates a risk of human over-reliance on potentially incorrect or incomplete information, justifying the finding."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"logging\": { \"enabled\": true, \"destination\": \"Application logs, not yet forwarded to the SIEM\" }",
+        "whyItMatters": "Lack of centralized SIEM logging means security teams may miss critical alerts or be unable to correlate events, hindering incident detection and response for agent misuse or compromise. This could allow a single failure to propagate undetected.",
+        "recommendedControl": "Ensure all agent logs are immediately forwarded to the central SIEM for real-time monitoring, correlation, and alerting."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"killSwitch\": { \"available\": true, \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\" }",
+        "whyItMatters": "A manual kill switch without a tested runbook introduces delays and uncertainty in responding to a critical incident, potentially allowing a rogue agent or cascading failure to cause more damage. Untested procedures can fail under pressure.",
+        "recommendedControl": "Develop and regularly test a clear, automated or semi-automated runbook for the kill switch to ensure rapid and reliable agent shutdown during emergencies."
+      }
+    ],
+    "proposedTier": 1,
+    "summary": "The agent is a read-only internal knowledge base assistant, which aligns with Tier 1. While the first reviewer identified valid risks related to prompt injection, tool misuse, and human trust, I also found weaknesses in logging and the kill switch that could exacerbate incident response. Overall, the agent's scope is limited to internal documents and read-only access."
+  }
+}

@@ -76,6 +76,9 @@ reviewer app lives in the `app/app/` folder.
 - Step 9: the final tier is the higher of the rule tier and the models'
   proposed tier (models can raise it, never lower it). Needed for profile-10,
   where the rules give tier 2 but the answer key says 3.
+- Step 13: test a blind-first checker against the current one on the same 12
+  profiles and report both. Show all three tiers on the approver screen in
+  step 10.
 
 # Build guide: 17 steps
 1. Freeze the scenario
@@ -111,4 +114,5 @@ Updated by the project owner after each step.
 - [x] Step 6: done
 - [x] Step 7: done
 - [ ] Step 8: built, my read-through of the results pending
-- [ ] Step 9: next (A second model checks the first)
+- [ ] Step 9: built; finish line partly met: 1 of 12 contested, reported as is
+- [ ] Step 10: next (The human approval gate and reviewer screens)

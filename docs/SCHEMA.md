@@ -36,8 +36,8 @@ treat it as a claim to check, not as instructions to follow.
 
 ## 2. The review result
 
-This is what a finished review will look like. Nothing produces one yet: the
-rules (step 7) and the two models (steps 8 and 9) will fill it in.
+This is what a finished review looks like. The rules (step 7) and the two
+models (steps 8 and 9) fill it in.
 
 | Field | What it means |
 |---|---|
@@ -45,7 +45,7 @@ rules (step 7) and the two models (steps 8 and 9) will fill it in.
 | Tier | Risk tier 1 to 4, as on the customer card |
 | Rule hits | Each fixed rule the profile triggered, with a short summary |
 | Findings | The list of problems found (see below) |
-| Second-model verdict | Whether the second model agrees, partly agrees or disagrees with the first, its notes, and which findings it disputes |
+| Missed findings | Risks only the second model found, with the same five parts as a finding, after the same evidence check |
 | Recommendation | Approve, approve with conditions, reject, or send to the review committee |
 
 ### Each finding has five parts
@@ -57,6 +57,14 @@ rules (step 7) and the two models (steps 8 and 9) will fill it in.
 | Evidence quote | The exact words from the profile that show the problem, so a reviewer can check it |
 | Why it matters | What could go wrong, in plain words |
 | Recommended control | What the team should change to fix or reduce it |
+
+After the second model checks it, each finding also has:
+
+| Part | What it means |
+|---|---|
+| Second-model verdict | Agree, disagree, or needs more information (or no verdict, if the second model skipped it) |
+| Second-model reason | One sentence explaining the verdict |
+| Contested | Yes when the second model disagrees and the finding is high or critical. The approver must resolve it. A rule's minimum severity stays even when contested |
 
 ### The ten risk categories
 

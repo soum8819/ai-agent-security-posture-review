@@ -54,3 +54,28 @@ results are never edited, so that v3 file keeps it.
 Tuning stopped after v4, the change the project owner approved. With the same
 prompt, tiers still move between runs (v3: profile-03 was 3 then 1, profile-12
 was 2 then 3): run-to-run variation, to be measured in step 13.
+
+## Step 9: second model checks the first
+
+From step 9, runs use both models: the reviewer (openai/gpt-5-mini, prompt v4)
+and the checker (google/gemini-2.5-flash through AI Gateway, temperature 0.2,
+reasoning effort low, at most 6,000 output tokens). Each profile file stores
+both models' IDs, token usage, time taken, Gateway generation ID and actual
+cost, the per-finding verdicts, contested findings, missed findings and the
+tiers (rule, reviewer, checker, final and which one set the final tier).
+
+Contested means the checker says disagree on a finding that is high or
+critical after the rule floor. A rule floor stays when a finding is contested.
+Contested findings are an outcome, not a target: the checker prompt is never
+tuned to produce disagreement.
+
+| Run folder | Set | Mode | Prompts | Cost | What changed before this run, and why |
+|---|---|---|---|---|---|
+| 2026-10-22T04-57-36-145Z | tuning (8) | checker only, on reviewer results from 2026-10-22T04-05-56-336Z | v4 / c1 | $0.0361 | First checker run. Result: 31 of 32 findings agreed, 1 disagreed (medium), no skipped verdicts, no unknown finding ids, no dropped quotes. No fault to fix, so c1 was kept unchanged. |
+| 2026-10-22T04-59-52-013Z | all (12) | full: both models, fresh | v4 / c1 | $0.0966 | No change. The step 9 record. |
+
+Record run result: one profile contested, profile-04 (held out), finding F2.
+The reviewer reported its own scoped token as a high ASI03 risk, against its
+own instruction; the checker disagreed for that reason. The checker agreed
+with 48 of 49 findings, which is consistent with anchoring: it sees the first
+model's findings before forming a view.
