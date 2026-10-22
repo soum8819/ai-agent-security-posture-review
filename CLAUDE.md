@@ -67,6 +67,15 @@ reviewer app lives in the `app/app/` folder.
 - The answer key (eval/labels/, filled in by the project owner, with 4 profiles
   marked held out) is committed separately, in its own commit, before step 7
   starts. Nothing may be tuned against the held-out profiles.
+- Assumption to confirm with the customer (decided in step 7): the card's Tier
+  4 wording "Moves money" is ambiguous. The project owner's reading is that an
+  agent which moves money only after a person confirms is not Tier 4 by
+  itself; Tier 4 means moving money with no person confirming, or acting on
+  its own with write or run-code power. Implemented in lib/rules.ts
+  (assignTier).
+- Step 9: the final tier is the higher of the rule tier and the models'
+  proposed tier (models can raise it, never lower it). Needed for profile-10,
+  where the rules give tier 2 but the answer key says 3.
 
 # Build guide: 17 steps
 1. Freeze the scenario
@@ -100,4 +109,5 @@ Updated by the project owner after each step.
 - [x] Step 4: done
 - [x] Step 5: done
 - [x] Step 6: done
-- [ ] Step 7: next (The rules that set a floor)
+- [x] Step 7: done
+- [ ] Step 8: next (The first model reviews each profile)

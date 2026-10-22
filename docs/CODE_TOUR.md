@@ -40,6 +40,7 @@ of step 6, to be updated and reused in step 15.
 - `lib/label-schema.ts`: the strict rules for what an answer-key file must contain, so a typing mistake in a label is caught.
 - `lib/review-schema.ts`: the strict rules for what a review result must contain, including the five parts of every finding.
 - `lib/sample-profiles.ts`: loads the 12 test profiles so the form can offer them as samples.
+- `lib/rules.ts`: eight fixed rules that set a minimum severity from what a profile lists, the tier assignment, and the check that a model can never lower a rule's severity.
 - `lib/local-only.ts`: the lock that makes test routes answer "not found" anywhere except on this computer under `npm run dev`.
 
 ## Temporary spikes (to be replaced)
@@ -54,7 +55,19 @@ of step 6, to be updated and reused in step 15.
 - `eval/profiles/profile-01.json` to `profile-12.json`: the 12 fictional agent profiles the tool will be tested on, one per file.
 - `eval/labels/profile-01.json` to `profile-12.json`: the answer key, one file per profile, with the expected tier, the critical risks a good review must catch, and whether the profile is held out.
 - `eval/labels/README.md`: where the answer key came from, the rule used to write it, and how the 4 held-out profiles were drawn.
+- `eval/RULE_RUNS.md`: a log of every rules-versus-answer-key run, kept for the record, with what changed between runs.
 - `eval/ASSUMPTIONS.md`: where each profile came from and every value chosen where the source did not say.
+
+## Tests and tools
+
+- `tests/rules.test.ts`: one test for each rule, for tier assignment and for the severity floor, using made-up profiles; run with `npm test`.
+- `scripts/compare-rules.ts`: a developer tool, not part of the app, that compares the rules' tier with the answer key and lists the held-out profiles separately; run with `npm run compare-rules`.
+
+## Known limits
+
+- Rule 2 (runs code with no sandbox): the profile has no sandbox field, so any tool with run-code permission fires this rule, even if the team has a sandbox.
+- Rule 7 (customer financial data with no logging): weak OWASP fit. No category is mainly about missing logs; it is mapped to ASI10 Rogue Agents because that category's official mitigations call for audit logs of all agent actions.
+- Tier 4 and money: an agent that moves money only after a person confirms is not Tier 4 by itself. This is the project owner's reading of ambiguous customer card wording, to be confirmed with the customer.
 
 ## Not in git
 

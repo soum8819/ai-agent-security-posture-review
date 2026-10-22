@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/*.test.ts",
+    "compare-rules": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/compare-rules.ts"
   },
   "dependencies": {
     "ai": "^7.0.143",
