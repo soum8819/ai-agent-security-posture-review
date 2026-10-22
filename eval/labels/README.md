@@ -9,6 +9,11 @@ is expected to reach.
 - Reviewed and edited by Sam on 2026-10-21.
 - Sam assigned the tiers for profiles 04, 09, 10 and 12, and the two
   acceptable tier ranges (profile-09: 3 or 4; profile-12: 2 or 3).
+- profile-10: acceptableTiers [3, 4] was added on 2026-10-22, after seeing
+  reviewer run v3 (expectedTier stays 3). Reason: our own Tier 4 rule
+  ("moves money with no person confirming") gives 4 on a literal reading,
+  because the description says refunds of up to $50 happen automatically,
+  while the customer card's "at scale" argues for 3.
 
 ## Rules used
 

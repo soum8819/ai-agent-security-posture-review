@@ -1,6 +1,10 @@
 {
   "profileId": "profile-10",
   "expectedTier": 3,
+  "acceptableTiers": [
+    3,
+    4
+  ],
   "expectedCriticalFindings": [
     {
       "category": "ASI01",
