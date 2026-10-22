@@ -1,6 +1,7 @@
 {
   "profileId": "profile-06",
-  "expectedTier": null,
+  "expectedTier": 1,
   "expectedCriticalFindings": [],
-  "heldOut": null
+  "notes": "None critical established. It uses a scoped identity to retrieve vetted, access-controlled internal documents, holds no personal data, and cannot write to systems or call external tools. Session-only memory limits persistence. Its untested manual shutdown procedure does not, by itself, constitute a critical risk for this limited capability.",
+  "heldOut": true
 }

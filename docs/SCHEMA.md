@@ -75,13 +75,17 @@ From the official OWASP Top 10 for Agentic Applications for 2026.
 | ASI09 | Human-Agent Trust Exploitation |
 | ASI10 | Rogue Agents |
 
-## 3. The label files
+## 3. The label files (the answer key)
 
 Each file in `eval/labels/` matches one profile and holds the answers the
-project owner expects. They start empty on purpose:
+project owner expects. Where the key came from, and the held-out draw, are
+recorded in `eval/labels/README.md`. The rules for these files are written in
+code in `lib/label-schema.ts`.
 
-| Field | What it means | Starts as |
+| Field | What it means | Allowed values |
 |---|---|---|
-| expectedTier | The tier the owner thinks is right | empty |
-| expectedCriticalFindings | The risks a good review must catch | an empty list |
-| heldOut | Whether this profile is kept back for the final test, so nothing is tuned against it | empty |
+| expectedTier | The tier the answer key assigns | 1, 2, 3 or 4 |
+| acceptableTiers | Optional. Other tiers that also count as correct | A list of tiers that includes expectedTier |
+| expectedCriticalFindings | The critical risks a good review must catch | A list; each item has an ASI category and a reason. An empty list means none critical |
+| notes | Optional. The rest of the answer key's text for that profile, word for word | Any text |
+| heldOut | Whether this profile is kept back for the final test, so nothing is tuned against it | true or false; exactly 4 of the 12 are true |

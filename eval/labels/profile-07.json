@@ -1,6 +1,7 @@
 {
   "profileId": "profile-07",
-  "expectedTier": null,
+  "expectedTier": 3,
   "expectedCriticalFindings": [],
-  "heldOut": null
+  "notes": "None critical established under the ASI categories from the stated design. It handles customer financial information, but payment release requires analyst confirmation. Scoped credentials, session-only memory, SIEM logging, and a release-connection shutdown control constrain its capabilities.\nTier-related finding: The profile does not establish agreement from two people on different teams. A second analyst is required only above the first analyst’s limit. That does not demonstrate compliance with the supplied Tier 3 approval requirement.",
+  "heldOut": false
 }

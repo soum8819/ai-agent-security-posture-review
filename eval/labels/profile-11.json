@@ -1,6 +1,12 @@
 {
   "profileId": "profile-11",
-  "expectedTier": null,
-  "expectedCriticalFindings": [],
-  "heldOut": null
+  "expectedTier": 3,
+  "expectedCriticalFindings": [
+    {
+      "category": "ASI01",
+      "reason": "Customer-uploaded documents could contain instructions to omit discrepancies or misrepresent evidence in the draft KYC summary. Analyst review before saving reduces the downstream risk but does not remove the input manipulation path."
+    }
+  ],
+  "notes": "The agent cannot approve or reject customers. Scoped credentials, no retained memory, SIEM logging, and a per-business-line shutdown limit exposure. The profile specifies one analyst’s acceptance, so agreement from two people on different teams is not established.",
+  "heldOut": true
 }

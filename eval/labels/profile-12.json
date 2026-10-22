@@ -1,6 +1,11 @@
 {
   "profileId": "profile-12",
-  "expectedTier": null,
+  "expectedTier": 2,
+  "acceptableTiers": [
+    2,
+    3
+  ],
   "expectedCriticalFindings": [],
-  "heldOut": null
+  "notes": "None critical established. Specialists have scoped read-only tool access, the output is advisory, and no agent can write to production systems.\nThe shared token, persistent shared memory, application-only logging, and untested manual shutdown warrant further review. They do not establish critical privilege abuse, memory poisoning, insecure inter-agent communication, or cascading failures without additional evidence about scope and protections.",
+  "heldOut": false
 }

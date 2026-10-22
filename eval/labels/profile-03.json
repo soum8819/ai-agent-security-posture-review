@@ -1,6 +1,12 @@
 {
   "profileId": "profile-03",
-  "expectedTier": null,
-  "expectedCriticalFindings": [],
-  "heldOut": null
+  "expectedTier": 1,
+  "expectedCriticalFindings": [
+    {
+      "category": "ASI01",
+      "reason": "Public web pages and news content could contain instructions that redirect its research or contaminate the client brief. Its access to internal CRM context makes maintaining the boundary between external content and agent instructions important."
+    }
+  ],
+  "notes": "Its tools are read-only, it retains no memory, and a person reviews the advisory brief. The shared token warrants a scope check but does not, by itself, establish critical privilege abuse.",
+  "heldOut": false
 }

@@ -1,6 +1,7 @@
 {
   "profileId": "profile-02",
-  "expectedTier": null,
+  "expectedTier": 1,
   "expectedCriticalFindings": [],
-  "heldOut": null
+  "notes": "None critical established. It searches published policies with a scoped identity, provides source links, and cannot access employee records or change systems. Session-only memory, SIEM logging, and a feature-flag shutdown support its limited scope.",
+  "heldOut": false
 }

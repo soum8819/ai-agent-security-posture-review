@@ -1,6 +1,16 @@
 {
   "profileId": "profile-04",
-  "expectedTier": null,
-  "expectedCriticalFindings": [],
-  "heldOut": null
+  "expectedTier": 3,
+  "expectedCriticalFindings": [
+    {
+      "category": "ASI01",
+      "reason": "Public claim emails and attachments could contain instructions to suppress urgency, misroute a claim, or generate misleading notifications."
+    },
+    {
+      "category": "ASI02",
+      "reason": "It changes live claim priorities and queues without prior human confirmation. An incorrect change could delay an urgent claim before an adjuster notices and reverses it."
+    }
+  ],
+  "notes": "It cannot approve or pay claims. Scoped credentials, SIEM logging, no retained memory, and an administrative pause limit exposure. It does not meet Tier 2’s requirement that a person approve the change before execution.",
+  "heldOut": true
 }

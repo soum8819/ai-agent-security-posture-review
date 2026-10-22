@@ -37,6 +37,7 @@ of step 6, to be updated and reused in step 15.
 - `lib/models.ts`: the one place the two model names live, so a model can be swapped by changing a single line.
 - `lib/owasp.ts`: the ten OWASP agentic risk categories, copied exactly from the official list.
 - `lib/profile-schema.ts`: the strict rules for what an agent profile must contain, including the allowed choices for data, permissions and untrusted inputs (email, web, uploaded files, chat, logs or alerts).
+- `lib/label-schema.ts`: the strict rules for what an answer-key file must contain, so a typing mistake in a label is caught.
 - `lib/review-schema.ts`: the strict rules for what a review result must contain, including the five parts of every finding.
 - `lib/sample-profiles.ts`: loads the 12 test profiles so the form can offer them as samples.
 - `lib/local-only.ts`: the lock that makes test routes answer "not found" anywhere except on this computer under `npm run dev`.
@@ -51,7 +52,8 @@ of step 6, to be updated and reused in step 15.
 ## Evaluation set
 
 - `eval/profiles/profile-01.json` to `profile-12.json`: the 12 fictional agent profiles the tool will be tested on, one per file.
-- `eval/labels/profile-01.json` to `profile-12.json`: one file per profile for the owner's expected answers, left empty on purpose.
+- `eval/labels/profile-01.json` to `profile-12.json`: the answer key, one file per profile, with the expected tier, the critical risks a good review must catch, and whether the profile is held out.
+- `eval/labels/README.md`: where the answer key came from, the rule used to write it, and how the 4 held-out profiles were drawn.
 - `eval/ASSUMPTIONS.md`: where each profile came from and every value chosen where the source did not say.
 
 ## Not in git

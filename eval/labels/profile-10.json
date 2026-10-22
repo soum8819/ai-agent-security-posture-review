@@ -1,6 +1,16 @@
 {
   "profileId": "profile-10",
-  "expectedTier": null,
-  "expectedCriticalFindings": [],
-  "heldOut": null
+  "expectedTier": 3,
+  "expectedCriticalFindings": [
+    {
+      "category": "ASI01",
+      "reason": "Customer chat could contain instructions designed to induce unwarranted refunds or inappropriate CRM changes."
+    },
+    {
+      "category": "ASI02",
+      "reason": "It issues refunds of up to $50 without human confirmation. The blanket confirmation flag therefore does not accurately describe all consequential actions."
+    }
+  ],
+  "notes": "Transaction-history access establishes customer financial information even though the data classification omits it. Aggregate refund limits and repeat-refund protections are unknown",
+  "heldOut": false
 }
