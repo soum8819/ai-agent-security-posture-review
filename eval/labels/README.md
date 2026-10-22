@@ -10,9 +10,18 @@ is expected to reach.
 - Sam assigned the tiers for profiles 04, 09, 10 and 12, and the two
   acceptable tier ranges (profile-09: 3 or 4; profile-12: 2 or 3).
 
-## Rule used
+## Rules used
 
-Judge by what the profile lists, not by what it claims.
+- Judge by what the profile lists, not by what it claims.
+- When a profile contradicts itself, assume the riskier reading and flag the
+  contradiction.
+
+## Expected rules misses
+
+- profile-10: the profile's confirmation flag says yes, but its description
+  says refunds of up to $50 happen without confirmation. The fixed rules read
+  the listed flag, so they cannot reach the expected tier or flag the
+  unconfirmed refunds. The models are expected to catch it.
 
 ## Held-out profiles
 
