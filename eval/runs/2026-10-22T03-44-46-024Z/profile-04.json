@@ -1,0 +1,141 @@
+{
+  "profileId": "profile-04",
+  "promptVersion": "v3",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 4,
+    "reasons": [
+      "Tier 4: acts with no person confirming (Claims management system)",
+      "Tier 2: can act beyond reading (Claims management system, Team chat notification)",
+      "Tier 2: reads confidential, personal data"
+    ]
+  },
+  "proposedTier": 3,
+  "summary": "This agent reads confidential personal claim emails and can write directly to the claims management system without per-action human confirmation, creating a meaningful risk that priorities or queues could be changed incorrectly or maliciously (Tier 3). Key mitigations: require human approval for writes or produce draft updates, sanitize and validate untrusted attachments, and restrict/monitor model/provider usage.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "      {\n        \"name\": \"Claims management system\",\n        \"permissions\": [\n          \"read\",\n          \"write\"\n        ]\n      }",
+      "whyItMatters": "The agent has write permission to the claims system and the profile shows humanConfirmsActions is false, so it can modify claim records (priorities/queues) without a human reviewing each change, enabling accidental or malicious changes to customer claims data.",
+      "recommendedControl": "Require explicit human confirmation for any write actions that change claim priority or queue, or restrict the agent's token so it can only create draft updates that require an adjuster to approve before they take effect.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "  \"untrustedInputs\": [\n    \"email\",\n    \"uploaded_files\"\n  ],",
+      "whyItMatters": "The agent processes untrusted email text and uploaded files (photos/PDFs) directly; maliciously crafted attachments or prompt-like content could poison the model's input and cause misclassification of claim type or priority.",
+      "recommendedControl": "Implement preprocessing and sanitization of attachments (malware scanning, file type validation) and add input validation and adversarial-input testing before the model consumes content.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI09",
+      "severity": "medium",
+      "evidenceQuote": "Reads each new email sent to the public claims address, including attached photos and PDFs, extracts the policy number and claim type, sets a priority and queue on the claim record, and posts urgent claims to the adjusters' team channel.",
+      "whyItMatters": "The agent autonomously posts 'urgent' claims to the adjusters' channel and sets priorities, which staff may trust and act on; an attacker could trigger false urgent notifications or manipulated priorities to cause operational disruption or fraud.",
+      "recommendedControl": "Require an adjuster or triage person to confirm agent-flagged urgent claims before posting to the team channel or let the agent post only internal alerts that require manual escalation.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI04",
+      "severity": "low",
+      "evidenceQuote": "  \"model\": {\n    \"provider\": \"Google\",\n    \"name\": \"gemini-2.5-flash\"\n  },",
+      "whyItMatters": "The agent relies on an external third-party model provider (Google); if the model or provider is compromised or changes behavior, it could affect claim handling and confidentiality.",
+      "recommendedControl": "Document the model's security boundary, ensure contractual SLAs for model behavior and patching, and monitor model outputs for drift; consider an internal or audited model for sensitive processing.",
+      "modelSeverity": "low"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R1",
+      "severity": "critical",
+      "reason": "Lists Claims management system that can move money or change customer records, and no person confirms its actions.",
+      "field": "tools.permissions, humanConfirmsActions",
+      "category": "ASI02"
+    },
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (email, uploaded_files) and lists Claims management system that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "      {\n        \"name\": \"Claims management system\",\n        \"permissions\": [\n          \"read\",\n          \"write\"\n        ]\n      }",
+        "whyItMatters": "The agent has write permission to the claims system and the profile shows humanConfirmsActions is false, so it can modify claim records (priorities/queues) without a human reviewing each change, enabling accidental or malicious changes to customer claims data.",
+        "recommendedControl": "Require explicit human confirmation for any write actions that change claim priority or queue, or restrict the agent's token so it can only create draft updates that require an adjuster to approve before they take effect."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "  \"untrustedInputs\": [\n    \"email\",\n    \"uploaded_files\"\n  ],",
+        "whyItMatters": "The agent processes untrusted email text and uploaded files (photos/PDFs) directly; maliciously crafted attachments or prompt-like content could poison the model's input and cause misclassification of claim type or priority.",
+        "recommendedControl": "Implement preprocessing and sanitization of attachments (malware scanning, file type validation) and add input validation and adversarial-input testing before the model consumes content."
+      },
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "Reads each new email sent to the public claims address, including attached photos and PDFs, extracts the policy number and claim type, sets a priority and queue on the claim record, and posts urgent claims to the adjusters' team channel.",
+        "whyItMatters": "The agent autonomously posts 'urgent' claims to the adjusters' channel and sets priorities, which staff may trust and act on; an attacker could trigger false urgent notifications or manipulated priorities to cause operational disruption or fraud.",
+        "recommendedControl": "Require an adjuster or triage person to confirm agent-flagged urgent claims before posting to the team channel or let the agent post only internal alerts that require manual escalation."
+      },
+      {
+        "category": "ASI04",
+        "severity": "low",
+        "evidenceQuote": "  \"model\": {\n    \"provider\": \"Google\",\n    \"name\": \"gemini-2.5-flash\"\n  },",
+        "whyItMatters": "The agent relies on an external third-party model provider (Google); if the model or provider is compromised or changes behavior, it could affect claim handling and confidentiality.",
+        "recommendedControl": "Document the model's security boundary, ensure contractual SLAs for model behavior and patching, and monitor model outputs for drift; consider an internal or audited model for sensitive processing."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent reads confidential personal claim emails and can write directly to the claims management system without per-action human confirmation, creating a meaningful risk that priorities or queues could be changed incorrectly or maliciously (Tier 3). Key mitigations: require human approval for writes or produce draft updates, sanitize and validate untrusted attachments, and restrict/monitor model/provider usage."
+  },
+  "usage": {
+    "inputTokens": 1437,
+    "inputTokenDetails": {
+      "noCacheTokens": 1437,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1904,
+    "outputTokenDetails": {
+      "textTokens": 688,
+      "reasoningTokens": 1216
+    },
+    "totalTokens": 3341,
+    "raw": {
+      "input_tokens": 1437,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1904,
+      "output_tokens_details": {
+        "reasoning_tokens": 1216
+      },
+      "total_tokens": 3341
+    }
+  },
+  "generationId": "gen_01M5GVDAEE9TKGM5VACG49R4JH",
+  "durationMs": 22534
+}

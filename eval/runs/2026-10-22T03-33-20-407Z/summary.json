@@ -1,0 +1,288 @@
+{
+  "runId": "2026-10-22T03-33-20-407Z",
+  "set": "tuning",
+  "promptVersion": "v1",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "profiles": [
+    {
+      "id": "profile-01",
+      "ok": true,
+      "generationId": "gen_01M5GTQ8JJA3SSKAN4MFKK2AEY",
+      "tokens": 2693,
+      "note": "rule tier 4, model tier 4, 5 kept, 0 dropped"
+    },
+    {
+      "id": "profile-02",
+      "ok": true,
+      "generationId": "gen_01M5GTQQ3T548W5AP0QE3V99A1",
+      "tokens": 2299,
+      "note": "rule tier 1, model tier 1, 3 kept, 0 dropped"
+    },
+    {
+      "id": "profile-03",
+      "ok": true,
+      "generationId": "gen_01M5GTR4JFWRVFF5W41VH3RXPT",
+      "tokens": 2721,
+      "note": "rule tier 1, model tier 2, 5 kept, 0 dropped"
+    },
+    {
+      "id": "profile-05",
+      "ok": true,
+      "generationId": "gen_01M5GTRJZDSGARZAEFKGRDMPWG",
+      "tokens": 2449,
+      "note": "rule tier 3, model tier 3, 4 kept, 0 dropped"
+    },
+    {
+      "id": "profile-07",
+      "ok": true,
+      "generationId": "gen_01M5GTRZ7RXJ11ACP2R6KHV0GS",
+      "tokens": 2478,
+      "note": "rule tier 3, model tier 3, 3 kept, 0 dropped"
+    },
+    {
+      "id": "profile-09",
+      "ok": true,
+      "generationId": "gen_01M5GTSCBVZ3GCS7Y44A8S2MB9",
+      "tokens": 2818,
+      "note": "rule tier 4, model tier 4, 5 kept, 0 dropped"
+    },
+    {
+      "id": "profile-10",
+      "ok": true,
+      "generationId": "gen_01M5GTSW67RB7V8BRDVXBAAP42",
+      "tokens": 2870,
+      "note": "rule tier 2, model tier 4, 5 kept, 2 dropped"
+    },
+    {
+      "id": "profile-12",
+      "ok": true,
+      "generationId": "gen_01M5GTT9QBJV2DX36S93TCZ1TY",
+      "tokens": 2517,
+      "note": "rule tier 2, model tier 3, 0 kept, 4 dropped"
+    }
+  ],
+  "totalTokens": 20845,
+  "totalCostUsd": 0.024211,
+  "gatewayGenerations": {
+    "profile-01": {
+      "data": {
+        "id": "gen_01M5GTQ8JJA3SSKAN4MFKK2AEY",
+        "total_cost": 0.0031355,
+        "market_cost": 0.0031355,
+        "surcharge_cost": 0,
+        "gateway_cost": 0.0031355,
+        "upstream_inference_cost": 0,
+        "usage": 0.0031355,
+        "created_at": "2026-10-22T03:33:20.000Z",
+        "model": "openai/gpt-5-mini",
+        "is_byok": false,
+        "provider_name": "openai",
+        "streamed": false,
+        "finish_reason": "stop",
+        "latency": 14648,
+        "generation_time": 14648,
+        "tokens_prompt": 1286,
+        "tokens_completion": 831,
+        "native_tokens_prompt": 1286,
+        "native_tokens_completion": 831,
+        "native_tokens_reasoning": 576,
+        "native_tokens_cached": 0,
+        "native_tokens_cache_creation": 0,
+        "billable_web_search_calls": 0
+      }
+    },
+    "profile-02": {
+      "data": {
+        "id": "gen_01M5GTQQ3T548W5AP0QE3V99A1",
+        "total_cost": 0.002484,
+        "market_cost": 0.002484,
+        "surcharge_cost": 0,
+        "gateway_cost": 0.002484,
+        "upstream_inference_cost": 0,
+        "usage": 0.002484,
+        "created_at": "2026-10-22T03:33:35.000Z",
+        "model": "openai/gpt-5-mini",
+        "is_byok": false,
+        "provider_name": "openai",
+        "streamed": false,
+        "finish_reason": "stop",
+        "latency": 13629,
+        "generation_time": 13629,
+        "tokens_prompt": 1208,
+        "tokens_completion": 579,
+        "native_tokens_prompt": 1208,
+        "native_tokens_completion": 579,
+        "native_tokens_reasoning": 512,
+        "native_tokens_cached": 0,
+        "native_tokens_cache_creation": 0,
+        "billable_web_search_calls": 0
+      }
+    },
+    "profile-03": {
+      "data": {
+        "id": "gen_01M5GTR4JFWRVFF5W41VH3RXPT",
+        "total_cost": 0.00326325,
+        "market_cost": 0.00326325,
+        "surcharge_cost": 0,
+        "gateway_cost": 0.00326325,
+        "upstream_inference_cost": 0,
+        "usage": 0.00326325,
+        "created_at": "2026-10-22T03:33:49.000Z",
+        "model": "openai/gpt-5-mini",
+        "is_byok": false,
+        "provider_name": "openai",
+        "streamed": false,
+        "finish_reason": "stop",
+        "latency": 14550,
+        "generation_time": 14550,
+        "tokens_prompt": 1245,
+        "tokens_completion": 836,
+        "native_tokens_prompt": 1245,
+        "native_tokens_completion": 836,
+        "native_tokens_reasoning": 640,
+        "native_tokens_cached": 0,
+        "native_tokens_cache_creation": 0,
+        "billable_web_search_calls": 0
+      }
+    },
+    "profile-05": {
+      "data": {
+        "id": "gen_01M5GTRJZDSGARZAEFKGRDMPWG",
+        "total_cost": 0.00273675,
+        "market_cost": 0.00273675,
+        "surcharge_cost": 0,
+        "gateway_cost": 0.00273675,
+        "upstream_inference_cost": 0,
+        "usage": 0.00273675,
+        "created_at": "2026-10-22T03:34:04.000Z",
+        "model": "openai/gpt-5-mini",
+        "is_byok": false,
+        "provider_name": "openai",
+        "streamed": false,
+        "finish_reason": "stop",
+        "latency": 12454,
+        "generation_time": 12454,
+        "tokens_prompt": 1235,
+        "tokens_completion": 766,
+        "native_tokens_prompt": 1235,
+        "native_tokens_completion": 766,
+        "native_tokens_reasoning": 448,
+        "native_tokens_cached": 0,
+        "native_tokens_cache_creation": 0,
+        "billable_web_search_calls": 0
+      }
+    },
+    "profile-07": {
+      "data": {
+        "id": "gen_01M5GTRZ7RXJ11ACP2R6KHV0GS",
+        "total_cost": 0.00274225,
+        "market_cost": 0.00274225,
+        "surcharge_cost": 0,
+        "gateway_cost": 0.00274225,
+        "upstream_inference_cost": 0,
+        "usage": 0.00274225,
+        "created_at": "2026-10-22T03:34:16.000Z",
+        "model": "openai/gpt-5-mini",
+        "is_byok": false,
+        "provider_name": "openai",
+        "streamed": false,
+        "finish_reason": "stop",
+        "latency": 13188,
+        "generation_time": 13188,
+        "tokens_prompt": 1265,
+        "tokens_completion": 573,
+        "native_tokens_prompt": 1265,
+        "native_tokens_completion": 573,
+        "native_tokens_reasoning": 640,
+        "native_tokens_cached": 0,
+        "native_tokens_cache_creation": 0,
+        "billable_web_search_calls": 0
+      }
+    },
+    "profile-09": {
+      "data": {
+        "id": "gen_01M5GTSCBVZ3GCS7Y44A8S2MB9",
+        "total_cost": 0.00348,
+        "market_cost": 0.00348,
+        "surcharge_cost": 0,
+        "gateway_cost": 0.00348,
+        "upstream_inference_cost": 0,
+        "usage": 0.00348,
+        "created_at": "2026-10-22T03:34:30.000Z",
+        "model": "openai/gpt-5-mini",
+        "is_byok": false,
+        "provider_name": "openai",
+        "streamed": false,
+        "finish_reason": "stop",
+        "latency": 15960,
+        "generation_time": 15960,
+        "tokens_prompt": 1232,
+        "tokens_completion": 882,
+        "native_tokens_prompt": 1232,
+        "native_tokens_completion": 882,
+        "native_tokens_reasoning": 704,
+        "native_tokens_cached": 0,
+        "native_tokens_cache_creation": 0,
+        "billable_web_search_calls": 0
+      }
+    },
+    "profile-10": {
+      "data": {
+        "id": "gen_01M5GTSW67RB7V8BRDVXBAAP42",
+        "total_cost": 0.0035385,
+        "market_cost": 0.0035385,
+        "surcharge_cost": 0,
+        "gateway_cost": 0.0035385,
+        "upstream_inference_cost": 0,
+        "usage": 0.0035385,
+        "created_at": "2026-10-22T03:34:46.000Z",
+        "model": "openai/gpt-5-mini",
+        "is_byok": false,
+        "provider_name": "openai",
+        "streamed": false,
+        "finish_reason": "stop",
+        "latency": 13709,
+        "generation_time": 13709,
+        "tokens_prompt": 1258,
+        "tokens_completion": 1164,
+        "native_tokens_prompt": 1258,
+        "native_tokens_completion": 1164,
+        "native_tokens_reasoning": 448,
+        "native_tokens_cached": 0,
+        "native_tokens_cache_creation": 0,
+        "billable_web_search_calls": 0
+      }
+    },
+    "profile-12": {
+      "data": {
+        "id": "gen_01M5GTT9QBJV2DX36S93TCZ1TY",
+        "total_cost": 0.00283075,
+        "market_cost": 0.00283075,
+        "surcharge_cost": 0,
+        "gateway_cost": 0.00283075,
+        "upstream_inference_cost": 0,
+        "usage": 0.00283075,
+        "created_at": "2026-10-22T03:35:00.000Z",
+        "model": "openai/gpt-5-mini",
+        "is_byok": false,
+        "provider_name": "openai",
+        "streamed": false,
+        "finish_reason": "stop",
+        "latency": 13406,
+        "generation_time": 13406,
+        "tokens_prompt": 1259,
+        "tokens_completion": 682,
+        "native_tokens_prompt": 1259,
+        "native_tokens_completion": 682,
+        "native_tokens_reasoning": 576,
+        "native_tokens_cached": 0,
+        "native_tokens_cache_creation": 0,
+        "billable_web_search_calls": 0
+      }
+    }
+  }
+}

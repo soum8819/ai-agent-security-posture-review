@@ -1,0 +1,134 @@
+{
+  "profileId": "profile-11",
+  "promptVersion": "v4",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 3,
+    "reasons": [
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (KYC case management system)",
+      "Tier 2: reads personal, customer_financial data"
+    ]
+  },
+  "proposedTier": 3,
+  "summary": "The agent reads personal and customer financial documents and can write drafts into the case system while requiring analyst confirmation. Primary risks are credential or tool abuse because it has write access, untrusted uploaded documents that can poison outputs, reliance on a third-party model, and potential tool misuse. Controls recommended: tighten write privileges and token lifetimes, sanitize and sandbox uploaded files, reduce sensitive data sent to the external model, and enforce analyst gating and additional output filtering.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "medium",
+      "evidenceQuote": "{ \"name\": \"KYC case management system\", \"permissions\": [ \"read\", \"write\" ] }",
+      "whyItMatters": "The agent holds write permissions to the case management system and uses its own scoped token, so a compromised agent or credential could modify case data or escalate actions beyond draft creation.",
+      "recommendedControl": "Restrict the agent to read-plus-create-draft-only PRIs or a write queue that requires human-initiated commit, force short-lived scoped tokens with strict RBAC, and log and alert on any direct writes from the agent.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [ \"uploaded_files\" ]",
+      "whyItMatters": "The agent ingests user-uploaded documents as context without persistent memory, so maliciously crafted documents could poison summaries or cause incorrect gap detection across cases.",
+      "recommendedControl": "Implement input validation and content provenance checks, sandbox parsing of uploaded files, and structured extraction with strict schema validation before the content is used by the model.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "\"model\": { \"provider\": \"OpenAI\", \"name\": \"gpt-5-mini\" }",
+      "whyItMatters": "The agent depends on a third-party hosted model, so model provider compromise or malicious updates could alter outputs or leak sensitive customer data sent to the provider.",
+      "recommendedControl": "Minimize sensitive data sent to the external model by redacting or tokenizing PII and financial details, use a vetted enterprise contract with data protection guarantees, and consider an on-premise or fully controlled model for processing highly sensitive documents.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "\"tools\": [ { \"name\": \"KYC document store\", \"permissions\": [ \"read\" ] }, { \"name\": \"KYC case management system\", \"permissions\": [ \"read\", \"write\" ] } ]",
+      "whyItMatters": "The agent has automated access to document and case-management tools, so crafted inputs or ambiguous instructions could cause the agent to misuse those tools, for example creating misleading draft notes or embedding exfiltration channels into case data.",
+      "recommendedControl": "Harden tool interfaces with strict input sanitization, enforce output filtering and normalization before any writes, and add application-layer approvals that require an analyst to explicitly accept and audit any agent-created content before it becomes permanent.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (uploaded_files) and lists KYC case management system that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "{ \"name\": \"KYC case management system\", \"permissions\": [ \"read\", \"write\" ] }",
+        "whyItMatters": "The agent holds write permissions to the case management system and uses its own scoped token, so a compromised agent or credential could modify case data or escalate actions beyond draft creation.",
+        "recommendedControl": "Restrict the agent to read-plus-create-draft-only PRIs or a write queue that requires human-initiated commit, force short-lived scoped tokens with strict RBAC, and log and alert on any direct writes from the agent."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [ \"uploaded_files\" ]",
+        "whyItMatters": "The agent ingests user-uploaded documents as context without persistent memory, so maliciously crafted documents could poison summaries or cause incorrect gap detection across cases.",
+        "recommendedControl": "Implement input validation and content provenance checks, sandbox parsing of uploaded files, and structured extraction with strict schema validation before the content is used by the model."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"model\": { \"provider\": \"OpenAI\", \"name\": \"gpt-5-mini\" }",
+        "whyItMatters": "The agent depends on a third-party hosted model, so model provider compromise or malicious updates could alter outputs or leak sensitive customer data sent to the provider.",
+        "recommendedControl": "Minimize sensitive data sent to the external model by redacting or tokenizing PII and financial details, use a vetted enterprise contract with data protection guarantees, and consider an on-premise or fully controlled model for processing highly sensitive documents."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"tools\": [ { \"name\": \"KYC document store\", \"permissions\": [ \"read\" ] }, { \"name\": \"KYC case management system\", \"permissions\": [ \"read\", \"write\" ] } ]",
+        "whyItMatters": "The agent has automated access to document and case-management tools, so crafted inputs or ambiguous instructions could cause the agent to misuse those tools, for example creating misleading draft notes or embedding exfiltration channels into case data.",
+        "recommendedControl": "Harden tool interfaces with strict input sanitization, enforce output filtering and normalization before any writes, and add application-layer approvals that require an analyst to explicitly accept and audit any agent-created content before it becomes permanent."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The agent reads personal and customer financial documents and can write drafts into the case system while requiring analyst confirmation. Primary risks are credential or tool abuse because it has write access, untrusted uploaded documents that can poison outputs, reliance on a third-party model, and potential tool misuse. Controls recommended: tighten write privileges and token lifetimes, sanitize and sandbox uploaded files, reduce sensitive data sent to the external model, and enforce analyst gating and additional output filtering."
+  },
+  "usage": {
+    "inputTokens": 1889,
+    "inputTokenDetails": {
+      "noCacheTokens": 1889,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1852,
+    "outputTokenDetails": {
+      "textTokens": 764,
+      "reasoningTokens": 1088
+    },
+    "totalTokens": 3741,
+    "raw": {
+      "input_tokens": 1889,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1852,
+      "output_tokens_details": {
+        "reasoning_tokens": 1088
+      },
+      "total_tokens": 3741
+    }
+  },
+  "generationId": "gen_01M5GWS6RTXM9QKCB3H6BSVVBZ",
+  "durationMs": 30871
+}

@@ -35,17 +35,18 @@ of step 6, to be updated and reused in step 15.
 ## Shared building blocks
 
 - `lib/models.ts`: the one place the two model names live, so a model can be swapped by changing a single line.
-- `lib/owasp.ts`: the ten OWASP agentic risk categories, copied exactly from the official list.
+- `lib/owasp.ts`: the ten OWASP agentic risk categories, with names and a description of each copied word for word from the official document, and the source and retrieval date.
 - `lib/profile-schema.ts`: the strict rules for what an agent profile must contain, including the allowed choices for data, permissions and untrusted inputs (email, web, uploaded files, chat, logs or alerts).
 - `lib/label-schema.ts`: the strict rules for what an answer-key file must contain, so a typing mistake in a label is caught.
-- `lib/review-schema.ts`: the strict rules for what a review result must contain, including the five parts of every finding.
+- `lib/review-schema.ts`: the strict rules for what a review result must contain, including the five parts of every finding, and the simpler form the reviewer model fills in.
 - `lib/sample-profiles.ts`: loads the 12 test profiles so the form can offer them as samples.
+- `lib/review-prompt.ts`: the reviewer model's instructions, with the profile placed between clearly marked lines as data, never as instructions.
+- `lib/analyze.ts`: sends one profile to the reviewer model through AI Gateway, throws away findings whose evidence quote is not in the profile, and applies the rule floor.
 - `lib/rules.ts`: eight fixed rules that set a minimum severity from what a profile lists, the tier assignment, and the check that a model can never lower a rule's severity.
 - `lib/local-only.ts`: the lock that makes test routes answer "not found" anywhere except on this computer under `npm run dev`.
 
 ## Temporary spikes (to be replaced)
 
-- `app/api/ping/route.ts`: proves one model call works through AI Gateway, local only, to be deleted in step 8.
 - `workflows/review.ts`: proves a review can pause until the right people approve, with two different approvers for tier 3 and any rejection ending it.
 - `app/api/review/start/route.ts`: starts one test review, local only, after checking the inputs.
 - `app/api/review/approve/route.ts`: sends one approval or rejection to a waiting review, local only, after checking the inputs.
@@ -55,18 +56,23 @@ of step 6, to be updated and reused in step 15.
 - `eval/profiles/profile-01.json` to `profile-12.json`: the 12 fictional agent profiles the tool will be tested on, one per file.
 - `eval/labels/profile-01.json` to `profile-12.json`: the answer key, one file per profile, with the expected tier, the critical risks a good review must catch, and whether the profile is held out.
 - `eval/labels/README.md`: where the answer key came from, the rule used to write it, and how the 4 held-out profiles were drawn.
+- `eval/runs/`: raw results of every reviewer model run, one folder per run, with a README logging what changed between runs.
 - `eval/RULE_RUNS.md`: a log of every rules-versus-answer-key run, kept for the record, with what changed between runs.
 - `eval/ASSUMPTIONS.md`: where each profile came from and every value chosen where the source did not say.
 
 ## Tests and tools
 
 - `tests/rules.test.ts`: one test for each rule, for tier assignment and for the severity floor, using made-up profiles; run with `npm test`.
+- `tests/analyze.test.ts`: proves the evidence check drops a made-up finding and the rule floor raises a severity that is too low; calls no model.
+- `scripts/run-reviews.ts`: a developer tool that runs the reviewer model over the evaluation profiles and saves raw results and actual cost to `eval/runs`; run with `npm run reviews -- --set tuning` or `--set all`.
 - `scripts/compare-rules.ts`: a developer tool, not part of the app, that compares the rules' tier with the answer key and lists the held-out profiles separately; run with `npm run compare-rules`.
 
 ## Known limits
 
 - Rule 2 (runs code with no sandbox): the profile has no sandbox field, so any tool with run-code permission fires this rule, even if the team has a sandbox.
 - Rule 7 (customer financial data with no logging): weak OWASP fit. No category is mainly about missing logs; it is mapped to ASI10 Rogue Agents because that category's official mitigations call for audit logs of all agent actions.
+- ASI01 versus ASI06: the reviewer model often files untrusted-input risks under ASI06 (Memory & Context Poisoning) where the answer key expects ASI01 (Agent Goal Hijack). Prompt v4 added OWASP's own descriptions, but in its full run ASI01 matched the answer key on only one profile. See eval/runs/README.md.
+- Reviewer model: openai/gpt-5-mini does not accept a temperature setting, so its answers vary between runs even with the same prompt; reasoning effort is fixed at low instead.
 - Tier 4 and money: an agent that moves money only after a person confirms is not Tier 4 by itself. This is the project owner's reading of ambiguous customer card wording, to be confirmed with the customer.
 
 ## Not in git

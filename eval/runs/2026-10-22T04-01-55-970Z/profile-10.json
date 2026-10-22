@@ -1,0 +1,148 @@
+{
+  "profileId": "profile-10",
+  "promptVersion": "v4",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 2,
+    "reasons": [
+      "Tier 2: can act beyond reading (Customer support CRM, Refund issuance API)",
+      "Tier 2: reads confidential data"
+    ]
+  },
+  "proposedTier": 4,
+  "summary": "The agent has direct financial capabilities via a move_money permission and text that says it issues refunds automatically, creating a high-risk path to move funds without reliable human control. Logging, kill switch procedures, and session context protections are incomplete, raising medium-severity detection and containment risks. Require removal or brokered handling of move_money, enforce human approval and SIEM logging, and implement tested shutdown and session-sanitization controls before approval.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI10",
+      "severity": "high",
+      "evidenceQuote": "description\": \"Customer-facing chat agent. It looks up order and transaction history using support documents and the CRM, drafts replies, and issues refunds of up to $50 automatically.",
+      "whyItMatters": "The profile asserts the agent issues refunds automatically while the tools include a 'move_money' permission, so the agent can move funds without a human step, enabling unauthorized or fraudulent payments.",
+      "recommendedControl": "Require that the Refund issuance API rejects any direct move_money calls from the agent and enforce an auditable approval workflow service that performs the refund after explicit human approval, or remove the agent's move_money permission entirely.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"permissions\": [ \"move_money\" ]",
+      "whyItMatters": "The agent has a permission to move money, and it uses its own scoped token, which lets the agent itself exercise financial privileges and could be abused or stolen to escalate financial actions.",
+      "recommendedControl": "Replace the agent-scoped move_money credential with a constrained brokered approval service that performs monetary actions only after multi-factor human authorization and logs the operation with non-repudiation.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "Conversation history is kept for each customer session.",
+      "whyItMatters": "Untrusted chat inputs are retained per-session, so malicious or crafted messages could poison the agent's session context and cause unsafe or incorrect behavior during that session.",
+      "recommendedControl": "Sanitize and validate session inputs, apply strict input filtering and anomaly detection on session context, and expire or isolate session state after short TTLs to limit poisoning impact.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+      "whyItMatters": "Logs are not forwarded to central monitoring, so suspicious or erroneous agent actions, including financial operations, may go undetected and allow failures or abuse to cascade across systems.",
+      "recommendedControl": "Forward agent logs and audit events to the corporate SIEM in real time and create alerts for refunds, move_money API calls, and abnormal agent behaviors.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "Manual: the on-call engineer disables the agent's service account. No tested runbook.",
+      "whyItMatters": "The kill switch is manual and has no tested runbook, increasing the time to mitigate incidents and allowing problems to propagate before containment.",
+      "recommendedControl": "Implement an automated and tested emergency disable procedure with runbooks, scripted playbooks, and periodic drills to ensure the agent can be rapidly and reliably shut down.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (chat) and lists Customer support CRM that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 4,
+    "findings": [
+      {
+        "category": "ASI10",
+        "severity": "high",
+        "evidenceQuote": "description\": \"Customer-facing chat agent. It looks up order and transaction history using support documents and the CRM, drafts replies, and issues refunds of up to $50 automatically.",
+        "whyItMatters": "The profile asserts the agent issues refunds automatically while the tools include a 'move_money' permission, so the agent can move funds without a human step, enabling unauthorized or fraudulent payments.",
+        "recommendedControl": "Require that the Refund issuance API rejects any direct move_money calls from the agent and enforce an auditable approval workflow service that performs the refund after explicit human approval, or remove the agent's move_money permission entirely."
+      },
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"permissions\": [ \"move_money\" ]",
+        "whyItMatters": "The agent has a permission to move money, and it uses its own scoped token, which lets the agent itself exercise financial privileges and could be abused or stolen to escalate financial actions.",
+        "recommendedControl": "Replace the agent-scoped move_money credential with a constrained brokered approval service that performs monetary actions only after multi-factor human authorization and logs the operation with non-repudiation."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "Conversation history is kept for each customer session.",
+        "whyItMatters": "Untrusted chat inputs are retained per-session, so malicious or crafted messages could poison the agent's session context and cause unsafe or incorrect behavior during that session.",
+        "recommendedControl": "Sanitize and validate session inputs, apply strict input filtering and anomaly detection on session context, and expire or isolate session state after short TTLs to limit poisoning impact."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+        "whyItMatters": "Logs are not forwarded to central monitoring, so suspicious or erroneous agent actions, including financial operations, may go undetected and allow failures or abuse to cascade across systems.",
+        "recommendedControl": "Forward agent logs and audit events to the corporate SIEM in real time and create alerts for refunds, move_money API calls, and abnormal agent behaviors."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "Manual: the on-call engineer disables the agent's service account. No tested runbook.",
+        "whyItMatters": "The kill switch is manual and has no tested runbook, increasing the time to mitigate incidents and allowing problems to propagate before containment.",
+        "recommendedControl": "Implement an automated and tested emergency disable procedure with runbooks, scripted playbooks, and periodic drills to ensure the agent can be rapidly and reliably shut down."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The agent has direct financial capabilities via a move_money permission and text that says it issues refunds automatically, creating a high-risk path to move funds without reliable human control. Logging, kill switch procedures, and session context protections are incomplete, raising medium-severity detection and containment risks. Require removal or brokered handling of move_money, enforce human approval and SIEM logging, and implement tested shutdown and session-sanitization controls before approval."
+  },
+  "usage": {
+    "inputTokens": 1894,
+    "inputTokenDetails": {
+      "noCacheTokens": 1894,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1888,
+    "outputTokenDetails": {
+      "textTokens": 800,
+      "reasoningTokens": 1088
+    },
+    "totalTokens": 3782,
+    "raw": {
+      "input_tokens": 1894,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1888,
+      "output_tokens_details": {
+        "reasoning_tokens": 1088
+      },
+      "total_tokens": 3782
+    }
+  },
+  "generationId": "gen_01M5GWFCJZQJSGHNSE3T9HGWGQ",
+  "durationMs": 24252
+}

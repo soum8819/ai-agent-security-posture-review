@@ -1,0 +1,163 @@
+{
+  "profileId": "profile-09",
+  "promptVersion": "v3",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 4,
+    "reasons": [
+      "Tier 4: acts with no person confirming (Contract repository)",
+      "Tier 2: can act beyond reading (Contract repository)",
+      "Tier 2: reads confidential data"
+    ]
+  },
+  "proposedTier": 4,
+  "summary": "This profile claims the assistant is read-only but grants write permission to the contract repository and uses a shared token while humanConfirmsActions is false, creating a high-risk ability to modify contracts without human oversight (Tier 4). Additional risks include untrusted inputs that can poison behavior, logs not forwarded to the SIEM, and use of a third-party model; mitigate by removing write access or adding mandatory human approvals, replacing shared credentials, adding input controls, and improving logging and vendor controls.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI02",
+      "severity": "high",
+      "evidenceQuote": "\"permissions\": [\n        \"read\",\n        \"write\"\n      ]",
+      "whyItMatters": "The profile's tools list gives the Contract repository write permission while the description claims the assistant is read-only; this contradiction means the agent may be able to modify contracts despite assuring it will not, enabling unauthorized changes to critical documents.",
+      "recommendedControl": "Remove write permission from the Contract repository tool or require a separate, auditable approval step (human confirmation) before any write operation.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI03",
+      "severity": "critical",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "A shared token combined with the agent having write access and humanConfirmsActions set to false allows the agent to act on behalf of many users without per-action authorization, enabling large-scale unauthorized changes or privilege abuse that would be hard to attribute and stop.",
+      "recommendedControl": "Replace the shared_token with scoped, per-agent credentials and enforce per-action user authorization or multi-person approval for any write operations to the contract repository.",
+      "modelSeverity": "critical"
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [\n    \"uploaded_files\",\n    \"chat\"\n  ]",
+      "whyItMatters": "The agent will ingest uploaded files and chat content marked as untrusted; without input validation or sanitization this enables context poisoning where malicious uploads or prompts cause incorrect or harmful behavior (e.g., misidentifying clauses).",
+      "recommendedControl": "Implement input validation, file scanning (malware and content checks), and prompt-sanitization/whitelisting; require human review of any contract extractions from newly uploaded files.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI10",
+      "severity": "medium",
+      "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+      "whyItMatters": "Logs are not forwarded to the SIEM, reducing centralized monitoring and delaying detection of misuse or a rogue agent modifying contracts, which increases the window for undetected harmful actions.",
+      "recommendedControl": "Forward application logs to the enterprise SIEM with alerts for write operations, failed access attempts, and anomalous behavior, and retain audit trails for forensic review.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI04",
+      "severity": "low",
+      "evidenceQuote": "\"provider\": \"Google\"",
+      "whyItMatters": "The model is hosted by an external provider, introducing supply chain dependencies and potential risks if model updates or third-party compromise change agent behavior without the bank's control.",
+      "recommendedControl": "Require a vendor security assessment, define allowed model versions, and deploy change-monitoring for model updates; consider using an internally vetted model or additional input/output filters.",
+      "modelSeverity": "low"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (uploaded_files, chat) and lists Contract repository that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    },
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    },
+    {
+      "ruleId": "R6",
+      "severity": "high",
+      "reason": "Its text claims it is read-only, but it lists Contract repository that can change things.",
+      "field": "description, tools.permissions",
+      "category": "ASI03"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 4,
+    "findings": [
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "\"permissions\": [\n        \"read\",\n        \"write\"\n      ]",
+        "whyItMatters": "The profile's tools list gives the Contract repository write permission while the description claims the assistant is read-only; this contradiction means the agent may be able to modify contracts despite assuring it will not, enabling unauthorized changes to critical documents.",
+        "recommendedControl": "Remove write permission from the Contract repository tool or require a separate, auditable approval step (human confirmation) before any write operation."
+      },
+      {
+        "category": "ASI03",
+        "severity": "critical",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "A shared token combined with the agent having write access and humanConfirmsActions set to false allows the agent to act on behalf of many users without per-action authorization, enabling large-scale unauthorized changes or privilege abuse that would be hard to attribute and stop.",
+        "recommendedControl": "Replace the shared_token with scoped, per-agent credentials and enforce per-action user authorization or multi-person approval for any write operations to the contract repository."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [\n    \"uploaded_files\",\n    \"chat\"\n  ]",
+        "whyItMatters": "The agent will ingest uploaded files and chat content marked as untrusted; without input validation or sanitization this enables context poisoning where malicious uploads or prompts cause incorrect or harmful behavior (e.g., misidentifying clauses).",
+        "recommendedControl": "Implement input validation, file scanning (malware and content checks), and prompt-sanitization/whitelisting; require human review of any contract extractions from newly uploaded files."
+      },
+      {
+        "category": "ASI10",
+        "severity": "medium",
+        "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+        "whyItMatters": "Logs are not forwarded to the SIEM, reducing centralized monitoring and delaying detection of misuse or a rogue agent modifying contracts, which increases the window for undetected harmful actions.",
+        "recommendedControl": "Forward application logs to the enterprise SIEM with alerts for write operations, failed access attempts, and anomalous behavior, and retain audit trails for forensic review."
+      },
+      {
+        "category": "ASI04",
+        "severity": "low",
+        "evidenceQuote": "\"provider\": \"Google\"",
+        "whyItMatters": "The model is hosted by an external provider, introducing supply chain dependencies and potential risks if model updates or third-party compromise change agent behavior without the bank's control.",
+        "recommendedControl": "Require a vendor security assessment, define allowed model versions, and deploy change-monitoring for model updates; consider using an internally vetted model or additional input/output filters."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This profile claims the assistant is read-only but grants write permission to the contract repository and uses a shared token while humanConfirmsActions is false, creating a high-risk ability to modify contracts without human oversight (Tier 4). Additional risks include untrusted inputs that can poison behavior, logs not forwarded to the SIEM, and use of a third-party model; mitigate by removing write access or adding mandatory human approvals, replacing shared credentials, adding input controls, and improving logging and vendor controls."
+  },
+  "usage": {
+    "inputTokens": 1398,
+    "inputTokenDetails": {
+      "noCacheTokens": 118,
+      "cacheReadTokens": 1280,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1462,
+    "outputTokenDetails": {
+      "textTokens": 694,
+      "reasoningTokens": 768
+    },
+    "totalTokens": 2860,
+    "raw": {
+      "input_tokens": 1398,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 1280
+      },
+      "output_tokens": 1462,
+      "output_tokens_details": {
+        "reasoning_tokens": 768
+      },
+      "total_tokens": 2860
+    }
+  },
+  "generationId": "gen_01M5GVFVD83T7B86ZRJRV3BT1G",
+  "durationMs": 14539
+}

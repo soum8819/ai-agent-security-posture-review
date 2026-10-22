@@ -110,4 +110,5 @@ Updated by the project owner after each step.
 - [x] Step 5: done
 - [x] Step 6: done
 - [x] Step 7: done
-- [ ] Step 8: next (The first model reviews each profile)
+- [ ] Step 8: built, my read-through of the results pending
+- [ ] Step 9: next (A second model checks the first)

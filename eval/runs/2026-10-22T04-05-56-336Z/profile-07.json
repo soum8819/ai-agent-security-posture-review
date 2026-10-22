@@ -1,0 +1,141 @@
+{
+  "profileId": "profile-07",
+  "promptVersion": "v4",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 3,
+    "reasons": [
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (Payment exceptions queue, Payment release API)",
+      "Tier 2: reads confidential, customer_financial, personal data"
+    ]
+  },
+  "proposedTier": 3,
+  "summary": "This agent handles customer financial data and can trigger payments, so it is Tier 3. Key risks are tool misuse for money movement, agent goal hijack via manipulated proposals, scoped credential abuse, third-party model supply chain risk, and human-agent trust exploitation. Mitigations include stronger approval controls, credential hardening, provenance and validation of proposals, model output integrity checks, and analyst safeguards.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI02",
+      "severity": "high",
+      "evidenceQuote": "\"move_money\"",
+      "whyItMatters": "The agent has direct permission to perform money-moving operations via the Payment release API, so if its proposals or the confirmation flow are manipulated an unauthorized transfer could occur despite a human confirmation step. A compromised or tricked analyst could enable high-impact fund movement.",
+      "recommendedControl": "Require two-person approval for all releases, enforce strict step-up authentication at the release API, and implement server-side policy checks that validate and log every payment before execution.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI01",
+      "severity": "medium",
+      "evidenceQuote": "\"For each held payment, the assistant looks up the beneficiary record, proposes a corrected field, and writes the proposal to the exception record.\"",
+      "whyItMatters": "Because the agent generates and writes proposed corrections to case records, an attacker could manipulate inputs or tool outputs to bias proposals, causing analysts to accept incorrect beneficiary data and enabling misdirected payments.",
+      "recommendedControl": "Add server-side validation rules and anomaly detection on proposed changes, and display provenance and confidence scores for each proposed correction so analysts can easily spot suspicious proposals.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI03",
+      "severity": "medium",
+      "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+      "whyItMatters": "The profile shows the agent uses a scoped token for its operations; if that token is stolen, abused or over-permissioned it could be used to call the release API or modify exception records outside expected flows.",
+      "recommendedControl": "Enforce least privilege on the token, rotate and short-lived credentials, bind tokens to the agent runtime and origin, and require token use to be logged and approved by the operations console.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "\"provider\": \"OpenAI\"",
+      "whyItMatters": "The model provider and model are third-party components, introducing supply chain risk if model weights, endpoints, or provider-managed tooling are compromised or return manipulated outputs that influence payment proposals.",
+      "recommendedControl": "Mitigate by sandboxing model responses, apply model output integrity checks, maintain a validated fallback model, and require attestation or allowlisting of provider endpoints and versions.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI09",
+      "severity": "medium",
+      "evidenceQuote": "\"An analyst reviews the proposal, and after the analyst clicks confirm the assistant calls the release API to send the payment.\"",
+      "whyItMatters": "The workflow relies on analysts trusting the assistant's proposals, creating an opportunity for overreliance where analysts may accept recommendations without sufficient scrutiny, leading to erroneous or fraudulent payments.",
+      "recommendedControl": "Provide clear UI indicators of agent-generated content, require analysts to justify or annotate approvals for audit, and train analysts on common agent failure modes and social-engineering patterns.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [],
+  "rawModelOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "\"move_money\"",
+        "whyItMatters": "The agent has direct permission to perform money-moving operations via the Payment release API, so if its proposals or the confirmation flow are manipulated an unauthorized transfer could occur despite a human confirmation step. A compromised or tricked analyst could enable high-impact fund movement.",
+        "recommendedControl": "Require two-person approval for all releases, enforce strict step-up authentication at the release API, and implement server-side policy checks that validate and log every payment before execution."
+      },
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "\"For each held payment, the assistant looks up the beneficiary record, proposes a corrected field, and writes the proposal to the exception record.\"",
+        "whyItMatters": "Because the agent generates and writes proposed corrections to case records, an attacker could manipulate inputs or tool outputs to bias proposals, causing analysts to accept incorrect beneficiary data and enabling misdirected payments.",
+        "recommendedControl": "Add server-side validation rules and anomaly detection on proposed changes, and display provenance and confidence scores for each proposed correction so analysts can easily spot suspicious proposals."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+        "whyItMatters": "The profile shows the agent uses a scoped token for its operations; if that token is stolen, abused or over-permissioned it could be used to call the release API or modify exception records outside expected flows.",
+        "recommendedControl": "Enforce least privilege on the token, rotate and short-lived credentials, bind tokens to the agent runtime and origin, and require token use to be logged and approved by the operations console."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"provider\": \"OpenAI\"",
+        "whyItMatters": "The model provider and model are third-party components, introducing supply chain risk if model weights, endpoints, or provider-managed tooling are compromised or return manipulated outputs that influence payment proposals.",
+        "recommendedControl": "Mitigate by sandboxing model responses, apply model output integrity checks, maintain a validated fallback model, and require attestation or allowlisting of provider endpoints and versions."
+      },
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "\"An analyst reviews the proposal, and after the analyst clicks confirm the assistant calls the release API to send the payment.\"",
+        "whyItMatters": "The workflow relies on analysts trusting the assistant's proposals, creating an opportunity for overreliance where analysts may accept recommendations without sufficient scrutiny, leading to erroneous or fraudulent payments.",
+        "recommendedControl": "Provide clear UI indicators of agent-generated content, require analysts to justify or annotate approvals for audit, and train analysts on common agent failure modes and social-engineering patterns."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent handles customer financial data and can trigger payments, so it is Tier 3. Key risks are tool misuse for money movement, agent goal hijack via manipulated proposals, scoped credential abuse, third-party model supply chain risk, and human-agent trust exploitation. Mitigations include stronger approval controls, credential hardening, provenance and validation of proposals, model output integrity checks, and analyst safeguards."
+  },
+  "usage": {
+    "inputTokens": 1901,
+    "inputTokenDetails": {
+      "noCacheTokens": 109,
+      "cacheReadTokens": 1792,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1853,
+    "outputTokenDetails": {
+      "textTokens": 701,
+      "reasoningTokens": 1152
+    },
+    "totalTokens": 3754,
+    "raw": {
+      "input_tokens": 1901,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 1792
+      },
+      "output_tokens": 1853,
+      "output_tokens_details": {
+        "reasoning_tokens": 1152
+      },
+      "total_tokens": 3754
+    }
+  },
+  "generationId": "gen_01M5GWPA7FM9SQ67N5F6V3X9PH",
+  "durationMs": 23761
+}

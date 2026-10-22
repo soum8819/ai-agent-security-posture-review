@@ -1,0 +1,148 @@
+{
+  "profileId": "profile-12",
+  "promptVersion": "v4",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 2,
+    "reasons": [
+      "Tier 2: can act beyond reading (Team chat notification)",
+      "Tier 2: reads confidential data"
+    ]
+  },
+  "proposedTier": 3,
+  "summary": "Tier 3 is appropriate because the agent reads confidential corporate client data. Major risks include shared credentials, persistent shared memory between sub-agents, and a manual untested kill switch, all of which could enable context poisoning, privilege misuse, exfiltration, or a rogue agent remaining active. Mitigations should include per-agent scoped credentials, segmented and integrity-protected memory with provenance checks, automated tested kill mechanisms, and SIEM-forwarded logging plus chat output controls.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "A shared token implies multiple agents and possibly humans use the same credential, enabling lateral misuse or privilege escalation if the token is leaked or misused. There is no evidence of per-agent scoped credentials or short-lived tokens to limit blast radius.",
+      "recommendedControl": "Replace the shared token with per-agent least-privilege credentials, use short-lived tokens or workload identities, and audit/rotate those credentials automatically.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI06",
+      "severity": "high",
+      "evidenceQuote": "An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations.",
+      "whyItMatters": "Multiple sub-agents write to and read from persistent shared memory, which lets an attacker or malicious input poison context that influences future recommendations and tool use across agents.",
+      "recommendedControl": "Segment memory by agent role, enforce input validation and provenance checks on memory writes, and implement integrity protections and periodic memory sanitization and review.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "\"description\": \"An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations. Each sub-agent has scoped read-only tool access. The orchestrator can post summaries to team chat. No agent has write access to production systems.\"",
+      "whyItMatters": "The agent can post summaries to team chat and has access to confidential data, which creates a path for accidental or malicious exfiltration of sensitive client information via the chat tool.",
+      "recommendedControl": "Restrict chat outputs to redact sensitive fields by default, require an approval step before posting confidential content to chat, and log all outgoing messages with content scanners to detect secrets.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI10",
+      "severity": "high",
+      "evidenceQuote": "\"killSwitch\": {\"available\": true,\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"}",
+      "whyItMatters": "The kill switch is manual, untested, and implemented by disabling a service account, which may be slow or ineffective during an active compromise, allowing a rogue agent to continue harmful actions.",
+      "recommendedControl": "Implement an automated, well-documented, and tested emergency stop that immediately suspends agent execution and tool calls, and run regular tabletop tests of the runbook.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+      "whyItMatters": "Logs are not forwarded to the SIEM, reducing centralized detection and correlation, which increases the chance that failures or compromise will propagate unnoticed across agents and systems.",
+      "recommendedControl": "Configure secure, tamper-evident forwarding of agent logs to the enterprise SIEM with alerting on anomalous agent behavior, and ensure log retention and access control meet incident response needs.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "A shared token implies multiple agents and possibly humans use the same credential, enabling lateral misuse or privilege escalation if the token is leaked or misused. There is no evidence of per-agent scoped credentials or short-lived tokens to limit blast radius.",
+        "recommendedControl": "Replace the shared token with per-agent least-privilege credentials, use short-lived tokens or workload identities, and audit/rotate those credentials automatically."
+      },
+      {
+        "category": "ASI06",
+        "severity": "high",
+        "evidenceQuote": "An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations.",
+        "whyItMatters": "Multiple sub-agents write to and read from persistent shared memory, which lets an attacker or malicious input poison context that influences future recommendations and tool use across agents.",
+        "recommendedControl": "Segment memory by agent role, enforce input validation and provenance checks on memory writes, and implement integrity protections and periodic memory sanitization and review."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"description\": \"An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations. Each sub-agent has scoped read-only tool access. The orchestrator can post summaries to team chat. No agent has write access to production systems.\"",
+        "whyItMatters": "The agent can post summaries to team chat and has access to confidential data, which creates a path for accidental or malicious exfiltration of sensitive client information via the chat tool.",
+        "recommendedControl": "Restrict chat outputs to redact sensitive fields by default, require an approval step before posting confidential content to chat, and log all outgoing messages with content scanners to detect secrets."
+      },
+      {
+        "category": "ASI10",
+        "severity": "high",
+        "evidenceQuote": "\"killSwitch\": {\"available\": true,\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"}",
+        "whyItMatters": "The kill switch is manual, untested, and implemented by disabling a service account, which may be slow or ineffective during an active compromise, allowing a rogue agent to continue harmful actions.",
+        "recommendedControl": "Implement an automated, well-documented, and tested emergency stop that immediately suspends agent execution and tool calls, and run regular tabletop tests of the runbook."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+        "whyItMatters": "Logs are not forwarded to the SIEM, reducing centralized detection and correlation, which increases the chance that failures or compromise will propagate unnoticed across agents and systems.",
+        "recommendedControl": "Configure secure, tamper-evident forwarding of agent logs to the enterprise SIEM with alerting on anomalous agent behavior, and ensure log retention and access control meet incident response needs."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "Tier 3 is appropriate because the agent reads confidential corporate client data. Major risks include shared credentials, persistent shared memory between sub-agents, and a manual untested kill switch, all of which could enable context poisoning, privilege misuse, exfiltration, or a rogue agent remaining active. Mitigations should include per-agent scoped credentials, segmented and integrity-protected memory with provenance checks, automated tested kill mechanisms, and SIEM-forwarded logging plus chat output controls."
+  },
+  "usage": {
+    "inputTokens": 1895,
+    "inputTokenDetails": {
+      "noCacheTokens": 1895,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1600,
+    "outputTokenDetails": {
+      "textTokens": 896,
+      "reasoningTokens": 704
+    },
+    "totalTokens": 3495,
+    "raw": {
+      "input_tokens": 1895,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1600,
+      "output_tokens_details": {
+        "reasoning_tokens": 704
+      },
+      "total_tokens": 3495
+    }
+  },
+  "generationId": "gen_01M5GWG496M32WTNQ6E0KHQNGC",
+  "durationMs": 20622
+}

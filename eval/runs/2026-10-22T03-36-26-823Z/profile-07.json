@@ -1,0 +1,111 @@
+{
+  "profileId": "profile-07",
+  "promptVersion": "v2",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 3,
+    "reasons": [
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (Payment exceptions queue, Payment release API)",
+      "Tier 2: reads confidential, customer_financial, personal data"
+    ]
+  },
+  "proposedTier": 3,
+  "summary": "This agent handles confidential customer financial data and has a tool with move_money permission while using an agent-scoped credential; that combination presents a high-risk privilege/financial abuse vector. Additional medium risk comes from the agent's ability to write exception proposals, which could be misused or tampered with. Implement server-side enforcement of multi-person approvals, eliminate direct move_money capability from the agent token, strengthen audit and validation of agent-written proposals, and apply supply-chain mitigations for the external model provider.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "{\n      \"name\": \"Payment release API\",\n      \"permissions\": [\n        \"move_money\"\n      ]\n    }\n  ],\n  \"humanConfirmsActions\": true,\n  \"untrustedInputs\": [],\n  \"credentials\": \"own_scoped_token\",",
+      "whyItMatters": "The agent holds a scoped credential and has a tool with move_money permission, so if the credential or confirmation flow is bypassed or abused the agent can move customer funds. Even with an analyst confirmation step, possession of direct move_money ability with an owned token enables high-impact privilege abuse if controls fail.",
+      "recommendedControl": "Restrict the agent's runtime token so it cannot call move_money directly; require the release API to enforce server-side mandatory multi-person approval and use per-action attestation tied to human operator identities rather than an agent-scoped token.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "{\n      \"name\": \"Payment exceptions queue\",\n      \"permissions\": [\n        \"read\",\n        \"write\"\n      ]\n    },",
+      "whyItMatters": "The agent can write proposed corrections into the exceptions queue; if the agent is exploited or its proposals are tampered with, incorrect or fraudulent modification proposals could be injected and then approved by analysts, leading to incorrect payments or fraud.",
+      "recommendedControl": "Enforce write validation: require immutable audit fields for agent proposals, flag agent-originated edits for mandatory secondary review, and implement integrity checks and alerts in the exception queue for agent-written changes.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI04",
+      "severity": "low",
+      "evidenceQuote": "  \"model\": {\n    \"provider\": \"OpenAI\",\n    \"name\": \"gpt-5-mini\"\n  },",
+      "whyItMatters": "The agent depends on an external model provider; compromise or model drift at the provider could alter agent behavior and introduce risk to payment decisions or data confidentiality.",
+      "recommendedControl": "Apply provider risk mitigations: restrict which model endpoints can be used, encrypt and minimize data sent to the model, log and review model responses for anomalies, and maintain a fallback/local-review process if the provider is unavailable or suspected compromised.",
+      "modelSeverity": "low"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [],
+  "rawModelOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "{\n      \"name\": \"Payment release API\",\n      \"permissions\": [\n        \"move_money\"\n      ]\n    }\n  ],\n  \"humanConfirmsActions\": true,\n  \"untrustedInputs\": [],\n  \"credentials\": \"own_scoped_token\",",
+        "whyItMatters": "The agent holds a scoped credential and has a tool with move_money permission, so if the credential or confirmation flow is bypassed or abused the agent can move customer funds. Even with an analyst confirmation step, possession of direct move_money ability with an owned token enables high-impact privilege abuse if controls fail.",
+        "recommendedControl": "Restrict the agent's runtime token so it cannot call move_money directly; require the release API to enforce server-side mandatory multi-person approval and use per-action attestation tied to human operator identities rather than an agent-scoped token."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "{\n      \"name\": \"Payment exceptions queue\",\n      \"permissions\": [\n        \"read\",\n        \"write\"\n      ]\n    },",
+        "whyItMatters": "The agent can write proposed corrections into the exceptions queue; if the agent is exploited or its proposals are tampered with, incorrect or fraudulent modification proposals could be injected and then approved by analysts, leading to incorrect payments or fraud.",
+        "recommendedControl": "Enforce write validation: require immutable audit fields for agent proposals, flag agent-originated edits for mandatory secondary review, and implement integrity checks and alerts in the exception queue for agent-written changes."
+      },
+      {
+        "category": "ASI04",
+        "severity": "low",
+        "evidenceQuote": "  \"model\": {\n    \"provider\": \"OpenAI\",\n    \"name\": \"gpt-5-mini\"\n  },",
+        "whyItMatters": "The agent depends on an external model provider; compromise or model drift at the provider could alter agent behavior and introduce risk to payment decisions or data confidentiality.",
+        "recommendedControl": "Apply provider risk mitigations: restrict which model endpoints can be used, encrypt and minimize data sent to the model, log and review model responses for anomalies, and maintain a fallback/local-review process if the provider is unavailable or suspected compromised."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent handles confidential customer financial data and has a tool with move_money permission while using an agent-scoped credential; that combination presents a high-risk privilege/financial abuse vector. Additional medium risk comes from the agent's ability to write exception proposals, which could be misused or tampered with. Implement server-side enforcement of multi-person approvals, eliminate direct move_money capability from the agent token, strengthen audit and validation of agent-written proposals, and apply supply-chain mitigations for the external model provider."
+  },
+  "usage": {
+    "inputTokens": 1326,
+    "inputTokenDetails": {
+      "noCacheTokens": 1326,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1767,
+    "outputTokenDetails": {
+      "textTokens": 679,
+      "reasoningTokens": 1088
+    },
+    "totalTokens": 3093,
+    "raw": {
+      "input_tokens": 1326,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1767,
+      "output_tokens_details": {
+        "reasoning_tokens": 1088
+      },
+      "total_tokens": 3093
+    }
+  },
+  "generationId": "gen_01M5GTZEE4303PXF29XQ1VC3GH",
+  "durationMs": 22956
+}

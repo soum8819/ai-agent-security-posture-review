@@ -1,0 +1,178 @@
+{
+  "profileId": "profile-09",
+  "promptVersion": "v4",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 4,
+    "reasons": [
+      "Tier 4: acts with no person confirming (Contract repository)",
+      "Tier 2: can act beyond reading (Contract repository)",
+      "Tier 2: reads confidential data"
+    ]
+  },
+  "proposedTier": 4,
+  "summary": "The profile declares read-only operation but grants write permission and uses a shared credential while operating without human confirmation, creating high-risk capabilities for unauthorized modification and rogue actions. Mitigations required include removing autonomous write access or enforcing human approval, replacing the shared token with per-agent scoped credentials, sanitizing untrusted uploads, and hardening supply chain controls for the third-party model.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "A shared token lets any user or process that obtains it act as the assistant and inherit its permissions, enabling privilege escalation and unauthorized changes to contract records. Because the agent has autonomous write access, a compromised token could be used to modify or delete contracts at scale.",
+      "recommendedControl": "Replace the shared_token with a least-privileged, per-agent scoped credential and rotate it regularly; require per-call authentication and audit logging tied to individual user identities.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI02",
+      "severity": "critical",
+      "evidenceQuote": "\"permissions\": [ \"read\", \"write\" ]",
+      "whyItMatters": "The assistant has write permissions on the contract repository and operates without human confirmation, so tool misuse or prompt-based manipulation could cause unauthorized edits or injection of malicious content into authoritative contracts. There is no stated confirmation step to stop destructive or exfiltrative actions.",
+      "recommendedControl": "Remove or restrict autonomous write permission, require an explicit human approval workflow for any repository writes, and enforce allow-listing of allowed editing actions with server-side validation.",
+      "modelSeverity": "critical"
+    },
+    {
+      "category": "ASI01",
+      "severity": "high",
+      "evidenceQuote": "\"description\": \"This assistant is strictly read-only. Staff ask it questions in the procurement team chat and it searches signed vendor contracts, including contracts vendors upload through the supplier portal, and replies with the matching clause and its location.\"",
+      "whyItMatters": "The profile text claims the agent is read-only, but the tools list includes write permissions for the contract repository, a contradiction that could hide capability to change objectives or take unauthorized actions. An attacker or malicious input could exploit the write capability contrary to the stated intent.",
+      "recommendedControl": "Resolve the contradiction by updating the profile to accurately reflect capabilities; if write is not needed, remove it. Enforce capability declarations with automated checks during deployment.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [ \"uploaded_files\", \"chat\" ]",
+      "whyItMatters": "The assistant ingests uploaded files and chat content which are explicitly untrusted, creating a vector for context poisoning where malicious uploads or crafted chat messages alter future behavior or cause unsafe disclosures. There is no memory but RAG or cached search indices could still be poisoned by uploaded content.",
+      "recommendedControl": "Sanitize and sandbox uploaded documents, validate and scan for malicious content before indexing, and implement provenance tagging and time-limited context so poisoned inputs cannot persist or influence unrelated queries.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "\"provider\": \"Google\", \"name\": \"gemini-2.5-flash\"",
+      "whyItMatters": "The agent depends on a third-party model provider, introducing supply chain risk if the model, its updates, or its hosting are compromised. A tampered or malicious model could change agent behavior or exfiltrate sensitive contract data.",
+      "recommendedControl": "Treat the model as an external dependency: enforce contractual security assurances, monitor model behavior for anomalies, use model signing/verifiable provenance where available, and restrict high-risk outputs when processing confidential data.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI10",
+      "severity": "high",
+      "evidenceQuote": "\"humanConfirmsActions\": false",
+      "whyItMatters": "With no human confirmation and autonomous access to repository write permissions, the assistant can perform actions on its own, enabling a rogue agent scenario where it deviates from intended scope and makes harmful changes without oversight.",
+      "recommendedControl": "Require human confirmation for any non-read operations, add enforcement at the action-execution layer so that the agent cannot bypass confirmation, and implement anomaly detection plus an automated quarantine for suspicious agent actions.",
+      "modelSeverity": "high"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (uploaded_files, chat) and lists Contract repository that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    },
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    },
+    {
+      "ruleId": "R6",
+      "severity": "high",
+      "reason": "Its text claims it is read-only, but it lists Contract repository that can change things.",
+      "field": "description, tools.permissions",
+      "category": "ASI03"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 4,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "A shared token lets any user or process that obtains it act as the assistant and inherit its permissions, enabling privilege escalation and unauthorized changes to contract records. Because the agent has autonomous write access, a compromised token could be used to modify or delete contracts at scale.",
+        "recommendedControl": "Replace the shared_token with a least-privileged, per-agent scoped credential and rotate it regularly; require per-call authentication and audit logging tied to individual user identities."
+      },
+      {
+        "category": "ASI02",
+        "severity": "critical",
+        "evidenceQuote": "\"permissions\": [ \"read\", \"write\" ]",
+        "whyItMatters": "The assistant has write permissions on the contract repository and operates without human confirmation, so tool misuse or prompt-based manipulation could cause unauthorized edits or injection of malicious content into authoritative contracts. There is no stated confirmation step to stop destructive or exfiltrative actions.",
+        "recommendedControl": "Remove or restrict autonomous write permission, require an explicit human approval workflow for any repository writes, and enforce allow-listing of allowed editing actions with server-side validation."
+      },
+      {
+        "category": "ASI01",
+        "severity": "high",
+        "evidenceQuote": "\"description\": \"This assistant is strictly read-only. Staff ask it questions in the procurement team chat and it searches signed vendor contracts, including contracts vendors upload through the supplier portal, and replies with the matching clause and its location.\"",
+        "whyItMatters": "The profile text claims the agent is read-only, but the tools list includes write permissions for the contract repository, a contradiction that could hide capability to change objectives or take unauthorized actions. An attacker or malicious input could exploit the write capability contrary to the stated intent.",
+        "recommendedControl": "Resolve the contradiction by updating the profile to accurately reflect capabilities; if write is not needed, remove it. Enforce capability declarations with automated checks during deployment."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [ \"uploaded_files\", \"chat\" ]",
+        "whyItMatters": "The assistant ingests uploaded files and chat content which are explicitly untrusted, creating a vector for context poisoning where malicious uploads or crafted chat messages alter future behavior or cause unsafe disclosures. There is no memory but RAG or cached search indices could still be poisoned by uploaded content.",
+        "recommendedControl": "Sanitize and sandbox uploaded documents, validate and scan for malicious content before indexing, and implement provenance tagging and time-limited context so poisoned inputs cannot persist or influence unrelated queries."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"provider\": \"Google\", \"name\": \"gemini-2.5-flash\"",
+        "whyItMatters": "The agent depends on a third-party model provider, introducing supply chain risk if the model, its updates, or its hosting are compromised. A tampered or malicious model could change agent behavior or exfiltrate sensitive contract data.",
+        "recommendedControl": "Treat the model as an external dependency: enforce contractual security assurances, monitor model behavior for anomalies, use model signing/verifiable provenance where available, and restrict high-risk outputs when processing confidential data."
+      },
+      {
+        "category": "ASI10",
+        "severity": "high",
+        "evidenceQuote": "\"humanConfirmsActions\": false",
+        "whyItMatters": "With no human confirmation and autonomous access to repository write permissions, the assistant can perform actions on its own, enabling a rogue agent scenario where it deviates from intended scope and makes harmful changes without oversight.",
+        "recommendedControl": "Require human confirmation for any non-read operations, add enforcement at the action-execution layer so that the agent cannot bypass confirmation, and implement anomaly detection plus an automated quarantine for suspicious agent actions."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The profile declares read-only operation but grants write permission and uses a shared credential while operating without human confirmation, creating high-risk capabilities for unauthorized modification and rogue actions. Mitigations required include removing autonomous write access or enforcing human approval, replacing the shared token with per-agent scoped credentials, sanitizing untrusted uploads, and hardening supply chain controls for the third-party model."
+  },
+  "usage": {
+    "inputTokens": 1868,
+    "inputTokenDetails": {
+      "noCacheTokens": 1868,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1934,
+    "outputTokenDetails": {
+      "textTokens": 1038,
+      "reasoningTokens": 896
+    },
+    "totalTokens": 3802,
+    "raw": {
+      "input_tokens": 1868,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1934,
+      "output_tokens_details": {
+        "reasoning_tokens": 896
+      },
+      "total_tokens": 3802
+    }
+  },
+  "generationId": "gen_01M5GWEKWHAAXWKTQ50QKMS2QC",
+  "durationMs": 25300
+}

@@ -1,0 +1,169 @@
+{
+  "profileId": "profile-01",
+  "promptVersion": "v3",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 4,
+    "reasons": [
+      "Tier 4: moves money with no person confirming (Wire transfer API)",
+      "Tier 4: acts with no person confirming (ERP financial system, Vendor invoices email inbox)",
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (ERP financial system, Vendor invoices email inbox, Wire transfer API)",
+      "Tier 2: reads confidential, customer_financial data"
+    ]
+  },
+  "proposedTier": 4,
+  "summary": "This agent is Tier 4 because it can initiate wire transfers up to $25,000 without human confirmation and reads confidential customer financial data. Major risks: autonomous movement of funds, execution based on untrusted email inputs, and persistent shared memory that can be poisoned. Mitigations should include enforced human or multi-party approvals for payments, removing direct move_money privileges, hardening input validation and attachment handling, segmenting memory per vendor, and documenting/patching the self-hosted model.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "critical",
+      "evidenceQuote": "It keeps a memory of vendor history to spot anomalies, but that memory store is shared across all vendor accounts with no per-vendor separation.",
+      "whyItMatters": "The agent is authorized to approve and initiate wire transfers and operates without human confirmation, so its credentials and privileges can directly move funds; if compromised or misused it can transfer money with no stopping control.",
+      "recommendedControl": "Require multi-person approval or an out-of-band human confirmation for any wire transfer action and restrict the 'move_money' permission to a vaulted service that enforces approval policies.",
+      "modelSeverity": "critical"
+    },
+    {
+      "category": "ASI02",
+      "severity": "critical",
+      "evidenceQuote": "\"untrustedInputs\": [ \"email\" ]",
+      "whyItMatters": "The agent consumes untrusted email inputs (including attachments per description) and can act on them to initiate payments, enabling attackers to trigger fraudulent transfers via crafted emails or attachments.",
+      "recommendedControl": "Block direct payment actions from untrusted sources: enforce strict sender/PO matching, require invoice attestation, run malware and content validation on attachments, and route any payment-triggering inputs to a human review queue.",
+      "modelSeverity": "high",
+      "raisedByRule": "R1"
+    },
+    {
+      "category": "ASI06",
+      "severity": "high",
+      "evidenceQuote": "\"memory\": \"persistent\"",
+      "whyItMatters": "The persistent memory is shared across all vendor accounts (per profile description), allowing cross-vendor contamination or poisoning that could cause incorrect approval decisions or hide fraudulent activity.",
+      "recommendedControl": "Segment memory by vendor with access controls and integrity checks, add versioning and provenance metadata, and implement procedures to review and purge suspect memory entries.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "\"provider\": \"Self-hosted\",\"name\": \"Llama (version not specified)\"",
+      "whyItMatters": "A self-hosted model with no version specified prevents assurance about patching, provenance, and security posture, increasing the risk of exploited model vulnerabilities or unpatched supply-chain issues.",
+      "recommendedControl": "Record and enforce a supported model version, maintain vendor/patching evidence, run integrity and vulnerability scans on model artifacts, and include the model in supply-chain risk assessments.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [
+    {
+      "finding": {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"tools\": [ { \"name\": \"Wire transfer API\", \"permissions\": [ \"move_money\" ] } ]",
+        "whyItMatters": "The agent directly has 'move_money' permission on a wire transfer API and 'humanConfirmsActions' is false, so the agent can execute financial transactions autonomously, increasing risk of unauthorized transfers.",
+        "recommendedControl": "Remove direct move_money capability from the agent account; require a scoped action token that only a separate approval service can exchange after human or automated policy checks."
+      },
+      "reason": "evidence quote not found in the profile"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R1",
+      "severity": "critical",
+      "reason": "Lists Wire transfer API, ERP financial system, Vendor invoices email inbox that can move money or change customer records, and no person confirms its actions.",
+      "field": "tools.permissions, humanConfirmsActions",
+      "category": "ASI02"
+    },
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (email) and lists ERP financial system, Vendor invoices email inbox that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    },
+    {
+      "ruleId": "R5",
+      "severity": "high",
+      "reason": "Keeps persistent memory and reads untrusted input (email).",
+      "field": "memory, untrustedInputs",
+      "category": "ASI06"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 4,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "critical",
+        "evidenceQuote": "It keeps a memory of vendor history to spot anomalies, but that memory store is shared across all vendor accounts with no per-vendor separation.",
+        "whyItMatters": "The agent is authorized to approve and initiate wire transfers and operates without human confirmation, so its credentials and privileges can directly move funds; if compromised or misused it can transfer money with no stopping control.",
+        "recommendedControl": "Require multi-person approval or an out-of-band human confirmation for any wire transfer action and restrict the 'move_money' permission to a vaulted service that enforces approval policies."
+      },
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "\"untrustedInputs\": [ \"email\" ]",
+        "whyItMatters": "The agent consumes untrusted email inputs (including attachments per description) and can act on them to initiate payments, enabling attackers to trigger fraudulent transfers via crafted emails or attachments.",
+        "recommendedControl": "Block direct payment actions from untrusted sources: enforce strict sender/PO matching, require invoice attestation, run malware and content validation on attachments, and route any payment-triggering inputs to a human review queue."
+      },
+      {
+        "category": "ASI06",
+        "severity": "high",
+        "evidenceQuote": "\"memory\": \"persistent\"",
+        "whyItMatters": "The persistent memory is shared across all vendor accounts (per profile description), allowing cross-vendor contamination or poisoning that could cause incorrect approval decisions or hide fraudulent activity.",
+        "recommendedControl": "Segment memory by vendor with access controls and integrity checks, add versioning and provenance metadata, and implement procedures to review and purge suspect memory entries."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"provider\": \"Self-hosted\",\"name\": \"Llama (version not specified)\"",
+        "whyItMatters": "A self-hosted model with no version specified prevents assurance about patching, provenance, and security posture, increasing the risk of exploited model vulnerabilities or unpatched supply-chain issues.",
+        "recommendedControl": "Record and enforce a supported model version, maintain vendor/patching evidence, run integrity and vulnerability scans on model artifacts, and include the model in supply-chain risk assessments."
+      },
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"tools\": [ { \"name\": \"Wire transfer API\", \"permissions\": [ \"move_money\" ] } ]",
+        "whyItMatters": "The agent directly has 'move_money' permission on a wire transfer API and 'humanConfirmsActions' is false, so the agent can execute financial transactions autonomously, increasing risk of unauthorized transfers.",
+        "recommendedControl": "Remove direct move_money capability from the agent account; require a scoped action token that only a separate approval service can exchange after human or automated policy checks."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent is Tier 4 because it can initiate wire transfers up to $25,000 without human confirmation and reads confidential customer financial data. Major risks: autonomous movement of funds, execution based on untrusted email inputs, and persistent shared memory that can be poisoned. Mitigations should include enforced human or multi-party approvals for payments, removing direct move_money privileges, hardening input validation and attachment handling, segmenting memory per vendor, and documenting/patching the self-hosted model."
+  },
+  "usage": {
+    "inputTokens": 1452,
+    "inputTokenDetails": {
+      "noCacheTokens": 44,
+      "cacheReadTokens": 1408,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1342,
+    "outputTokenDetails": {
+      "textTokens": 830,
+      "reasoningTokens": 512
+    },
+    "totalTokens": 2794,
+    "raw": {
+      "input_tokens": 1452,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 1408
+      },
+      "output_tokens": 1342,
+      "output_tokens_details": {
+        "reasoning_tokens": 512
+      },
+      "total_tokens": 2794
+    }
+  },
+  "generationId": "gen_01M5GVC67JWPQ3ZFAH1RFW6M0J",
+  "durationMs": 13654
+}

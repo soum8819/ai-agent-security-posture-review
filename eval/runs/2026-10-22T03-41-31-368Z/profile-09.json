@@ -1,0 +1,178 @@
+{
+  "profileId": "profile-09",
+  "promptVersion": "v3",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 4,
+    "reasons": [
+      "Tier 4: acts with no person confirming (Contract repository)",
+      "Tier 2: can act beyond reading (Contract repository)",
+      "Tier 2: reads confidential data"
+    ]
+  },
+  "proposedTier": 4,
+  "summary": "The profile grants the assistant write permissions to the contract repository while also indicating no human confirmation and a shared credential, creating a high-risk ability for autonomous modification of critical contracts. Mitigations should remove or tightly control write capability, introduce mandatory human approval for changes, replace the shared token with scoped credentials, and improve logging and input validation before approving deployment.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI02",
+      "severity": "high",
+      "evidenceQuote": "\"permissions\": [\"read\", \"write\"]",
+      "whyItMatters": "The assistant is granted write access to the contract repository but the profile also claims it is read-only; with write permissions and no human confirmation the agent could modify or delete contracts, causing integrity loss or fraud.",
+      "recommendedControl": "Remove write permissions or enforce an approval gate (human-in-the-loop) and strict ACLs so the assistant can only perform read operations; require all write attempts be blocked or routed to a privileged service account with audit and human authorization.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI10",
+      "severity": "high",
+      "evidenceQuote": "\"humanConfirmsActions\": false",
+      "whyItMatters": "The agent can act without human confirmation; combined with repository write access this allows autonomous changes to critical legal documents, enabling high-impact, unauthorised actions.",
+      "recommendedControl": "Require explicit human confirmation for any action that modifies data (writes/deletes) and enforce that confirmation via a separate authenticated approval workflow before the agent is allowed to execute writes.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "A shared token grants broad, unscoped access and prevents per-user accountability; credential compromise or misuse would allow an attacker to act as the agent across all users and systems.",
+      "recommendedControl": "Replace the shared token with least-privilege, per-agent and per-user scoped credentials (short-lived tokens or mTLS) and rotate/manage them in a secrets manager with audit logging.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [ \"uploaded_files\", \"chat\" ]",
+      "whyItMatters": "The agent ingests uploaded files and chat content from untrusted sources; maliciously crafted uploads or poisoned chat context could cause incorrect outputs or disclosure of confidential data.",
+      "recommendedControl": "Apply input validation, content provenance checks, file-type and virus scanning, and contextual sanitization; explicitly treat uploaded files and chat as untrusted and surface provenance/confidence in results.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "\"provider\": \"Google\"",
+      "whyItMatters": "The model depends on an external third-party provider; without enterprise deployment controls this creates supply-chain risk where model behavior, availability, or confidentiality could be impacted by the provider.",
+      "recommendedControl": "Use an enterprise/isolated deployment or vetted model instance, obtain a model security SLA, and restrict export of confidential data to the provider (e.g., model-hosting in a VPC, data-handling contract clauses, and logging of model calls).",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI09",
+      "severity": "medium",
+      "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+      "whyItMatters": "Logs are not centrally forwarded to the SIEM, reducing detection and forensic capability for suspicious access or unauthorized writes to contracts.",
+      "recommendedControl": "Forward all application logs (including access and write attempts) to the corporate SIEM with retention and alerting for anomalous access patterns or modification events.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (uploaded_files, chat) and lists Contract repository that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    },
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    },
+    {
+      "ruleId": "R6",
+      "severity": "high",
+      "reason": "Its text claims it is read-only, but it lists Contract repository that can change things.",
+      "field": "description, tools.permissions",
+      "category": "ASI03"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 4,
+    "findings": [
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "\"permissions\": [\"read\", \"write\"]",
+        "whyItMatters": "The assistant is granted write access to the contract repository but the profile also claims it is read-only; with write permissions and no human confirmation the agent could modify or delete contracts, causing integrity loss or fraud.",
+        "recommendedControl": "Remove write permissions or enforce an approval gate (human-in-the-loop) and strict ACLs so the assistant can only perform read operations; require all write attempts be blocked or routed to a privileged service account with audit and human authorization."
+      },
+      {
+        "category": "ASI10",
+        "severity": "high",
+        "evidenceQuote": "\"humanConfirmsActions\": false",
+        "whyItMatters": "The agent can act without human confirmation; combined with repository write access this allows autonomous changes to critical legal documents, enabling high-impact, unauthorised actions.",
+        "recommendedControl": "Require explicit human confirmation for any action that modifies data (writes/deletes) and enforce that confirmation via a separate authenticated approval workflow before the agent is allowed to execute writes."
+      },
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "A shared token grants broad, unscoped access and prevents per-user accountability; credential compromise or misuse would allow an attacker to act as the agent across all users and systems.",
+        "recommendedControl": "Replace the shared token with least-privilege, per-agent and per-user scoped credentials (short-lived tokens or mTLS) and rotate/manage them in a secrets manager with audit logging."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [ \"uploaded_files\", \"chat\" ]",
+        "whyItMatters": "The agent ingests uploaded files and chat content from untrusted sources; maliciously crafted uploads or poisoned chat context could cause incorrect outputs or disclosure of confidential data.",
+        "recommendedControl": "Apply input validation, content provenance checks, file-type and virus scanning, and contextual sanitization; explicitly treat uploaded files and chat as untrusted and surface provenance/confidence in results."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"provider\": \"Google\"",
+        "whyItMatters": "The model depends on an external third-party provider; without enterprise deployment controls this creates supply-chain risk where model behavior, availability, or confidentiality could be impacted by the provider.",
+        "recommendedControl": "Use an enterprise/isolated deployment or vetted model instance, obtain a model security SLA, and restrict export of confidential data to the provider (e.g., model-hosting in a VPC, data-handling contract clauses, and logging of model calls)."
+      },
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+        "whyItMatters": "Logs are not centrally forwarded to the SIEM, reducing detection and forensic capability for suspicious access or unauthorized writes to contracts.",
+        "recommendedControl": "Forward all application logs (including access and write attempts) to the corporate SIEM with retention and alerting for anomalous access patterns or modification events."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The profile grants the assistant write permissions to the contract repository while also indicating no human confirmation and a shared credential, creating a high-risk ability for autonomous modification of critical contracts. Mitigations should remove or tightly control write capability, introduce mandatory human approval for changes, replace the shared token with scoped credentials, and improve logging and input validation before approving deployment."
+  },
+  "usage": {
+    "inputTokens": 1398,
+    "inputTokenDetails": {
+      "noCacheTokens": 1398,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1953,
+    "outputTokenDetails": {
+      "textTokens": 865,
+      "reasoningTokens": 1088
+    },
+    "totalTokens": 3351,
+    "raw": {
+      "input_tokens": 1398,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1953,
+      "output_tokens_details": {
+        "reasoning_tokens": 1088
+      },
+      "total_tokens": 3351
+    }
+  },
+  "generationId": "gen_01M5GV8HS462CRY559NHRA7Q11",
+  "durationMs": 19636
+}

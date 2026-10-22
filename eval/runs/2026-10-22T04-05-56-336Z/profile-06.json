@@ -1,0 +1,109 @@
+{
+  "profileId": "profile-06",
+  "promptVersion": "v4",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 1,
+    "reasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "proposedTier": 1,
+  "summary": "The agent is read-only and limited to internal data so it fits a Tier 1 classification. Main risks are session-level context poisoning and goal manipulation via untrusted chat inputs, and a supply-chain dependency on an external model provider; implement input sanitization, stricter memory controls, human verification for adopted directives, and vendor risk controls before launch.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [ \"chat\" ]",
+      "whyItMatters": "Untrusted chat inputs are accepted and can be recorded in session memory, allowing an attacker to seed malicious or misleading context that influences future answers or causes unsafe behavior.",
+      "recommendedControl": "Block or sanitize untrusted chat content before it enters session memory, implement strict input validation and provenance tagging, and expire or review session memory regularly.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI01",
+      "severity": "medium",
+      "evidenceQuote": "\"memory\": \"session\"",
+      "whyItMatters": "Session memory plus untrusted chat means user-provided content can persist across the session and alter agent decision pathways or objectives via prompt-style injections.",
+      "recommendedControl": "Limit what is stored in session memory to vetted metadata only, require explicit human verification before adopting any user-provided directives, and log all memory writes for audit.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI04",
+      "severity": "low",
+      "evidenceQuote": "\"provider\": \"Anthropic\"",
+      "whyItMatters": "The model provider is a third party, so model compromise or provider-side issues could affect confidentiality, integrity, or availability of agent responses and downstream decisions.",
+      "recommendedControl": "Establish provider risk controls: contractual security requirements, model integrity checks, periodic audit of provider security posture, and a fallback local model or degraded mode if provider issues are detected.",
+      "modelSeverity": "low"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [],
+  "rawModelOutput": {
+    "proposedTier": 1,
+    "findings": [
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [ \"chat\" ]",
+        "whyItMatters": "Untrusted chat inputs are accepted and can be recorded in session memory, allowing an attacker to seed malicious or misleading context that influences future answers or causes unsafe behavior.",
+        "recommendedControl": "Block or sanitize untrusted chat content before it enters session memory, implement strict input validation and provenance tagging, and expire or review session memory regularly."
+      },
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "\"memory\": \"session\"",
+        "whyItMatters": "Session memory plus untrusted chat means user-provided content can persist across the session and alter agent decision pathways or objectives via prompt-style injections.",
+        "recommendedControl": "Limit what is stored in session memory to vetted metadata only, require explicit human verification before adopting any user-provided directives, and log all memory writes for audit."
+      },
+      {
+        "category": "ASI04",
+        "severity": "low",
+        "evidenceQuote": "\"provider\": \"Anthropic\"",
+        "whyItMatters": "The model provider is a third party, so model compromise or provider-side issues could affect confidentiality, integrity, or availability of agent responses and downstream decisions.",
+        "recommendedControl": "Establish provider risk controls: contractual security requirements, model integrity checks, periodic audit of provider security posture, and a fallback local model or degraded mode if provider issues are detected."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The agent is read-only and limited to internal data so it fits a Tier 1 classification. Main risks are session-level context poisoning and goal manipulation via untrusted chat inputs, and a supply-chain dependency on an external model provider; implement input sanitization, stricter memory controls, human verification for adopted directives, and vendor risk controls before launch."
+  },
+  "usage": {
+    "inputTokens": 1830,
+    "inputTokenDetails": {
+      "noCacheTokens": 1830,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1065,
+    "outputTokenDetails": {
+      "textTokens": 425,
+      "reasoningTokens": 640
+    },
+    "totalTokens": 2895,
+    "raw": {
+      "input_tokens": 1830,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1065,
+      "output_tokens_details": {
+        "reasoning_tokens": 640
+      },
+      "total_tokens": 2895
+    }
+  },
+  "generationId": "gen_01M5GWNV6TCPWWTWNW32KRDWBT",
+  "durationMs": 15364
+}

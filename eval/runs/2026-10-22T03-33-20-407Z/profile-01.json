@@ -1,0 +1,166 @@
+{
+  "profileId": "profile-01",
+  "promptVersion": "v1",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 4,
+    "reasons": [
+      "Tier 4: moves money with no person confirming (Wire transfer API)",
+      "Tier 4: acts with no person confirming (ERP financial system, Vendor invoices email inbox)",
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (ERP financial system, Vendor invoices email inbox, Wire transfer API)",
+      "Tier 2: reads confidential, customer_financial data"
+    ]
+  },
+  "proposedTier": 4,
+  "summary": "This agent is high-risk: it autonomously initiates wire transfers without human confirmation and holds credentials able to perform write and payment actions, while processing untrusted email attachments and using shared persistent memory that can leak or poison contexts. Require human approvals for payments, restrict and harden credentials and parsing, isolate memory per vendor, and implement SIEM integration plus an automated, tested kill switch before approval to operate.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI10",
+      "severity": "critical",
+      "evidenceQuote": "\"humanConfirmsActions\": false",
+      "whyItMatters": "The agent is authorized to approve and initiate wire transfers without any human confirmation, so it can move funds autonomously and cause direct financial loss or fraud.",
+      "recommendedControl": "Require a human-in-the-loop for all payments (block move_money calls unless an approved human-validated token/ack is present) and enforce transaction approval workflows with dual control for payments over a low threshold (e.g., any wire > $0 requires human approval).",
+      "modelSeverity": "critical"
+    },
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+      "whyItMatters": "A long-lived or poorly scoped service token combined with broad tool permissions (read/write on ERP and email) allows the agent to exercise high privileges and impersonate automation with no additional human checks.",
+      "recommendedControl": "Use short-lived, narrowly scoped credentials tied to least privilege, enforce credential rotation and robust auditing, and restrict payment-capable credentials to a separate service account with monitoring and emergency revocation.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI05",
+      "severity": "high",
+      "evidenceQuote": "\"untrustedInputs\": [\n    \"email\"\n  ]",
+      "whyItMatters": "Processing untrusted email and attachments can trigger RCE or other exploit paths in parsers or downstream tools, potentially allowing arbitrary code execution or escalation of compromise.",
+      "recommendedControl": "Treat all email attachments as untrusted: parse only in isolated, hardened sandboxes with strict time/resource limits, use safe parsers, strip/scan attachments for active content, and fail closed on parse errors.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI06",
+      "severity": "high",
+      "evidenceQuote": "\"memory\": \"persistent\"",
+      "whyItMatters": "The profile states the memory store is shared across all vendor accounts with no per-vendor separation, risking cross-tenant data leakage and context poisoning that can lead to incorrect approvals or exposure of confidential vendor/customer financial data.",
+      "recommendedControl": "Implement per-vendor (per-tenant) isolated memory stores with access controls and encryption, apply input validation and integrity checks on memory entries, and enforce retention and purge policies.",
+      "modelSeverity": "medium",
+      "raisedByRule": "R5"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+      "whyItMatters": "Logs are not integrated into centralized monitoring and the described kill switch is a manual, untested process, reducing visibility and delaying incident response which can allow failures to cascade or an ongoing compromise to persist.",
+      "recommendedControl": "Forward logs and alerts to the corporate SIEM with real-time alerting for payment events and anomalous behavior; implement an automated, tested circuit-breaker (automated stop on anomalous activity) and a documented, exercised runbook for the kill switch.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R1",
+      "severity": "critical",
+      "reason": "Lists Wire transfer API, ERP financial system, Vendor invoices email inbox that can move money or change customer records, and no person confirms its actions.",
+      "field": "tools.permissions, humanConfirmsActions",
+      "category": "ASI02"
+    },
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (email) and lists ERP financial system, Vendor invoices email inbox that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    },
+    {
+      "ruleId": "R5",
+      "severity": "high",
+      "reason": "Keeps persistent memory and reads untrusted input (email).",
+      "field": "memory, untrustedInputs",
+      "category": "ASI06"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 4,
+    "findings": [
+      {
+        "category": "ASI10",
+        "severity": "critical",
+        "evidenceQuote": "\"humanConfirmsActions\": false",
+        "whyItMatters": "The agent is authorized to approve and initiate wire transfers without any human confirmation, so it can move funds autonomously and cause direct financial loss or fraud.",
+        "recommendedControl": "Require a human-in-the-loop for all payments (block move_money calls unless an approved human-validated token/ack is present) and enforce transaction approval workflows with dual control for payments over a low threshold (e.g., any wire > $0 requires human approval)."
+      },
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+        "whyItMatters": "A long-lived or poorly scoped service token combined with broad tool permissions (read/write on ERP and email) allows the agent to exercise high privileges and impersonate automation with no additional human checks.",
+        "recommendedControl": "Use short-lived, narrowly scoped credentials tied to least privilege, enforce credential rotation and robust auditing, and restrict payment-capable credentials to a separate service account with monitoring and emergency revocation."
+      },
+      {
+        "category": "ASI05",
+        "severity": "high",
+        "evidenceQuote": "\"untrustedInputs\": [\n    \"email\"\n  ]",
+        "whyItMatters": "Processing untrusted email and attachments can trigger RCE or other exploit paths in parsers or downstream tools, potentially allowing arbitrary code execution or escalation of compromise.",
+        "recommendedControl": "Treat all email attachments as untrusted: parse only in isolated, hardened sandboxes with strict time/resource limits, use safe parsers, strip/scan attachments for active content, and fail closed on parse errors."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"memory\": \"persistent\"",
+        "whyItMatters": "The profile states the memory store is shared across all vendor accounts with no per-vendor separation, risking cross-tenant data leakage and context poisoning that can lead to incorrect approvals or exposure of confidential vendor/customer financial data.",
+        "recommendedControl": "Implement per-vendor (per-tenant) isolated memory stores with access controls and encryption, apply input validation and integrity checks on memory entries, and enforce retention and purge policies."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+        "whyItMatters": "Logs are not integrated into centralized monitoring and the described kill switch is a manual, untested process, reducing visibility and delaying incident response which can allow failures to cascade or an ongoing compromise to persist.",
+        "recommendedControl": "Forward logs and alerts to the corporate SIEM with real-time alerting for payment events and anomalous behavior; implement an automated, tested circuit-breaker (automated stop on anomalous activity) and a documented, exercised runbook for the kill switch."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent is high-risk: it autonomously initiates wire transfers without human confirmation and holds credentials able to perform write and payment actions, while processing untrusted email attachments and using shared persistent memory that can leak or poison contexts. Require human approvals for payments, restrict and harden credentials and parsing, isolate memory per vendor, and implement SIEM integration plus an automated, tested kill switch before approval to operate."
+  },
+  "usage": {
+    "inputTokens": 1286,
+    "inputTokenDetails": {
+      "noCacheTokens": 1286,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1407,
+    "outputTokenDetails": {
+      "textTokens": 831,
+      "reasoningTokens": 576
+    },
+    "totalTokens": 2693,
+    "raw": {
+      "input_tokens": 1286,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1407,
+      "output_tokens_details": {
+        "reasoning_tokens": 576
+      },
+      "total_tokens": 2693
+    }
+  },
+  "generationId": "gen_01M5GTQ8JJA3SSKAN4MFKK2AEY",
+  "durationMs": 15019
+}

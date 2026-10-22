@@ -1,0 +1,133 @@
+{
+  "profileId": "profile-03",
+  "promptVersion": "v4",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 1,
+    "reasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "proposedTier": 3,
+  "summary": "The profile reads internal CRM and public web data using shared credentials and untrusted web inputs, with manual untested recovery and limited centralized logging. Primary risks are shared credential abuse, external-input manipulation of agent outputs, an unreliable kill switch, and insufficient monitoring. Recommend scoped credentials, input validation and provenance checks, an automated tested kill switch, and SIEM integration before approval.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "Shared credentials allow compromise of the agent identity to affect multiple systems and make it hard to revoke or attribute misuse, increasing risk of lateral access and privilege escalation.",
+      "recommendedControl": "Use per-agent, short-lived scoped credentials with individual identities, rotate them regularly, and log authentication events to a central audit trail.",
+      "modelSeverity": "medium",
+      "raisedByRule": "R4"
+    },
+    {
+      "category": "ASI01",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [\"web\"]",
+      "whyItMatters": "The agent ingests external web data that can contain malicious or manipulative content, enabling attackers to influence the agent's objectives or outputs and cause incorrect or harmful briefs.",
+      "recommendedControl": "Apply validated sanitization and provenance checks to web inputs, restrict which domains/sources are allowed, and implement content integrity and adversarial-input detection before using external content in outputs.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI10",
+      "severity": "medium",
+      "evidenceQuote": "\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"",
+      "whyItMatters": "The kill switch is manual and untested, so a compromised or misbehaving agent may not be reliably or quickly disabled, increasing the chance of prolonged harmful behavior.",
+      "recommendedControl": "Implement an automated, tested kill switch and an operational runbook with drills, plus role-based emergency controls that can immediately revoke the agent's runtime capabilities.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI08",
+      "severity": "low",
+      "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+      "whyItMatters": "Logs are not forwarded to centralized security monitoring, reducing visibility into anomalous behavior and increasing the chance that faults or malicious actions propagate undetected across systems.",
+      "recommendedControl": "Forward agent logs to the organization SIEM with structured, searchable events and configure alerts for anomalous behavior and access patterns.",
+      "modelSeverity": "low"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "Shared credentials allow compromise of the agent identity to affect multiple systems and make it hard to revoke or attribute misuse, increasing risk of lateral access and privilege escalation.",
+        "recommendedControl": "Use per-agent, short-lived scoped credentials with individual identities, rotate them regularly, and log authentication events to a central audit trail."
+      },
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [\"web\"]",
+        "whyItMatters": "The agent ingests external web data that can contain malicious or manipulative content, enabling attackers to influence the agent's objectives or outputs and cause incorrect or harmful briefs.",
+        "recommendedControl": "Apply validated sanitization and provenance checks to web inputs, restrict which domains/sources are allowed, and implement content integrity and adversarial-input detection before using external content in outputs."
+      },
+      {
+        "category": "ASI10",
+        "severity": "medium",
+        "evidenceQuote": "\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"",
+        "whyItMatters": "The kill switch is manual and untested, so a compromised or misbehaving agent may not be reliably or quickly disabled, increasing the chance of prolonged harmful behavior.",
+        "recommendedControl": "Implement an automated, tested kill switch and an operational runbook with drills, plus role-based emergency controls that can immediately revoke the agent's runtime capabilities."
+      },
+      {
+        "category": "ASI08",
+        "severity": "low",
+        "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+        "whyItMatters": "Logs are not forwarded to centralized security monitoring, reducing visibility into anomalous behavior and increasing the chance that faults or malicious actions propagate undetected across systems.",
+        "recommendedControl": "Forward agent logs to the organization SIEM with structured, searchable events and configure alerts for anomalous behavior and access patterns."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The profile reads internal CRM and public web data using shared credentials and untrusted web inputs, with manual untested recovery and limited centralized logging. Primary risks are shared credential abuse, external-input manipulation of agent outputs, an unreliable kill switch, and insufficient monitoring. Recommend scoped credentials, input validation and provenance checks, an automated tested kill switch, and SIEM integration before approval."
+  },
+  "usage": {
+    "inputTokens": 1881,
+    "inputTokenDetails": {
+      "noCacheTokens": 1881,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1605,
+    "outputTokenDetails": {
+      "textTokens": 517,
+      "reasoningTokens": 1088
+    },
+    "totalTokens": 3486,
+    "raw": {
+      "input_tokens": 1881,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1605,
+      "output_tokens_details": {
+        "reasoning_tokens": 1088
+      },
+      "total_tokens": 3486
+    }
+  },
+  "generationId": "gen_01M5GWCKEHYYVRQYHX0VF24WFA",
+  "durationMs": 17884
+}

@@ -1,0 +1,109 @@
+{
+  "profileId": "profile-02",
+  "promptVersion": "v1",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 1,
+    "reasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "proposedTier": 1,
+  "summary": "This agent is read-only and fits Tier 1 but exposes moderate risks from untrusted chat inputs (session poisoning), ambiguous credential scoping, and an unclear \"internal\" data read scope that contradicts the claim it cannot access personal records. Mitigations: hard-scope credentials and data reads, add input sanitization/prompt-injection defenses, and enforce index-level filters and audit logging before approval.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [\n    \"chat\"\n  ]\n",
+      "whyItMatters": "User-provided chat messages are treated as untrusted inputs while the agent keeps session memory, so prompt-injection or malicious inputs can poison session context and cause incorrect or unsafe answers during that session.",
+      "recommendedControl": "Sanitize and canonicalize chat inputs, implement prompt-injection detection and blocking, and ensure user content is never directly incorporated into system prompts or citations without strict validation and escaping.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI03",
+      "severity": "medium",
+      "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+      "whyItMatters": "The profile provides an opaque \"own_scoped_token\" credential without documented least-privilege scope; if the token is over-permissioned or stolen it could be used to access internal data beyond the intended published HR policies.",
+      "recommendedControl": "Enforce least-privilege scoped credentials with explicit documented scopes, rotate keys regularly, bind tokens to the search tool only, and audit all token usage with alerts for anomalous access patterns.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "\"dataReads\": [\n    \"internal\"\n  ]\n",
+      "whyItMatters": "The profile claims it \"cannot see any employee's personal records\" but also allows reads of unspecified \"internal\" data; this contradiction implies the search tool might return sensitive internal records if not properly scoped, risking data exposure via answers.",
+      "recommendedControl": "Constrain the search index and dataReads to a validated list of published HR policy documents only, apply data classification filters to block personal records, and add query-level allowlists and deny-lists to the search tool.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [],
+  "rawModelOutput": {
+    "proposedTier": 1,
+    "findings": [
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [\n    \"chat\"\n  ]\n",
+        "whyItMatters": "User-provided chat messages are treated as untrusted inputs while the agent keeps session memory, so prompt-injection or malicious inputs can poison session context and cause incorrect or unsafe answers during that session.",
+        "recommendedControl": "Sanitize and canonicalize chat inputs, implement prompt-injection detection and blocking, and ensure user content is never directly incorporated into system prompts or citations without strict validation and escaping."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+        "whyItMatters": "The profile provides an opaque \"own_scoped_token\" credential without documented least-privilege scope; if the token is over-permissioned or stolen it could be used to access internal data beyond the intended published HR policies.",
+        "recommendedControl": "Enforce least-privilege scoped credentials with explicit documented scopes, rotate keys regularly, bind tokens to the search tool only, and audit all token usage with alerts for anomalous access patterns."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"dataReads\": [\n    \"internal\"\n  ]\n",
+        "whyItMatters": "The profile claims it \"cannot see any employee's personal records\" but also allows reads of unspecified \"internal\" data; this contradiction implies the search tool might return sensitive internal records if not properly scoped, risking data exposure via answers.",
+        "recommendedControl": "Constrain the search index and dataReads to a validated list of published HR policy documents only, apply data classification filters to block personal records, and add query-level allowlists and deny-lists to the search tool."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent is read-only and fits Tier 1 but exposes moderate risks from untrusted chat inputs (session poisoning), ambiguous credential scoping, and an unclear \"internal\" data read scope that contradicts the claim it cannot access personal records. Mitigations: hard-scope credentials and data reads, add input sanitization/prompt-injection defenses, and enforce index-level filters and audit logging before approval."
+  },
+  "usage": {
+    "inputTokens": 1208,
+    "inputTokenDetails": {
+      "noCacheTokens": 1208,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1091,
+    "outputTokenDetails": {
+      "textTokens": 579,
+      "reasoningTokens": 512
+    },
+    "totalTokens": 2299,
+    "raw": {
+      "input_tokens": 1208,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1091,
+      "output_tokens_details": {
+        "reasoning_tokens": 512
+      },
+      "total_tokens": 2299
+    }
+  },
+  "generationId": "gen_01M5GTQQ3T548W5AP0QE3V99A1",
+  "durationMs": 13776
+}

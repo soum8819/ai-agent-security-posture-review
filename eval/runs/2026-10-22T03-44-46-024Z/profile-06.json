@@ -1,0 +1,109 @@
+{
+  "profileId": "profile-06",
+  "promptVersion": "v3",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 1,
+    "reasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "proposedTier": 1,
+  "summary": "This agent is read-only and limited to internal wiki reads, so it is a Tier 1. Key risks: session-level ingestion of untrusted chat input (context poisoning), reliance on an externally hosted model with no pinned version, and weak/untested incident detection and shutdown (manual kill switch and logs not in SIEM). Addressing input sanitization, model versioning, and automated/ tested incident response will materially reduce risk.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [\"chat\"]",
+      "whyItMatters": "The agent accepts untrusted chat input while keeping session memory, which allows a user or attacker to inject misleading or malicious context that the agent will continue to use for the duration of the session, causing it to return or amplify poisoned information from internal sources.",
+      "recommendedControl": "Either disable session memory for untrusted chat inputs or sanitize and validate chat input before it is added to session context; add content-origin tagging and prompt-source filters so the agent can ignore or treat untrusted content as untrusted.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "\"model\": { \"provider\": \"Anthropic\", \"name\": \"Claude Sonnet (version not specified)\" }",
+      "whyItMatters": "The agent depends on an external third-party model with no version specified, creating a supply-chain risk if the provider updates the model, introduces a vulnerability, or if the runtime behaves unexpectedly; lack of versioning prevents reproducible behavior and timely rollback.",
+      "recommendedControl": "Pin to a specific, reviewed model version and implement a change-control process for model upgrades including security review, testing in a staging environment, and a rollback plan.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"",
+      "whyItMatters": "Shutdown and incident response rely on an untested manual procedure to disable a service account, and logging is not yet forwarded to the SIEM, which together increase the chance that an incident will not be detected or contained quickly, allowing problems to persist or cascade.",
+      "recommendedControl": "Implement and test an automated, documented kill-switch runbook and forward relevant application logs to the SIEM with alerting for anomalous behavior; perform periodic drills to validate response times.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [],
+  "rawModelOutput": {
+    "proposedTier": 1,
+    "findings": [
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [\"chat\"]",
+        "whyItMatters": "The agent accepts untrusted chat input while keeping session memory, which allows a user or attacker to inject misleading or malicious context that the agent will continue to use for the duration of the session, causing it to return or amplify poisoned information from internal sources.",
+        "recommendedControl": "Either disable session memory for untrusted chat inputs or sanitize and validate chat input before it is added to session context; add content-origin tagging and prompt-source filters so the agent can ignore or treat untrusted content as untrusted."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"model\": { \"provider\": \"Anthropic\", \"name\": \"Claude Sonnet (version not specified)\" }",
+        "whyItMatters": "The agent depends on an external third-party model with no version specified, creating a supply-chain risk if the provider updates the model, introduces a vulnerability, or if the runtime behaves unexpectedly; lack of versioning prevents reproducible behavior and timely rollback.",
+        "recommendedControl": "Pin to a specific, reviewed model version and implement a change-control process for model upgrades including security review, testing in a staging environment, and a rollback plan."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"",
+        "whyItMatters": "Shutdown and incident response rely on an untested manual procedure to disable a service account, and logging is not yet forwarded to the SIEM, which together increase the chance that an incident will not be detected or contained quickly, allowing problems to persist or cascade.",
+        "recommendedControl": "Implement and test an automated, documented kill-switch runbook and forward relevant application logs to the SIEM with alerting for anomalous behavior; perform periodic drills to validate response times."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent is read-only and limited to internal wiki reads, so it is a Tier 1. Key risks: session-level ingestion of untrusted chat input (context poisoning), reliance on an externally hosted model with no pinned version, and weak/untested incident detection and shutdown (manual kill switch and logs not in SIEM). Addressing input sanitization, model versioning, and automated/ tested incident response will materially reduce risk."
+  },
+  "usage": {
+    "inputTokens": 1360,
+    "inputTokenDetails": {
+      "noCacheTokens": 1360,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1493,
+    "outputTokenDetails": {
+      "textTokens": 597,
+      "reasoningTokens": 896
+    },
+    "totalTokens": 2853,
+    "raw": {
+      "input_tokens": 1360,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1493,
+      "output_tokens_details": {
+        "reasoning_tokens": 896
+      },
+      "total_tokens": 2853
+    }
+  },
+  "generationId": "gen_01M5GVEGBEPMPRZ12RWFDSJ5ZF",
+  "durationMs": 15518
+}

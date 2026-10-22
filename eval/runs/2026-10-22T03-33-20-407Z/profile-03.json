@@ -1,0 +1,147 @@
+{
+  "profileId": "profile-03",
+  "promptVersion": "v1",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 1,
+    "reasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "proposedTier": 2,
+  "summary": "The agent is read-only and suitable for Tier 2, but it has several operational and security weaknesses: ingestion of untrusted web data without provenance controls, use of a shared token for credentials, lack of enforced human confirmation, an untested manual kill switch, and an unspecified external model version. Addressing these controls (per-agent short-lived credentials, provenance checks, enforced human signoff, automated tested shutdown, and model versioning) will materially reduce risk.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [\n    \"web\"\n  ]",
+      "whyItMatters": "The agent ingests data from untrusted web sources which can be poisoned or manipulated, causing it to produce incorrect or misleading account briefs that RMs may rely on.",
+      "recommendedControl": "Apply source allowlists and automated provenance checks, validate and cross-check web-derived facts against trusted internal sources, and surface source confidence and links in the brief.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "A shared token implies broad, non‑audited credentials that can be re-used, leaked, or abused to access read-only CRM data and other resources without per-agent least-privilege controls.",
+      "recommendedControl": "Replace the shared token with short‑lived, per-agent credentials using least privilege and scoped access; enable audit logging tied to the agent identity.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI09",
+      "severity": "medium",
+      "evidenceQuote": "\"humanConfirmsActions\": false",
+      "whyItMatters": "The profile indicates the agent operates without required human confirmation, so automated outputs could be consumed by RMs as authoritative and lead to poor decisions based on unverified summaries.",
+      "recommendedControl": "Enforce an explicit human-in-the-loop step before briefs are distributed or marked final (e.g., UI signoff), and prominently show source provenance and confidence levels.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI10",
+      "severity": "medium",
+      "evidenceQuote": "\"killSwitch\": {\n    \"available\": true,\n    \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"\n  }",
+      "whyItMatters": "The kill switch is manual and the runbook is untested, which may delay or prevent reliable shutdown during incidents, prolonging harmful agent behavior or data exposure.",
+      "recommendedControl": "Implement an automated, tested emergency disable mechanism (e.g., revoke agent credentials via IAM API), document and test the runbook regularly, and verify procedure time-to-shutdown.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI04",
+      "severity": "low",
+      "evidenceQuote": "\"model\": {\n    \"provider\": \"Anthropic\",\n    \"name\": \"Claude Sonnet (version not specified)\"\n  }",
+      "whyItMatters": "Use of an external model provider with no specified version increases supply-chain uncertainty (e.g., dependency changes, model updates, or provider-side data handling) that could affect outputs or compliance.",
+      "recommendedControl": "Record the exact model version, review provider security and data-handling policies, and include the model/version in change control and periodic supplier risk assessments.",
+      "modelSeverity": "low"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 2,
+    "findings": [
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [\n    \"web\"\n  ]",
+        "whyItMatters": "The agent ingests data from untrusted web sources which can be poisoned or manipulated, causing it to produce incorrect or misleading account briefs that RMs may rely on.",
+        "recommendedControl": "Apply source allowlists and automated provenance checks, validate and cross-check web-derived facts against trusted internal sources, and surface source confidence and links in the brief."
+      },
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "A shared token implies broad, non‑audited credentials that can be re-used, leaked, or abused to access read-only CRM data and other resources without per-agent least-privilege controls.",
+        "recommendedControl": "Replace the shared token with short‑lived, per-agent credentials using least privilege and scoped access; enable audit logging tied to the agent identity."
+      },
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "\"humanConfirmsActions\": false",
+        "whyItMatters": "The profile indicates the agent operates without required human confirmation, so automated outputs could be consumed by RMs as authoritative and lead to poor decisions based on unverified summaries.",
+        "recommendedControl": "Enforce an explicit human-in-the-loop step before briefs are distributed or marked final (e.g., UI signoff), and prominently show source provenance and confidence levels."
+      },
+      {
+        "category": "ASI10",
+        "severity": "medium",
+        "evidenceQuote": "\"killSwitch\": {\n    \"available\": true,\n    \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"\n  }",
+        "whyItMatters": "The kill switch is manual and the runbook is untested, which may delay or prevent reliable shutdown during incidents, prolonging harmful agent behavior or data exposure.",
+        "recommendedControl": "Implement an automated, tested emergency disable mechanism (e.g., revoke agent credentials via IAM API), document and test the runbook regularly, and verify procedure time-to-shutdown."
+      },
+      {
+        "category": "ASI04",
+        "severity": "low",
+        "evidenceQuote": "\"model\": {\n    \"provider\": \"Anthropic\",\n    \"name\": \"Claude Sonnet (version not specified)\"\n  }",
+        "whyItMatters": "Use of an external model provider with no specified version increases supply-chain uncertainty (e.g., dependency changes, model updates, or provider-side data handling) that could affect outputs or compliance.",
+        "recommendedControl": "Record the exact model version, review provider security and data-handling policies, and include the model/version in change control and periodic supplier risk assessments."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The agent is read-only and suitable for Tier 2, but it has several operational and security weaknesses: ingestion of untrusted web data without provenance controls, use of a shared token for credentials, lack of enforced human confirmation, an untested manual kill switch, and an unspecified external model version. Addressing these controls (per-agent short-lived credentials, provenance checks, enforced human signoff, automated tested shutdown, and model versioning) will materially reduce risk."
+  },
+  "usage": {
+    "inputTokens": 1245,
+    "inputTokenDetails": {
+      "noCacheTokens": 1245,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1476,
+    "outputTokenDetails": {
+      "textTokens": 836,
+      "reasoningTokens": 640
+    },
+    "totalTokens": 2721,
+    "raw": {
+      "input_tokens": 1245,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1476,
+      "output_tokens_details": {
+        "reasoning_tokens": 640
+      },
+      "total_tokens": 2721
+    }
+  },
+  "generationId": "gen_01M5GTR4JFWRVFF5W41VH3RXPT",
+  "durationMs": 14702
+}

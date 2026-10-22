@@ -1,0 +1,109 @@
+{
+  "profileId": "profile-02",
+  "promptVersion": "v3",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 1,
+    "reasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "proposedTier": 1,
+  "summary": "This read-only HR Q&A agent is appropriately scoped to internal policy documents (Tier 1) but has moderate risks from untrusted chat input (context poisoning), dependence on a third-party model, and potential to mislead employees with incorrect policy answers. Implement input sanitization and prompt-attack detection, vendor controls and output monitoring, and enforced source citation plus escalation for ambiguous/high-impact queries before deployment.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [ \"chat\" ]",
+      "whyItMatters": "User-provided chat messages can intentionally or accidentally poison the agent's session context and cause it to give incorrect or misleading HR guidance during that session. Session-only memory limits persistence but does not prevent harmful or misleading replies within an active conversation.",
+      "recommendedControl": "Validate and sanitize user inputs, add intent/attack detection (e.g., prompt injection filters) before feeding chat content to the model, and implement guardrails that detect and refuse suspicious prompts or context manipulations.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "\"model\": { \"provider\": \"OpenAI\", \"name\": \"gpt-5-mini\" }",
+      "whyItMatters": "The agent depends on an external model provider (OpenAI). If the model or its integrations are compromised, altered, or experience a supply-chain incident, the agent could return incorrect or malicious responses to employees. Reliance on a third-party model without described mitigations increases risk.",
+      "recommendedControl": "Require vendor risk assessment and SLA controls, enable model output monitoring and anomaly detection, and implement an allowlist of acceptable response formats and data sources; consider an on-prem or vetted model for sensitive HR use if available.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI09",
+      "severity": "medium",
+      "evidenceQuote": "\"businessPurpose\": \"Answer employee questions about HR policies such as leave, benefits and travel, so the HR helpdesk handles fewer routine tickets.\"",
+      "whyItMatters": "Employees will rely on the agent for HR policy guidance, so incorrect answers or hallucinated policy links can cause misunderstanding of benefits, leave entitlements, or compliance issues. The profile claims it links to source policy but does not describe verification of those links or mitigations for hallucination.",
+      "recommendedControl": "Require the agent to always cite authoritative policy documents by verified URL and include an explicit disclaimer and escalation path for ambiguous or high-impact queries; add sampling and QA checks of outputs before broad rollout.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [],
+  "rawModelOutput": {
+    "proposedTier": 1,
+    "findings": [
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [ \"chat\" ]",
+        "whyItMatters": "User-provided chat messages can intentionally or accidentally poison the agent's session context and cause it to give incorrect or misleading HR guidance during that session. Session-only memory limits persistence but does not prevent harmful or misleading replies within an active conversation.",
+        "recommendedControl": "Validate and sanitize user inputs, add intent/attack detection (e.g., prompt injection filters) before feeding chat content to the model, and implement guardrails that detect and refuse suspicious prompts or context manipulations."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"model\": { \"provider\": \"OpenAI\", \"name\": \"gpt-5-mini\" }",
+        "whyItMatters": "The agent depends on an external model provider (OpenAI). If the model or its integrations are compromised, altered, or experience a supply-chain incident, the agent could return incorrect or malicious responses to employees. Reliance on a third-party model without described mitigations increases risk.",
+        "recommendedControl": "Require vendor risk assessment and SLA controls, enable model output monitoring and anomaly detection, and implement an allowlist of acceptable response formats and data sources; consider an on-prem or vetted model for sensitive HR use if available."
+      },
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "\"businessPurpose\": \"Answer employee questions about HR policies such as leave, benefits and travel, so the HR helpdesk handles fewer routine tickets.\"",
+        "whyItMatters": "Employees will rely on the agent for HR policy guidance, so incorrect answers or hallucinated policy links can cause misunderstanding of benefits, leave entitlements, or compliance issues. The profile claims it links to source policy but does not describe verification of those links or mitigations for hallucination.",
+        "recommendedControl": "Require the agent to always cite authoritative policy documents by verified URL and include an explicit disclaimer and escalation path for ambiguous or high-impact queries; add sampling and QA checks of outputs before broad rollout."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This read-only HR Q&A agent is appropriately scoped to internal policy documents (Tier 1) but has moderate risks from untrusted chat input (context poisoning), dependence on a third-party model, and potential to mislead employees with incorrect policy answers. Implement input sanitization and prompt-attack detection, vendor controls and output monitoring, and enforced source citation plus escalation for ambiguous/high-impact queries before deployment."
+  },
+  "usage": {
+    "inputTokens": 1374,
+    "inputTokenDetails": {
+      "noCacheTokens": 1374,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1370,
+    "outputTokenDetails": {
+      "textTokens": 602,
+      "reasoningTokens": 768
+    },
+    "totalTokens": 2744,
+    "raw": {
+      "input_tokens": 1374,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1370,
+      "output_tokens_details": {
+        "reasoning_tokens": 768
+      },
+      "total_tokens": 2744
+    }
+  },
+  "generationId": "gen_01M5GV6TVP89BK8NSQ5AV4ZCJC",
+  "durationMs": 13383
+}

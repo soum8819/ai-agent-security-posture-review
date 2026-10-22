@@ -1,0 +1,141 @@
+{
+  "profileId": "profile-12",
+  "promptVersion": "v1",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 2,
+    "reasons": [
+      "Tier 2: can act beyond reading (Team chat notification)",
+      "Tier 2: reads confidential data"
+    ]
+  },
+  "proposedTier": 3,
+  "summary": "This agent handles confidential data and coordinates multiple sub-agents via persistent shared memory and a shared credential, creating risks of context poisoning, credential abuse, and undue influence on humans via chat posts. Logging and the untested manual kill switch reduce detection and containment capabilities. Mitigations: restrict/ephemeral memory, per-agent short-lived credentials and RBAC, limit automated chat influence with stronger human-verification, and integrate logging plus a tested kill/runbook.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [],
+  "droppedFindings": [
+    {
+      "finding": {
+        "category": "ASI06",
+        "severity": "high",
+        "evidenceQuote": "\"memory\": \"persistent\"\n...\n\"An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations.",
+        "whyItMatters": "Persistent, shared memory across multiple sub-agents lets stale or malicious context influence all future recommendations, enabling context-poisoning attacks that can persist across sessions and mislead humans reviewing outputs.",
+        "recommendedControl": "Limit retention (expiry/purging) and scope of shared memory, add signed provenance and integrity checks for memory entries, validate and sanitize any inputs before storing, and implement per-session ephemeral context for sensitive workflows."
+      },
+      "reason": "evidence quote not found in the profile"
+    },
+    {
+      "finding": {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"credentials\": \"shared_token\"\n...\n\"Team chat notification\",\n      \"permissions\": [\n        \"send_messages\"",
+        "whyItMatters": "A single shared token increases blast radius if compromised and can allow lateral misuse of the agent's ability to send messages (exfiltration, social-engineering), with no per-agent accountability or least-privilege isolation.",
+        "recommendedControl": "Replace the shared_token with per-agent short-lived credentials bound to least-privilege scopes, rotate tokens automatically, and enforce RBAC and individual audit logging for actions like sending messages."
+      },
+      "reason": "evidence quote not found in the profile"
+    },
+    {
+      "finding": {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "\"humanConfirmsActions\": true\n...\n\"The orchestrator can post summaries to team chat.\"",
+        "whyItMatters": "Because the agent can proactively post summaries to team chat, it can influence human approvers' decisions (automation bias) and push unsafe recommendations that humans then confirm, exploiting trust to enact harmful actions.",
+        "recommendedControl": "Restrict automated postings to structured, read-only notifications with clear provenance, require an independent human verification workflow outside the chat channel before any approval, and label agent-generated content prominently."
+      },
+      "reason": "evidence quote not found in the profile"
+    },
+    {
+      "finding": {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"\n...\n\"killSwitch\": {\n    \"available\": true,\n    \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"",
+        "whyItMatters": "Logging not integrated into SIEM reduces detection/alerting capability, and the kill switch is manual and untested, increasing time to respond and the risk that an incident propagates before containment.",
+        "recommendedControl": "Forward logs to SIEM with alerting for anomalous behavior, implement and test an automated or reliably fast kill switch/runbook (including drills), and document recovery and post-incident procedures."
+      },
+      "reason": "evidence quote not found in the profile"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI06",
+        "severity": "high",
+        "evidenceQuote": "\"memory\": \"persistent\"\n...\n\"An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations.",
+        "whyItMatters": "Persistent, shared memory across multiple sub-agents lets stale or malicious context influence all future recommendations, enabling context-poisoning attacks that can persist across sessions and mislead humans reviewing outputs.",
+        "recommendedControl": "Limit retention (expiry/purging) and scope of shared memory, add signed provenance and integrity checks for memory entries, validate and sanitize any inputs before storing, and implement per-session ephemeral context for sensitive workflows."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"credentials\": \"shared_token\"\n...\n\"Team chat notification\",\n      \"permissions\": [\n        \"send_messages\"",
+        "whyItMatters": "A single shared token increases blast radius if compromised and can allow lateral misuse of the agent's ability to send messages (exfiltration, social-engineering), with no per-agent accountability or least-privilege isolation.",
+        "recommendedControl": "Replace the shared_token with per-agent short-lived credentials bound to least-privilege scopes, rotate tokens automatically, and enforce RBAC and individual audit logging for actions like sending messages."
+      },
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "\"humanConfirmsActions\": true\n...\n\"The orchestrator can post summaries to team chat.\"",
+        "whyItMatters": "Because the agent can proactively post summaries to team chat, it can influence human approvers' decisions (automation bias) and push unsafe recommendations that humans then confirm, exploiting trust to enact harmful actions.",
+        "recommendedControl": "Restrict automated postings to structured, read-only notifications with clear provenance, require an independent human verification workflow outside the chat channel before any approval, and label agent-generated content prominently."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"\n...\n\"killSwitch\": {\n    \"available\": true,\n    \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"",
+        "whyItMatters": "Logging not integrated into SIEM reduces detection/alerting capability, and the kill switch is manual and untested, increasing time to respond and the risk that an incident propagates before containment.",
+        "recommendedControl": "Forward logs to SIEM with alerting for anomalous behavior, implement and test an automated or reliably fast kill switch/runbook (including drills), and document recovery and post-incident procedures."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent handles confidential data and coordinates multiple sub-agents via persistent shared memory and a shared credential, creating risks of context poisoning, credential abuse, and undue influence on humans via chat posts. Logging and the untested manual kill switch reduce detection and containment capabilities. Mitigations: restrict/ephemeral memory, per-agent short-lived credentials and RBAC, limit automated chat influence with stronger human-verification, and integrate logging plus a tested kill/runbook."
+  },
+  "usage": {
+    "inputTokens": 1259,
+    "inputTokenDetails": {
+      "noCacheTokens": 1259,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1258,
+    "outputTokenDetails": {
+      "textTokens": 682,
+      "reasoningTokens": 576
+    },
+    "totalTokens": 2517,
+    "raw": {
+      "input_tokens": 1259,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1258,
+      "output_tokens_details": {
+        "reasoning_tokens": 576
+      },
+      "total_tokens": 2517
+    }
+  },
+  "generationId": "gen_01M5GTT9QBJV2DX36S93TCZ1TY",
+  "durationMs": 13556
+}

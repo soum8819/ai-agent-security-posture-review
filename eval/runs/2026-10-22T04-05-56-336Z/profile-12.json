@@ -1,0 +1,133 @@
+{
+  "profileId": "profile-12",
+  "promptVersion": "v4",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 2,
+    "reasons": [
+      "Tier 2: can act beyond reading (Team chat notification)",
+      "Tier 2: reads confidential data"
+    ]
+  },
+  "proposedTier": 2,
+  "summary": "This orchestrator handles confidential data and coordinates multiple persistent sub-agents, which raises risks from shared credentials, persistent shared memory, and outbound messaging. Mitigations should include per-agent credentials, segmented and validated memory, enforced message approval and SIEM integration plus a tested kill procedure before approval to operate.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "A shared token implies credential reuse across agents or personnel, enabling lateral privilege escalation and making it hard to revoke or audit individual agent actions.",
+      "recommendedControl": "Replace the shared token with per-agent scoped credentials and implement short-lived tokens plus an automated rotation and revocation process.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations.",
+      "whyItMatters": "Persistent, shared memory between multiple sub-agents lets corrupted or malicious inputs persist and influence future decisions, increasing the chance of biased or unsafe recommendations.",
+      "recommendedControl": "Segment memory per agent role with integrity checks, implement input validation and provenance tagging, and add periodic automated sanitization and review of persistent memory contents.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "The orchestrator can post summaries to team chat.",
+      "whyItMatters": "Ability to post summaries to team chat can be abused to exfiltrate confidential data or propagate malicious content, especially if posting is not strictly audited or restricted to sanitized outputs.",
+      "recommendedControl": "Require explicit human confirmation and automated content filtering before any message is posted, and log all posted messages to a monitored SIEM stream for audit.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+      "whyItMatters": "Logs not forwarded to the SIEM and a kill switch described as manual with no tested runbook reduce monitoring and incident response capability, enabling faults or misuse to propagate longer before detection and containment.",
+      "recommendedControl": "Forward logs to the enterprise SIEM with alerting for anomalous agent behavior, and implement a tested, documented automated shutdown/runbook for the kill switch to ensure rapid containment.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 2,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "A shared token implies credential reuse across agents or personnel, enabling lateral privilege escalation and making it hard to revoke or audit individual agent actions.",
+        "recommendedControl": "Replace the shared token with per-agent scoped credentials and implement short-lived tokens plus an automated rotation and revocation process."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations.",
+        "whyItMatters": "Persistent, shared memory between multiple sub-agents lets corrupted or malicious inputs persist and influence future decisions, increasing the chance of biased or unsafe recommendations.",
+        "recommendedControl": "Segment memory per agent role with integrity checks, implement input validation and provenance tagging, and add periodic automated sanitization and review of persistent memory contents."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "The orchestrator can post summaries to team chat.",
+        "whyItMatters": "Ability to post summaries to team chat can be abused to exfiltrate confidential data or propagate malicious content, especially if posting is not strictly audited or restricted to sanitized outputs.",
+        "recommendedControl": "Require explicit human confirmation and automated content filtering before any message is posted, and log all posted messages to a monitored SIEM stream for audit."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+        "whyItMatters": "Logs not forwarded to the SIEM and a kill switch described as manual with no tested runbook reduce monitoring and incident response capability, enabling faults or misuse to propagate longer before detection and containment.",
+        "recommendedControl": "Forward logs to the enterprise SIEM with alerting for anomalous agent behavior, and implement a tested, documented automated shutdown/runbook for the kill switch to ensure rapid containment."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This orchestrator handles confidential data and coordinates multiple persistent sub-agents, which raises risks from shared credentials, persistent shared memory, and outbound messaging. Mitigations should include per-agent credentials, segmented and validated memory, enforced message approval and SIEM integration plus a tested kill procedure before approval to operate."
+  },
+  "usage": {
+    "inputTokens": 1895,
+    "inputTokenDetails": {
+      "noCacheTokens": 103,
+      "cacheReadTokens": 1792,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1763,
+    "outputTokenDetails": {
+      "textTokens": 611,
+      "reasoningTokens": 1152
+    },
+    "totalTokens": 3658,
+    "raw": {
+      "input_tokens": 1895,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 1792
+      },
+      "output_tokens": 1763,
+      "output_tokens_details": {
+        "reasoning_tokens": 1152
+      },
+      "total_tokens": 3658
+    }
+  },
+  "generationId": "gen_01M5GWT4YGH0WR24SYS9DBYQVZ",
+  "durationMs": 20875
+}

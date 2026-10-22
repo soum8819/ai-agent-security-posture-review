@@ -1,0 +1,132 @@
+{
+  "profileId": "profile-03",
+  "promptVersion": "v3",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 1,
+    "reasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "proposedTier": 3,
+  "summary": "This read-only research agent accesses internal CRM data and untrusted web content while using a shared credential and has limited operational controls. The highest risks are the shared credential (identity/privilege abuse) and an unreliable, untested kill switch; additional issues include ingesting untrusted web inputs and lack of centralized logging. Require scoped credentials, input controls, SIEM integration, and an automated/tested shutdown before approval.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "A shared token can be used by multiple services or people, increasing the blast radius if it is leaked or abused and making it difficult to audit or revoke access per-agent. This can enable identity/privilege abuse and lateral access to CRM or other internal data.",
+      "recommendedControl": "Replace the shared token with a unique, least-privilege service credential scoped to this agent and the read-only CRM role; enforce per-agent rotation and audit logging of usage.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [ \"web\" ]",
+      "whyItMatters": "The agent ingests untrusted web data which may contain malicious or misleading content (e.g., data that triggers prompt-injection or context poisoning), causing the model to produce incorrect or unsafe briefs for relationship managers.",
+      "recommendedControl": "Introduce input validation and sanitization for web-sourced content, apply a curated retrieval/whitelist process for sources, and include model-level sanitization prompts or filters before using web text in summaries.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+      "whyItMatters": "Logs are not yet integrated into centralized monitoring, reducing ability to detect compromise, data exfiltration, or misuse and increasing time to respond to incidents.",
+      "recommendedControl": "Forward application logs to the enterprise SIEM with appropriate log fields (credential usage, queries performed, tool API calls) and alerting for anomalous activity from this agent.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI10",
+      "severity": "high",
+      "evidenceQuote": "\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"",
+      "whyItMatters": "The kill switch is manual and untested, risking delays or failure to reliably stop the agent during an incident; that increases the chance of continued unauthorized access or harmful behavior.",
+      "recommendedControl": "Implement an automated, tested shutdown mechanism (e.g., revoke the agent's scoped credential via IAM automation or an orchestration API) and document and exercise a runbook for emergency deactivation.",
+      "modelSeverity": "high"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "A shared token can be used by multiple services or people, increasing the blast radius if it is leaked or abused and making it difficult to audit or revoke access per-agent. This can enable identity/privilege abuse and lateral access to CRM or other internal data.",
+        "recommendedControl": "Replace the shared token with a unique, least-privilege service credential scoped to this agent and the read-only CRM role; enforce per-agent rotation and audit logging of usage."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [ \"web\" ]",
+        "whyItMatters": "The agent ingests untrusted web data which may contain malicious or misleading content (e.g., data that triggers prompt-injection or context poisoning), causing the model to produce incorrect or unsafe briefs for relationship managers.",
+        "recommendedControl": "Introduce input validation and sanitization for web-sourced content, apply a curated retrieval/whitelist process for sources, and include model-level sanitization prompts or filters before using web text in summaries."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+        "whyItMatters": "Logs are not yet integrated into centralized monitoring, reducing ability to detect compromise, data exfiltration, or misuse and increasing time to respond to incidents.",
+        "recommendedControl": "Forward application logs to the enterprise SIEM with appropriate log fields (credential usage, queries performed, tool API calls) and alerting for anomalous activity from this agent."
+      },
+      {
+        "category": "ASI10",
+        "severity": "high",
+        "evidenceQuote": "\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"",
+        "whyItMatters": "The kill switch is manual and untested, risking delays or failure to reliably stop the agent during an incident; that increases the chance of continued unauthorized access or harmful behavior.",
+        "recommendedControl": "Implement an automated, tested shutdown mechanism (e.g., revoke the agent's scoped credential via IAM automation or an orchestration API) and document and exercise a runbook for emergency deactivation."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This read-only research agent accesses internal CRM data and untrusted web content while using a shared credential and has limited operational controls. The highest risks are the shared credential (identity/privilege abuse) and an unreliable, untested kill switch; additional issues include ingesting untrusted web inputs and lack of centralized logging. Require scoped credentials, input controls, SIEM integration, and an automated/tested shutdown before approval."
+  },
+  "usage": {
+    "inputTokens": 1411,
+    "inputTokenDetails": {
+      "noCacheTokens": 1411,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1512,
+    "outputTokenDetails": {
+      "textTokens": 680,
+      "reasoningTokens": 832
+    },
+    "totalTokens": 2923,
+    "raw": {
+      "input_tokens": 1411,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1512,
+      "output_tokens_details": {
+        "reasoning_tokens": 832
+      },
+      "total_tokens": 2923
+    }
+  },
+  "generationId": "gen_01M5GV77XX7QJB7N3S0C38KSWP",
+  "durationMs": 15328
+}

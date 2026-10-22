@@ -1,0 +1,132 @@
+{
+  "profileId": "profile-03",
+  "promptVersion": "v4",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 1,
+    "reasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "proposedTier": 2,
+  "summary": "This agent reads internal CRM and untrusted web data and uses a shared credential and a third-party model with no pinned version, creating moderate to high risks. Require scoped credentials, input sanitization for web sources, model version pinning and human-in-the-loop confirmation before briefs are used.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "A shared credential increases the blast radius if the token is compromised or reused by other services, allowing attackers to access the read-only CRM and other tools the agent uses without per-agent least-privilege controls.",
+      "recommendedControl": "Replace the shared_token with a per-agent, scoped credential that enforces least privilege and short lifetime, and rotate and audit the credential usage regularly.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI01",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [ \"web\" ]",
+      "whyItMatters": "The agent consumes untrusted web content which can include prompt-injection or malicious artifacts that alter planning or outputs, causing the agent to produce misleading or unsafe briefs.",
+      "recommendedControl": "Implement input sanitization and content provenance checks, restrict or sandbox retrieved web content, and apply prompt-level defenses and allowlists before incorporating external content into the agent's reasoning.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "\"model\": {\"provider\": \"Anthropic\", \"name\": \"Claude Sonnet (version not specified)\"}",
+      "whyItMatters": "The agent depends on a third-party model with an unspecified version, creating supply chain risk from model updates, hidden behavior changes, or malicious/compromised model variants that could alter outputs or leak sensitive context.",
+      "recommendedControl": "Pin the model to an explicit vetted version, perform change monitoring and testing for new model releases, and require attestation or vendor security documentation before model upgrades.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI09",
+      "severity": "medium",
+      "evidenceQuote": "\"humanConfirmsActions\": false",
+      "whyItMatters": "The profile shows no enforced human confirmation while the agent generates advisory briefs consumed by relationship managers, so the agent's outputs may be trusted and acted upon even if they are incorrect or biased, enabling human-agent trust exploitation.",
+      "recommendedControl": "Enforce an explicit human-in-the-loop confirmation step for any brief used to influence client interactions, add provenance and confidence indicators in outputs, and log reviewer acknowledgement before use.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 2,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "A shared credential increases the blast radius if the token is compromised or reused by other services, allowing attackers to access the read-only CRM and other tools the agent uses without per-agent least-privilege controls.",
+        "recommendedControl": "Replace the shared_token with a per-agent, scoped credential that enforces least privilege and short lifetime, and rotate and audit the credential usage regularly."
+      },
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [ \"web\" ]",
+        "whyItMatters": "The agent consumes untrusted web content which can include prompt-injection or malicious artifacts that alter planning or outputs, causing the agent to produce misleading or unsafe briefs.",
+        "recommendedControl": "Implement input sanitization and content provenance checks, restrict or sandbox retrieved web content, and apply prompt-level defenses and allowlists before incorporating external content into the agent's reasoning."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"model\": {\"provider\": \"Anthropic\", \"name\": \"Claude Sonnet (version not specified)\"}",
+        "whyItMatters": "The agent depends on a third-party model with an unspecified version, creating supply chain risk from model updates, hidden behavior changes, or malicious/compromised model variants that could alter outputs or leak sensitive context.",
+        "recommendedControl": "Pin the model to an explicit vetted version, perform change monitoring and testing for new model releases, and require attestation or vendor security documentation before model upgrades."
+      },
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "\"humanConfirmsActions\": false",
+        "whyItMatters": "The profile shows no enforced human confirmation while the agent generates advisory briefs consumed by relationship managers, so the agent's outputs may be trusted and acted upon even if they are incorrect or biased, enabling human-agent trust exploitation.",
+        "recommendedControl": "Enforce an explicit human-in-the-loop confirmation step for any brief used to influence client interactions, add provenance and confidence indicators in outputs, and log reviewer acknowledgement before use."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent reads internal CRM and untrusted web data and uses a shared credential and a third-party model with no pinned version, creating moderate to high risks. Require scoped credentials, input sanitization for web sources, model version pinning and human-in-the-loop confirmation before briefs are used."
+  },
+  "usage": {
+    "inputTokens": 1881,
+    "inputTokenDetails": {
+      "noCacheTokens": 89,
+      "cacheReadTokens": 1792,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1800,
+    "outputTokenDetails": {
+      "textTokens": 648,
+      "reasoningTokens": 1152
+    },
+    "totalTokens": 3681,
+    "raw": {
+      "input_tokens": 1881,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 1792
+      },
+      "output_tokens": 1800,
+      "output_tokens_details": {
+        "reasoning_tokens": 1152
+      },
+      "total_tokens": 3681
+    }
+  },
+  "generationId": "gen_01M5GWM4MTP0NKNH2HFPWTZNAQ",
+  "durationMs": 24460
+}

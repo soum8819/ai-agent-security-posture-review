@@ -1,0 +1,164 @@
+{
+  "profileId": "profile-12",
+  "promptVersion": "v3",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 2,
+    "reasons": [
+      "Tier 2: can act beyond reading (Team chat notification)",
+      "Tier 2: reads confidential data"
+    ]
+  },
+  "proposedTier": 3,
+  "summary": "The agent handles confidential client data and uses shared persistent memory and a shared credential, creating elevated risks of inter-agent poisoning and impersonation. Logging is not centralized to the SIEM and the kill switch is manual and untested, impairing detection and response. Recommend per-agent credentials, isolated inter-agent communication with integrity checks, SIEM forwarding, pinned model versions, and an automated/tested kill switch before approval.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "A shared token can be used by any sub-agent or party with access to the token to act with the agent's identity, enabling lateral misuse or exfiltration of confidential client data without per-agent accountability.",
+      "recommendedControl": "Issue distinct, scoped credentials per agent/component with short lifetimes and audit logs; rotate tokens regularly and enforce per-agent least privilege.",
+      "modelSeverity": "medium",
+      "raisedByRule": "R4"
+    },
+    {
+      "category": "ASI07",
+      "severity": "high",
+      "evidenceQuote": "\"description\": \"An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations.",
+      "whyItMatters": "Shared persistent memory among multiple sub-agents creates a high risk of unauthorized data leakage or context poisoning between agents, enabling compromised or malicious sub-agents to influence others' outputs.",
+      "recommendedControl": "Replace shared writable memory with isolated per-agent contexts and a well-defined, validated message-passing layer with strict access controls and integrity checks; validate and sanitize all inter-agent data flows.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"memory\": \"persistent\"",
+      "whyItMatters": "Persistent memory increases the attack surface for context poisoning over time; poisoned or stale context stored persistently can cause incorrect recommendations or data exposure across sessions.",
+      "recommendedControl": "Limit persistence scope and retention time, implement integrity checks/versioning for memory entries, and require provenance verification before reusing historical context.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"logging\": {\"enabled\": true, \"destination\": \"Application logs, not yet forwarded to the SIEM\"}",
+      "whyItMatters": "Application logs that are not forwarded to the SIEM reduce timely detection and correlation of incidents; delayed or absent centralized monitoring can allow issues to cascade or go unnoticed.",
+      "recommendedControl": "Configure immediate forwarding of agent logs to the centralized SIEM with appropriate structured fields (agent id, action, tool calls) and set alerts for anomalous behaviors.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI04",
+      "severity": "low",
+      "evidenceQuote": "\"model\": {\"provider\": \"Anthropic\", \"name\": \"Claude Sonnet (version not specified)\"}",
+      "whyItMatters": "An unspecified model version makes it difficult to track vulnerabilities, updates, or provenance; unversioned models increase supply-chain risk if a vulnerable or unapproved model is swapped in.",
+      "recommendedControl": "Pin a specific, approved model version and document the model's provenance and update process; require change control for any model updates.",
+      "modelSeverity": "low"
+    },
+    {
+      "category": "ASI10",
+      "severity": "medium",
+      "evidenceQuote": "\"killSwitch\": {\"available\": true, \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"}",
+      "whyItMatters": "Relying on a manual, untested kill switch increases the time to respond to a misbehaving agent and risks human error during an incident, enabling a rogue agent to continue harmful actions longer than necessary.",
+      "recommendedControl": "Implement an automated emergency stop that can immediately disable agent actions, and create and test an incident runbook with defined SLAs for response and verification.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "A shared token can be used by any sub-agent or party with access to the token to act with the agent's identity, enabling lateral misuse or exfiltration of confidential client data without per-agent accountability.",
+        "recommendedControl": "Issue distinct, scoped credentials per agent/component with short lifetimes and audit logs; rotate tokens regularly and enforce per-agent least privilege."
+      },
+      {
+        "category": "ASI07",
+        "severity": "high",
+        "evidenceQuote": "\"description\": \"An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations.",
+        "whyItMatters": "Shared persistent memory among multiple sub-agents creates a high risk of unauthorized data leakage or context poisoning between agents, enabling compromised or malicious sub-agents to influence others' outputs.",
+        "recommendedControl": "Replace shared writable memory with isolated per-agent contexts and a well-defined, validated message-passing layer with strict access controls and integrity checks; validate and sanitize all inter-agent data flows."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"memory\": \"persistent\"",
+        "whyItMatters": "Persistent memory increases the attack surface for context poisoning over time; poisoned or stale context stored persistently can cause incorrect recommendations or data exposure across sessions.",
+        "recommendedControl": "Limit persistence scope and retention time, implement integrity checks/versioning for memory entries, and require provenance verification before reusing historical context."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"logging\": {\"enabled\": true, \"destination\": \"Application logs, not yet forwarded to the SIEM\"}",
+        "whyItMatters": "Application logs that are not forwarded to the SIEM reduce timely detection and correlation of incidents; delayed or absent centralized monitoring can allow issues to cascade or go unnoticed.",
+        "recommendedControl": "Configure immediate forwarding of agent logs to the centralized SIEM with appropriate structured fields (agent id, action, tool calls) and set alerts for anomalous behaviors."
+      },
+      {
+        "category": "ASI04",
+        "severity": "low",
+        "evidenceQuote": "\"model\": {\"provider\": \"Anthropic\", \"name\": \"Claude Sonnet (version not specified)\"}",
+        "whyItMatters": "An unspecified model version makes it difficult to track vulnerabilities, updates, or provenance; unversioned models increase supply-chain risk if a vulnerable or unapproved model is swapped in.",
+        "recommendedControl": "Pin a specific, approved model version and document the model's provenance and update process; require change control for any model updates."
+      },
+      {
+        "category": "ASI10",
+        "severity": "medium",
+        "evidenceQuote": "\"killSwitch\": {\"available\": true, \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"}",
+        "whyItMatters": "Relying on a manual, untested kill switch increases the time to respond to a misbehaving agent and risks human error during an incident, enabling a rogue agent to continue harmful actions longer than necessary.",
+        "recommendedControl": "Implement an automated emergency stop that can immediately disable agent actions, and create and test an incident runbook with defined SLAs for response and verification."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The agent handles confidential client data and uses shared persistent memory and a shared credential, creating elevated risks of inter-agent poisoning and impersonation. Logging is not centralized to the SIEM and the kill switch is manual and untested, impairing detection and response. Recommend per-agent credentials, isolated inter-agent communication with integrity checks, SIEM forwarding, pinned model versions, and an automated/tested kill switch before approval."
+  },
+  "usage": {
+    "inputTokens": 1425,
+    "inputTokenDetails": {
+      "noCacheTokens": 145,
+      "cacheReadTokens": 1280,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1643,
+    "outputTokenDetails": {
+      "textTokens": 811,
+      "reasoningTokens": 832
+    },
+    "totalTokens": 3068,
+    "raw": {
+      "input_tokens": 1425,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 1280
+      },
+      "output_tokens": 1643,
+      "output_tokens_details": {
+        "reasoning_tokens": 832
+      },
+      "total_tokens": 3068
+    }
+  },
+  "generationId": "gen_01M5GVH9CGSSDSQCNVB35G0CKT",
+  "durationMs": 21213
+}

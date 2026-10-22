@@ -1,0 +1,109 @@
+{
+  "profileId": "profile-02",
+  "promptVersion": "v2",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 1,
+    "reasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "proposedTier": 2,
+  "summary": "This read-oriented HR Q&A bot is appropriate for Tier 2 but has high-risk credential scope concerns and medium risks from untrusted chat inputs and operating without human confirmation. Mitigations: enforce least-privilege, short-lived scoped credentials with auditing, input sanitization/provenance checks, and require human review for ambiguous or consequential responses.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+      "whyItMatters": "The agent holds its own scoped token which, combined with broad \"dataReads\": [ \"internal\" ], could allow access to internal resources or sensitive employee data if the token scope is misconfigured or compromised. There is no additional control listed that limits token use to read-only HR-policy lookups.",
+      "recommendedControl": "Limit and document the token's scope to only the specific HR policy search API, use short-lived credentials with automatic rotation, and enforce least-privilege access with auditing and scoped IAM roles.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [ \"chat\" ]",
+      "whyItMatters": "The agent accepts untrusted chat input but keeps only session memory; attackers could craft inputs that poison context (misleading prior messages) and cause incorrect or harmful policy answers. There is no description of input sanitization, prompt filtering, or validation against the policy source.",
+      "recommendedControl": "Implement input validation and context-sanitization rules, add a provenance check that requires answers to cite policy source links, and log suspicious inputs for review before they influence responses.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI10",
+      "severity": "medium",
+      "evidenceQuote": "\"humanConfirmsActions\": false",
+      "whyItMatters": "The agent operates without human confirmation, so erroneous or inappropriate replies will be delivered directly to employees; without human-in-the-loop review for edge cases, this can erode trust and produce harmful guidance at scale.",
+      "recommendedControl": "Require human confirmation for any responses that deviate from a direct policy citation, for actions that could affect employee status, and add automated escalation to HR reviewers for ambiguous queries.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [],
+  "rawModelOutput": {
+    "proposedTier": 2,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+        "whyItMatters": "The agent holds its own scoped token which, combined with broad \"dataReads\": [ \"internal\" ], could allow access to internal resources or sensitive employee data if the token scope is misconfigured or compromised. There is no additional control listed that limits token use to read-only HR-policy lookups.",
+        "recommendedControl": "Limit and document the token's scope to only the specific HR policy search API, use short-lived credentials with automatic rotation, and enforce least-privilege access with auditing and scoped IAM roles."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [ \"chat\" ]",
+        "whyItMatters": "The agent accepts untrusted chat input but keeps only session memory; attackers could craft inputs that poison context (misleading prior messages) and cause incorrect or harmful policy answers. There is no description of input sanitization, prompt filtering, or validation against the policy source.",
+        "recommendedControl": "Implement input validation and context-sanitization rules, add a provenance check that requires answers to cite policy source links, and log suspicious inputs for review before they influence responses."
+      },
+      {
+        "category": "ASI10",
+        "severity": "medium",
+        "evidenceQuote": "\"humanConfirmsActions\": false",
+        "whyItMatters": "The agent operates without human confirmation, so erroneous or inappropriate replies will be delivered directly to employees; without human-in-the-loop review for edge cases, this can erode trust and produce harmful guidance at scale.",
+        "recommendedControl": "Require human confirmation for any responses that deviate from a direct policy citation, for actions that could affect employee status, and add automated escalation to HR reviewers for ambiguous queries."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This read-oriented HR Q&A bot is appropriate for Tier 2 but has high-risk credential scope concerns and medium risks from untrusted chat inputs and operating without human confirmation. Mitigations: enforce least-privilege, short-lived scoped credentials with auditing, input sanitization/provenance checks, and require human review for ambiguous or consequential responses."
+  },
+  "usage": {
+    "inputTokens": 1269,
+    "inputTokenDetails": {
+      "noCacheTokens": 1269,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1391,
+    "outputTokenDetails": {
+      "textTokens": 559,
+      "reasoningTokens": 832
+    },
+    "totalTokens": 2660,
+    "raw": {
+      "input_tokens": 1269,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1391,
+      "output_tokens_details": {
+        "reasoning_tokens": 832
+      },
+      "total_tokens": 2660
+    }
+  },
+  "generationId": "gen_01M5GTXJSB4JYT7836BNC7E67R",
+  "durationMs": 15020
+}

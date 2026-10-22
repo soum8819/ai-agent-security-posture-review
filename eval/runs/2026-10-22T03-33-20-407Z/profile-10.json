@@ -1,0 +1,183 @@
+{
+  "profileId": "profile-10",
+  "promptVersion": "v1",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 2,
+    "reasons": [
+      "Tier 2: can act beyond reading (Customer support CRM, Refund issuance API)",
+      "Tier 2: reads confidential data"
+    ]
+  },
+  "proposedTier": 4,
+  "summary": "This agent is high-risk (proposed Tier 4) because it has the ability to move money via a Refund issuance API and the profile indicates automatic refunds up to $50, combined with a scoped token and weak operational controls (untested kill switch, logs not in SIEM). Mitigations required before approval include removing automatic money-moving privileges, enforcing human approval and per-action delegation, short-lived credentials with auditing, tested emergency shutdown, SIEM integration, and input/memory protections.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI02",
+      "severity": "critical",
+      "evidenceQuote": "\"permissions\": [\n        \"move_money\"\n      ]",
+      "whyItMatters": "The agent has a tool permission that can move money and the description states it \"issues refunds of up to $50 automatically,\" meaning it can perform financial transactions without a reliable human approval barrier. This enables direct unauthorized or erroneous transfers.",
+      "recommendedControl": "Remove or disable the Refund issuance API move_money permission for the agent; require a separate auditable human-approval workflow (multi-person signoff) before any refund API call that moves funds is executed.",
+      "modelSeverity": "critical"
+    },
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+      "whyItMatters": "A dedicated token that allows the agent to access systems (including the refund API) concentrates privilege and could be abused if compromised or misused, enabling unauthorized data access or transactions.",
+      "recommendedControl": "Use short-lived, least-privilege credentials with automated rotation, scoped narrowly (read-only where possible), and require per-action delegation for any write or payment actions; log and audit token use.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI10",
+      "severity": "high",
+      "evidenceQuote": "\"killSwitch\": {\n    \"available\": true,\n    \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"\n  }",
+      "whyItMatters": "The only kill switch is an untested manual process to disable a service account, which may be too slow or unreliable to stop harmful activity (especially financial actions) and lacks demonstrated operational readiness.",
+      "recommendedControl": "Provide an automated, tested emergency shutdown mechanism that immediately blocks financial transactions and isolates the agent; document and test a runbook with on-call playbooks and regular drills.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI04",
+      "severity": "low",
+      "evidenceQuote": "\"model\": {\n    \"provider\": \"Anthropic\",\n    \"name\": \"Claude Sonnet (version not specified)\"\n  }",
+      "whyItMatters": "The model version is unspecified, which reduces the ability to assess known vulnerabilities or apply model-specific mitigations and updates in the supply chain.",
+      "recommendedControl": "Record and maintain the exact model version and vendor contract details; track and apply vendor security advisories and patching for the chosen model.",
+      "modelSeverity": "low"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"logging\": {\n    \"enabled\": true,\n    \"destination\": \"Application logs, not yet forwarded to the SIEM\"\n  }",
+      "whyItMatters": "Logs are not forwarded to the SIEM, reducing detection and response capability; this increases the chance that failures or abuse will cascade unnoticed.",
+      "recommendedControl": "Forward agent logs to the corporate SIEM with appropriate alerting for anomalous financial, write, or privilege-usage events; retain logs for forensic review.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [
+    {
+      "finding": {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [\n    \"chat\"\n  ]\n\n\"memory\": \"session\"",
+        "whyItMatters": "The agent accepts untrusted chat input and retains session memory, which could allow attackers to poison context or prompt the agent into unsafe actions (e.g., triggering refunds or exposing confidential data).",
+        "recommendedControl": "Implement input validation and sanitization, strict prompt / context filtering, and ephemeral memory that is validated against trusted data sources before any action; require explicit human confirmation for actions influenced by untrusted inputs."
+      },
+      "reason": "evidence quote not found in the profile"
+    },
+    {
+      "finding": {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "\"humanConfirmsActions\": true\n\n\"description\": \"...issues refunds of up to $50 automatically. Refunds above $50 need human approval.\"",
+        "whyItMatters": "The profile contains conflicting controls about whether actions require human confirmation vs. being automatic, which could allow goal-hijack scenarios where automated behavior bypasses intended human oversight.",
+        "recommendedControl": "Clarify and enforce a single policy: require explicit logged human confirmation for any refund or write operation; implement system enforcement that prevents the agent from executing automatic refunds without the recorded approval."
+      },
+      "reason": "evidence quote not found in the profile"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (chat) and lists Customer support CRM that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 4,
+    "findings": [
+      {
+        "category": "ASI02",
+        "severity": "critical",
+        "evidenceQuote": "\"permissions\": [\n        \"move_money\"\n      ]",
+        "whyItMatters": "The agent has a tool permission that can move money and the description states it \"issues refunds of up to $50 automatically,\" meaning it can perform financial transactions without a reliable human approval barrier. This enables direct unauthorized or erroneous transfers.",
+        "recommendedControl": "Remove or disable the Refund issuance API move_money permission for the agent; require a separate auditable human-approval workflow (multi-person signoff) before any refund API call that moves funds is executed."
+      },
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+        "whyItMatters": "A dedicated token that allows the agent to access systems (including the refund API) concentrates privilege and could be abused if compromised or misused, enabling unauthorized data access or transactions.",
+        "recommendedControl": "Use short-lived, least-privilege credentials with automated rotation, scoped narrowly (read-only where possible), and require per-action delegation for any write or payment actions; log and audit token use."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [\n    \"chat\"\n  ]\n\n\"memory\": \"session\"",
+        "whyItMatters": "The agent accepts untrusted chat input and retains session memory, which could allow attackers to poison context or prompt the agent into unsafe actions (e.g., triggering refunds or exposing confidential data).",
+        "recommendedControl": "Implement input validation and sanitization, strict prompt / context filtering, and ephemeral memory that is validated against trusted data sources before any action; require explicit human confirmation for actions influenced by untrusted inputs."
+      },
+      {
+        "category": "ASI10",
+        "severity": "high",
+        "evidenceQuote": "\"killSwitch\": {\n    \"available\": true,\n    \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"\n  }",
+        "whyItMatters": "The only kill switch is an untested manual process to disable a service account, which may be too slow or unreliable to stop harmful activity (especially financial actions) and lacks demonstrated operational readiness.",
+        "recommendedControl": "Provide an automated, tested emergency shutdown mechanism that immediately blocks financial transactions and isolates the agent; document and test a runbook with on-call playbooks and regular drills."
+      },
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "\"humanConfirmsActions\": true\n\n\"description\": \"...issues refunds of up to $50 automatically. Refunds above $50 need human approval.\"",
+        "whyItMatters": "The profile contains conflicting controls about whether actions require human confirmation vs. being automatic, which could allow goal-hijack scenarios where automated behavior bypasses intended human oversight.",
+        "recommendedControl": "Clarify and enforce a single policy: require explicit logged human confirmation for any refund or write operation; implement system enforcement that prevents the agent from executing automatic refunds without the recorded approval."
+      },
+      {
+        "category": "ASI04",
+        "severity": "low",
+        "evidenceQuote": "\"model\": {\n    \"provider\": \"Anthropic\",\n    \"name\": \"Claude Sonnet (version not specified)\"\n  }",
+        "whyItMatters": "The model version is unspecified, which reduces the ability to assess known vulnerabilities or apply model-specific mitigations and updates in the supply chain.",
+        "recommendedControl": "Record and maintain the exact model version and vendor contract details; track and apply vendor security advisories and patching for the chosen model."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"logging\": {\n    \"enabled\": true,\n    \"destination\": \"Application logs, not yet forwarded to the SIEM\"\n  }",
+        "whyItMatters": "Logs are not forwarded to the SIEM, reducing detection and response capability; this increases the chance that failures or abuse will cascade unnoticed.",
+        "recommendedControl": "Forward agent logs to the corporate SIEM with appropriate alerting for anomalous financial, write, or privilege-usage events; retain logs for forensic review."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent is high-risk (proposed Tier 4) because it has the ability to move money via a Refund issuance API and the profile indicates automatic refunds up to $50, combined with a scoped token and weak operational controls (untested kill switch, logs not in SIEM). Mitigations required before approval include removing automatic money-moving privileges, enforcing human approval and per-action delegation, short-lived credentials with auditing, tested emergency shutdown, SIEM integration, and input/memory protections."
+  },
+  "usage": {
+    "inputTokens": 1258,
+    "inputTokenDetails": {
+      "noCacheTokens": 1258,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1612,
+    "outputTokenDetails": {
+      "textTokens": 1164,
+      "reasoningTokens": 448
+    },
+    "totalTokens": 2870,
+    "raw": {
+      "input_tokens": 1258,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1612,
+      "output_tokens_details": {
+        "reasoning_tokens": 448
+      },
+      "total_tokens": 2870
+    }
+  },
+  "generationId": "gen_01M5GTSW67RB7V8BRDVXBAAP42",
+  "durationMs": 13930
+}

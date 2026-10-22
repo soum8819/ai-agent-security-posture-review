@@ -1,0 +1,111 @@
+{
+  "profileId": "profile-07",
+  "promptVersion": "v1",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 3,
+    "reasons": [
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (Payment exceptions queue, Payment release API)",
+      "Tier 2: reads confidential, customer_financial, personal data"
+    ]
+  },
+  "proposedTier": 3,
+  "summary": "The agent deals with customer financial data and holds a token permitting money movement, so treat as a high-risk, Tier 3 agent. Major risks are privileged credentials that can move funds, reliance on single human confirmation, and absent handling of untrusted inputs; mitigate by removing direct move_money capability from the agent, enforcing multi-party and automated policy checks, and adding explicit untrusted-input controls and auditing.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"permissions\": [\n        \"move_money\"\n      ]",
+      "whyItMatters": "The agent holds credentials that allow moving customer funds; if the agent's token is compromised or misused it could be used to transfer money even if human workflow is intended to gate the action. This creates a high-impact privilege risk over customer financial assets.",
+      "recommendedControl": "Remove direct move_money capability from the agent; require the agent to create an auditable action record that a separate hardened backend service (with distinct credentials and stricter authorization) executes, and enforce transaction execution only after multi-factor human approvals and automated policy checks.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "\"humanConfirmsActions\": true",
+      "whyItMatters": "Relying solely on a single human confirmation can be bypassed by social engineering, compromised analyst accounts, or UI-level manipulation, allowing the Payment release API's move_money permission to be invoked inappropriately.",
+      "recommendedControl": "Enforce automated policy checks and role-based thresholds so that high-value or sensitive payments require enforced multi-person approval and cryptographic attestation of the approving users before the release API call is allowed.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": []",
+      "whyItMatters": "The profile declares no untrusted inputs while processing confidential, customer_financial and personal data; lack of declared handling for untrusted inputs and only session memory increases the risk that corrupted or malicious input (e.g., crafted beneficiary data) could poison the agent's proposed corrections and lead to incorrect releases.",
+      "recommendedControl": "Explicitly enumerate untrusted input sources and apply input validation, canonicalization, and sandboxed simulational checks; persist an immutable audit trail of proposed corrections and the original inputs so analysts can validate and revert poisoned context before release.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [],
+  "rawModelOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"permissions\": [\n        \"move_money\"\n      ]",
+        "whyItMatters": "The agent holds credentials that allow moving customer funds; if the agent's token is compromised or misused it could be used to transfer money even if human workflow is intended to gate the action. This creates a high-impact privilege risk over customer financial assets.",
+        "recommendedControl": "Remove direct move_money capability from the agent; require the agent to create an auditable action record that a separate hardened backend service (with distinct credentials and stricter authorization) executes, and enforce transaction execution only after multi-factor human approvals and automated policy checks."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"humanConfirmsActions\": true",
+        "whyItMatters": "Relying solely on a single human confirmation can be bypassed by social engineering, compromised analyst accounts, or UI-level manipulation, allowing the Payment release API's move_money permission to be invoked inappropriately.",
+        "recommendedControl": "Enforce automated policy checks and role-based thresholds so that high-value or sensitive payments require enforced multi-person approval and cryptographic attestation of the approving users before the release API call is allowed."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": []",
+        "whyItMatters": "The profile declares no untrusted inputs while processing confidential, customer_financial and personal data; lack of declared handling for untrusted inputs and only session memory increases the risk that corrupted or malicious input (e.g., crafted beneficiary data) could poison the agent's proposed corrections and lead to incorrect releases.",
+        "recommendedControl": "Explicitly enumerate untrusted input sources and apply input validation, canonicalization, and sandboxed simulational checks; persist an immutable audit trail of proposed corrections and the original inputs so analysts can validate and revert poisoned context before release."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The agent deals with customer financial data and holds a token permitting money movement, so treat as a high-risk, Tier 3 agent. Major risks are privileged credentials that can move funds, reliance on single human confirmation, and absent handling of untrusted inputs; mitigate by removing direct move_money capability from the agent, enforcing multi-party and automated policy checks, and adding explicit untrusted-input controls and auditing."
+  },
+  "usage": {
+    "inputTokens": 1265,
+    "inputTokenDetails": {
+      "noCacheTokens": 1265,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1213,
+    "outputTokenDetails": {
+      "textTokens": 573,
+      "reasoningTokens": 640
+    },
+    "totalTokens": 2478,
+    "raw": {
+      "input_tokens": 1265,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1213,
+      "output_tokens_details": {
+        "reasoning_tokens": 640
+      },
+      "total_tokens": 2478
+    }
+  },
+  "generationId": "gen_01M5GTRZ7RXJ11ACP2R6KHV0GS",
+  "durationMs": 13431
+}

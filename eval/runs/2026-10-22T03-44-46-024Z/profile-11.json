@@ -1,0 +1,149 @@
+{
+  "profileId": "profile-11",
+  "promptVersion": "v3",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 3,
+    "reasons": [
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (KYC case management system)",
+      "Tier 2: reads personal, customer_financial data"
+    ]
+  },
+  "proposedTier": 3,
+  "summary": "This agent handles personal and customer financial data and has write access to the KYC case system; classify as Tier 3. Primary risks are write-capability abuse, untrusted uploaded inputs that can poison context or exploit parsing, reliance on an external model provider, and potential human over-trust in generated summaries. Apply controls: restrict write scope to staging, sanitize and quarantine uploads, add provenance/confidence signals, and enforce supply-chain and reviewer safeguards.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "medium",
+      "evidenceQuote": "\"permissions\": [\"read\",\"write\"]",
+      "whyItMatters": "The agent has write permissions to the KYC case management system and could modify case records if its credentials or prompts are abused, leading to unauthorized changes to customer records or case outcomes.",
+      "recommendedControl": "Restrict the agent to writing only to a separate, append-only draft/staging area and require a strong RBAC check and multi-factor approval before any updates are promoted to production case records.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [\"uploaded_files\"]",
+      "whyItMatters": "User-uploaded documents are explicitly marked as untrusted inputs; maliciously crafted files could exploit parsing, prompt-injection or model input handling to cause incorrect or unsafe outputs.",
+      "recommendedControl": "Implement file scanning, sanitization, content-type validation, and a quarantine step that extracts and normalizes text before sending content to the model; log and alert on anomalous inputs.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "the agent reads the documents the customer uploaded, such as passports, proof of address and company registration papers, and writes a draft summary note with any gaps it sees.",
+      "whyItMatters": "Malicious or noisy documents could poison the agent's context and cause it to produce misleading or incorrect summaries that propagate into KYC decisions if reviewers over-rely on them.",
+      "recommendedControl": "Apply input provenance tagging and automated consistency checks comparing extracted facts to source metadata, and require explicit flagged-source review for any statements derived from low-confidence extractions.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "\"provider\": \"OpenAI\",",
+      "whyItMatters": "The model provider is an external third party, creating a supply-chain dependency: model updates or provider-side compromises can change behavior or expose data.",
+      "recommendedControl": "Treat the model as an external dependency: enforce encrypted transport, contractual controls, periodic model-behavior testing, and a fallback mode that halts use if the provider's integrity cannot be validated.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI09",
+      "severity": "low",
+      "evidenceQuote": "\"A KYC analyst must review and accept the note before it is saved to the case.\"",
+      "whyItMatters": "Although a human must accept the draft, analysts can develop undue trust in agent summaries and miss errors or biases introduced by the agent.",
+      "recommendedControl": "Present source excerpts and confidence scores alongside the draft, require the reviewer to acknowledge verification of key facts, and track reviewer overrides to detect possible over-reliance.",
+      "modelSeverity": "low"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (uploaded_files) and lists KYC case management system that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"permissions\": [\"read\",\"write\"]",
+        "whyItMatters": "The agent has write permissions to the KYC case management system and could modify case records if its credentials or prompts are abused, leading to unauthorized changes to customer records or case outcomes.",
+        "recommendedControl": "Restrict the agent to writing only to a separate, append-only draft/staging area and require a strong RBAC check and multi-factor approval before any updates are promoted to production case records."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [\"uploaded_files\"]",
+        "whyItMatters": "User-uploaded documents are explicitly marked as untrusted inputs; maliciously crafted files could exploit parsing, prompt-injection or model input handling to cause incorrect or unsafe outputs.",
+        "recommendedControl": "Implement file scanning, sanitization, content-type validation, and a quarantine step that extracts and normalizes text before sending content to the model; log and alert on anomalous inputs."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "the agent reads the documents the customer uploaded, such as passports, proof of address and company registration papers, and writes a draft summary note with any gaps it sees.",
+        "whyItMatters": "Malicious or noisy documents could poison the agent's context and cause it to produce misleading or incorrect summaries that propagate into KYC decisions if reviewers over-rely on them.",
+        "recommendedControl": "Apply input provenance tagging and automated consistency checks comparing extracted facts to source metadata, and require explicit flagged-source review for any statements derived from low-confidence extractions."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"provider\": \"OpenAI\",",
+        "whyItMatters": "The model provider is an external third party, creating a supply-chain dependency: model updates or provider-side compromises can change behavior or expose data.",
+        "recommendedControl": "Treat the model as an external dependency: enforce encrypted transport, contractual controls, periodic model-behavior testing, and a fallback mode that halts use if the provider's integrity cannot be validated."
+      },
+      {
+        "category": "ASI09",
+        "severity": "low",
+        "evidenceQuote": "\"A KYC analyst must review and accept the note before it is saved to the case.\"",
+        "whyItMatters": "Although a human must accept the draft, analysts can develop undue trust in agent summaries and miss errors or biases introduced by the agent.",
+        "recommendedControl": "Present source excerpts and confidence scores alongside the draft, require the reviewer to acknowledge verification of key facts, and track reviewer overrides to detect possible over-reliance."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent handles personal and customer financial data and has write access to the KYC case system; classify as Tier 3. Primary risks are write-capability abuse, untrusted uploaded inputs that can poison context or exploit parsing, reliance on an external model provider, and potential human over-trust in generated summaries. Apply controls: restrict write scope to staging, sanitize and quarantine uploads, add provenance/confidence signals, and enforce supply-chain and reviewer safeguards."
+  },
+  "usage": {
+    "inputTokens": 1419,
+    "inputTokenDetails": {
+      "noCacheTokens": 1419,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1768,
+    "outputTokenDetails": {
+      "textTokens": 808,
+      "reasoningTokens": 960
+    },
+    "totalTokens": 3187,
+    "raw": {
+      "input_tokens": 1419,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1768,
+      "output_tokens_details": {
+        "reasoning_tokens": 960
+      },
+      "total_tokens": 3187
+    }
+  },
+  "generationId": "gen_01M5GVGQVZV0MTW9HT02Z1PKT8",
+  "durationMs": 17937
+}

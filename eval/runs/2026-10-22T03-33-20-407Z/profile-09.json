@@ -1,0 +1,163 @@
+{
+  "profileId": "profile-09",
+  "promptVersion": "v1",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 4,
+    "reasons": [
+      "Tier 4: acts with no person confirming (Contract repository)",
+      "Tier 2: can act beyond reading (Contract repository)",
+      "Tier 2: reads confidential data"
+    ]
+  },
+  "proposedTier": 4,
+  "summary": "This assistant is allowed to read confidential contracts but the profile grants it write access to the contract repository and uses a shared credential while acting without human confirmation, which enables autonomous damaging changes and high privilege abuse risk (Tier 4). Additional risks include use of a third‑party model without documented controls, processing untrusted uploads/chat without validation, and logging practices that may expose sensitive data; address these with least-privilege, per-identity credentials, input validation, supply-chain assessment, and secure logging/monitoring.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI02",
+      "severity": "critical",
+      "evidenceQuote": "\"permissions\": [\n        \"read\",\n        \"write\"\n      ]",
+      "whyItMatters": "The assistant has write permission on the contract repository but humanConfirmsActions is false, so it can modify repository contents autonomously which could corrupt or alter signed contracts and cause severe legal/operational harm.",
+      "recommendedControl": "Remove or disable write permissions for the assistant (least privilege); require explicit human confirmation and workflow approvals for any change to contract storage; add audit controls that block automated writes until approved.",
+      "modelSeverity": "critical"
+    },
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "A shared token credential can be abused, is difficult to audit per-user actions, and increases blast radius if compromised, letting the agent (or anyone with the token) access privileged systems without individual accountability.",
+      "recommendedControl": "Replace the shared token with per-service or per-user short-lived credentials and enforce strong authentication, least-privilege scopes, and centralized secrets management with rotation and audit logs.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "\"provider\": \"Google\",\n    \"name\": \"gemini-2.5-flash\"",
+      "whyItMatters": "The model is a third-party hosted model; relying on an external LLM introduces supply-chain and data governance risks (exfiltration, model updates or compromise) that are not controlled by internal teams.",
+      "recommendedControl": "Perform a supply-chain risk assessment of the provider, restrict which data is sent to the model (redact or proxy confidential fields), and consider using an enterprise/air-gapped model or contractual SLAs and SOC reports from the provider.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [\n    \"uploaded_files\",\n    \"chat\"\n  ]",
+      "whyItMatters": "The assistant will consume uploaded files and chat input flagged as untrusted without stated validation or sanitization, allowing poisoned or malicious inputs to cause incorrect contract excerpts or misinterpretation of clauses.",
+      "recommendedControl": "Implement input validation, content scanning, and provenance checks for uploaded files and user chat; show provenance and confidence scores in outputs and require human review for critical interpretations.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI09",
+      "severity": "medium",
+      "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+      "whyItMatters": "Logging is enabled but not forwarded to SIEM, increasing risk that sensitive contract data or PII returned by the assistant could be stored in accessible application logs without proper monitoring or retention controls, enabling data leakage.",
+      "recommendedControl": "Ensure logs containing sensitive data are forwarded to the SIEM with appropriate access controls, masking/redaction of sensitive fields, retention policies, and monitoring/alerting for suspicious access or exfiltration.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (uploaded_files, chat) and lists Contract repository that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    },
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    },
+    {
+      "ruleId": "R6",
+      "severity": "high",
+      "reason": "Its text claims it is read-only, but it lists Contract repository that can change things.",
+      "field": "description, tools.permissions",
+      "category": "ASI03"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 4,
+    "findings": [
+      {
+        "category": "ASI02",
+        "severity": "critical",
+        "evidenceQuote": "\"permissions\": [\n        \"read\",\n        \"write\"\n      ]",
+        "whyItMatters": "The assistant has write permission on the contract repository but humanConfirmsActions is false, so it can modify repository contents autonomously which could corrupt or alter signed contracts and cause severe legal/operational harm.",
+        "recommendedControl": "Remove or disable write permissions for the assistant (least privilege); require explicit human confirmation and workflow approvals for any change to contract storage; add audit controls that block automated writes until approved."
+      },
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "A shared token credential can be abused, is difficult to audit per-user actions, and increases blast radius if compromised, letting the agent (or anyone with the token) access privileged systems without individual accountability.",
+        "recommendedControl": "Replace the shared token with per-service or per-user short-lived credentials and enforce strong authentication, least-privilege scopes, and centralized secrets management with rotation and audit logs."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"provider\": \"Google\",\n    \"name\": \"gemini-2.5-flash\"",
+        "whyItMatters": "The model is a third-party hosted model; relying on an external LLM introduces supply-chain and data governance risks (exfiltration, model updates or compromise) that are not controlled by internal teams.",
+        "recommendedControl": "Perform a supply-chain risk assessment of the provider, restrict which data is sent to the model (redact or proxy confidential fields), and consider using an enterprise/air-gapped model or contractual SLAs and SOC reports from the provider."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [\n    \"uploaded_files\",\n    \"chat\"\n  ]",
+        "whyItMatters": "The assistant will consume uploaded files and chat input flagged as untrusted without stated validation or sanitization, allowing poisoned or malicious inputs to cause incorrect contract excerpts or misinterpretation of clauses.",
+        "recommendedControl": "Implement input validation, content scanning, and provenance checks for uploaded files and user chat; show provenance and confidence scores in outputs and require human review for critical interpretations."
+      },
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+        "whyItMatters": "Logging is enabled but not forwarded to SIEM, increasing risk that sensitive contract data or PII returned by the assistant could be stored in accessible application logs without proper monitoring or retention controls, enabling data leakage.",
+        "recommendedControl": "Ensure logs containing sensitive data are forwarded to the SIEM with appropriate access controls, masking/redaction of sensitive fields, retention policies, and monitoring/alerting for suspicious access or exfiltration."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This assistant is allowed to read confidential contracts but the profile grants it write access to the contract repository and uses a shared credential while acting without human confirmation, which enables autonomous damaging changes and high privilege abuse risk (Tier 4). Additional risks include use of a third‑party model without documented controls, processing untrusted uploads/chat without validation, and logging practices that may expose sensitive data; address these with least-privilege, per-identity credentials, input validation, supply-chain assessment, and secure logging/monitoring."
+  },
+  "usage": {
+    "inputTokens": 1232,
+    "inputTokenDetails": {
+      "noCacheTokens": 1232,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1586,
+    "outputTokenDetails": {
+      "textTokens": 882,
+      "reasoningTokens": 704
+    },
+    "totalTokens": 2818,
+    "raw": {
+      "input_tokens": 1232,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1586,
+      "output_tokens_details": {
+        "reasoning_tokens": 704
+      },
+      "total_tokens": 2818
+    }
+  },
+  "generationId": "gen_01M5GTSCBVZ3GCS7Y44A8S2MB9",
+  "durationMs": 16131
+}

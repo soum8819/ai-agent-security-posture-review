@@ -1,0 +1,166 @@
+{
+  "profileId": "profile-01",
+  "promptVersion": "v4",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 4,
+    "reasons": [
+      "Tier 4: moves money with no person confirming (Wire transfer API)",
+      "Tier 4: acts with no person confirming (ERP financial system, Vendor invoices email inbox)",
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (ERP financial system, Vendor invoices email inbox, Wire transfer API)",
+      "Tier 2: reads confidential, customer_financial data"
+    ]
+  },
+  "proposedTier": 4,
+  "summary": "This agent is high risk because it autonomously initiates wire transfers and has write/move_money permissions while ingesting untrusted email and using a shared persistent memory store. Immediate mitigations should require human approval for payments, isolate and harden memory, apply least-privilege credentials with rotation, and tighten input validation and model provenance before any production deployment.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI10",
+      "severity": "critical",
+      "evidenceQuote": "approves and initiates wire transfers of up to $25,000 without human review.",
+      "whyItMatters": "The agent can move funds autonomously with no human confirmation, enabling immediate financial loss if the agent is compromised, misconfigured, or tricked. There is no in-line human control to stop unauthorized transfers.",
+      "recommendedControl": "Require a human-in-the-loop approval step for all wire transfers and block all automated move_money operations until that control is enforced.",
+      "modelSeverity": "critical"
+    },
+    {
+      "category": "ASI02",
+      "severity": "critical",
+      "evidenceQuote": "\"untrustedInputs\": [\"email\"]",
+      "whyItMatters": "The agent ingests untrusted emails and uses them to drive approvals and payments, which creates a straightforward vector for attackers to submit malicious invoices or instructions that cause incorrect approvals or data exfiltration. Tool permissions include write and move_money, increasing the impact of such misuse.",
+      "recommendedControl": "Validate and quarantine incoming invoices: implement authenticated invoice channels, metadata checks, attachment sanitization, and require secondary verification for any invoice that triggers write or payment actions.",
+      "modelSeverity": "high",
+      "raisedByRule": "R1"
+    },
+    {
+      "category": "ASI06",
+      "severity": "high",
+      "evidenceQuote": "It keeps a memory of vendor history to spot anomalies, but that memory store is shared across all vendor accounts with no per-vendor separation.",
+      "whyItMatters": "A shared persistent memory enables context poisoning where malicious or corrupted vendor data influences decisions across unrelated vendor accounts, causing false approvals, denials, or data leakage between vendors.",
+      "recommendedControl": "Partition the memory store by vendor with strict access controls and integrity checks, and implement logging and alerting for memory modifications plus periodic audits and rollback capability.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "\"model\": {\"provider\": \"Self-hosted\", \"name\": \"Llama (version not specified)\"}",
+      "whyItMatters": "An unspecified self-hosted model version increases supply chain risk because unknown or unpatched model builds may contain vulnerabilities or backdoors and there is no documented provenance or patching policy.",
+      "recommendedControl": "Pin a specific, vetted model version with documented provenance and an update/patching policy, and perform regular security reviews and integrity checks of the model artifacts.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+      "whyItMatters": "The agent holds delegated credentials capable of read, write, and move_money actions; if those credentials are stolen or misused the agent's privileges can be abused to escalate access or perform unauthorised operations across systems.",
+      "recommendedControl": "Apply least privilege to the token (remove unnecessary permissions), enforce short-lived credentials with automated rotation, and restrict token use to specific endpoints and actions with strong monitoring and alerting.",
+      "modelSeverity": "high"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R1",
+      "severity": "critical",
+      "reason": "Lists Wire transfer API, ERP financial system, Vendor invoices email inbox that can move money or change customer records, and no person confirms its actions.",
+      "field": "tools.permissions, humanConfirmsActions",
+      "category": "ASI02"
+    },
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (email) and lists ERP financial system, Vendor invoices email inbox that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    },
+    {
+      "ruleId": "R5",
+      "severity": "high",
+      "reason": "Keeps persistent memory and reads untrusted input (email).",
+      "field": "memory, untrustedInputs",
+      "category": "ASI06"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 4,
+    "findings": [
+      {
+        "category": "ASI10",
+        "severity": "critical",
+        "evidenceQuote": "approves and initiates wire transfers of up to $25,000 without human review.",
+        "whyItMatters": "The agent can move funds autonomously with no human confirmation, enabling immediate financial loss if the agent is compromised, misconfigured, or tricked. There is no in-line human control to stop unauthorized transfers.",
+        "recommendedControl": "Require a human-in-the-loop approval step for all wire transfers and block all automated move_money operations until that control is enforced."
+      },
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "\"untrustedInputs\": [\"email\"]",
+        "whyItMatters": "The agent ingests untrusted emails and uses them to drive approvals and payments, which creates a straightforward vector for attackers to submit malicious invoices or instructions that cause incorrect approvals or data exfiltration. Tool permissions include write and move_money, increasing the impact of such misuse.",
+        "recommendedControl": "Validate and quarantine incoming invoices: implement authenticated invoice channels, metadata checks, attachment sanitization, and require secondary verification for any invoice that triggers write or payment actions."
+      },
+      {
+        "category": "ASI06",
+        "severity": "high",
+        "evidenceQuote": "It keeps a memory of vendor history to spot anomalies, but that memory store is shared across all vendor accounts with no per-vendor separation.",
+        "whyItMatters": "A shared persistent memory enables context poisoning where malicious or corrupted vendor data influences decisions across unrelated vendor accounts, causing false approvals, denials, or data leakage between vendors.",
+        "recommendedControl": "Partition the memory store by vendor with strict access controls and integrity checks, and implement logging and alerting for memory modifications plus periodic audits and rollback capability."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"model\": {\"provider\": \"Self-hosted\", \"name\": \"Llama (version not specified)\"}",
+        "whyItMatters": "An unspecified self-hosted model version increases supply chain risk because unknown or unpatched model builds may contain vulnerabilities or backdoors and there is no documented provenance or patching policy.",
+        "recommendedControl": "Pin a specific, vetted model version with documented provenance and an update/patching policy, and perform regular security reviews and integrity checks of the model artifacts."
+      },
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+        "whyItMatters": "The agent holds delegated credentials capable of read, write, and move_money actions; if those credentials are stolen or misused the agent's privileges can be abused to escalate access or perform unauthorised operations across systems.",
+        "recommendedControl": "Apply least privilege to the token (remove unnecessary permissions), enforce short-lived credentials with automated rotation, and restrict token use to specific endpoints and actions with strong monitoring and alerting."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent is high risk because it autonomously initiates wire transfers and has write/move_money permissions while ingesting untrusted email and using a shared persistent memory store. Immediate mitigations should require human approval for payments, isolate and harden memory, apply least-privilege credentials with rotation, and tighten input validation and model provenance before any production deployment."
+  },
+  "usage": {
+    "inputTokens": 1922,
+    "inputTokenDetails": {
+      "noCacheTokens": 1922,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1172,
+    "outputTokenDetails": {
+      "textTokens": 724,
+      "reasoningTokens": 448
+    },
+    "totalTokens": 3094,
+    "raw": {
+      "input_tokens": 1922,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1172,
+      "output_tokens_details": {
+        "reasoning_tokens": 448
+      },
+      "total_tokens": 3094
+    }
+  },
+  "generationId": "gen_01M5GWBM8K352QVCFATHVD64D2",
+  "durationMs": 16806
+}

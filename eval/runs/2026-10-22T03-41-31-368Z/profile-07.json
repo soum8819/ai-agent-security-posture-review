@@ -1,0 +1,111 @@
+{
+  "profileId": "profile-07",
+  "promptVersion": "v3",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 3,
+    "reasons": [
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (Payment exceptions queue, Payment release API)",
+      "Tier 2: reads confidential, customer_financial, personal data"
+    ]
+  },
+  "proposedTier": 3,
+  "summary": "This agent handles customer financial data and has a tool capable of moving money, so it is Tier 3. Major risks are the agent's move_money permission, its ability to write exception records, and reliance on an external model provider; require stronger privilege restrictions, enforced multi-party approvals and audit controls, and model supply-chain mitigations before approval.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"permissions\": [\"move_money\"]",
+      "whyItMatters": "The assistant has direct permission to move money via the Payment release API; if confirmations or enforcing controls fail or are bypassed, the agent could be used to initiate unauthorized transfers.",
+      "recommendedControl": "Restrict the agent's token so it cannot call move_money directly; require a separate, auditable service that enforces multi-party approval and enforces per-transaction limits before any move_money call is executed.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "\"permissions\": [\"read\", \"write\"]",
+      "whyItMatters": "The agent can write proposed corrections into the payment exceptions queue; if proposals are incorrect or maliciously manipulated they can lead to erroneous releases or incorrect beneficiary data being accepted by analysts.",
+      "recommendedControl": "Enforce immutable originals and an auditable change log for exception records, add server-side validation rules for beneficiary fields, and require explicit, recorded analyst approval for any automated write that changes beneficiary routing information.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "\"provider\": \"OpenAI\"",
+      "whyItMatters": "The agent depends on an external LLM provider which introduces supply-chain risk (model updates, compromised provider, or model drift) that can change behavior or leak sensitive data.",
+      "recommendedControl": "Pin an approved model version, perform regular model output monitoring and integrity checks, and require data minimization/obfuscation for secrets before sending any customer or financial data to the external model.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [],
+  "rawModelOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"permissions\": [\"move_money\"]",
+        "whyItMatters": "The assistant has direct permission to move money via the Payment release API; if confirmations or enforcing controls fail or are bypassed, the agent could be used to initiate unauthorized transfers.",
+        "recommendedControl": "Restrict the agent's token so it cannot call move_money directly; require a separate, auditable service that enforces multi-party approval and enforces per-transaction limits before any move_money call is executed."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"permissions\": [\"read\", \"write\"]",
+        "whyItMatters": "The agent can write proposed corrections into the payment exceptions queue; if proposals are incorrect or maliciously manipulated they can lead to erroneous releases or incorrect beneficiary data being accepted by analysts.",
+        "recommendedControl": "Enforce immutable originals and an auditable change log for exception records, add server-side validation rules for beneficiary fields, and require explicit, recorded analyst approval for any automated write that changes beneficiary routing information."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"provider\": \"OpenAI\"",
+        "whyItMatters": "The agent depends on an external LLM provider which introduces supply-chain risk (model updates, compromised provider, or model drift) that can change behavior or leak sensitive data.",
+        "recommendedControl": "Pin an approved model version, perform regular model output monitoring and integrity checks, and require data minimization/obfuscation for secrets before sending any customer or financial data to the external model."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent handles customer financial data and has a tool capable of moving money, so it is Tier 3. Major risks are the agent's move_money permission, its ability to write exception records, and reliance on an external model provider; require stronger privilege restrictions, enforced multi-party approvals and audit controls, and model supply-chain mitigations before approval."
+  },
+  "usage": {
+    "inputTokens": 1431,
+    "inputTokenDetails": {
+      "noCacheTokens": 1431,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1247,
+    "outputTokenDetails": {
+      "textTokens": 479,
+      "reasoningTokens": 768
+    },
+    "totalTokens": 2678,
+    "raw": {
+      "input_tokens": 1431,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1247,
+      "output_tokens_details": {
+        "reasoning_tokens": 768
+      },
+      "total_tokens": 2678
+    }
+  },
+  "generationId": "gen_01M5GV85A95TWVZVBWHY7H45B2",
+  "durationMs": 12769
+}

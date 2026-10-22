@@ -1,0 +1,126 @@
+{
+  "profileId": "profile-07",
+  "promptVersion": "v4",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 3,
+    "reasons": [
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (Payment exceptions queue, Payment release API)",
+      "Tier 2: reads confidential, customer_financial, personal data"
+    ]
+  },
+  "proposedTier": 3,
+  "summary": "The agent reads customer financial and personal data and has a tool permission that can move money, so this is Tier 3. Key risks: direct money-movement capability tied to agent credentials, the agent writing proposals into exception records, lack of declared handling for untrusted inputs, and reliance on a third-party model provider; mitigate with enforced approval gateways, quarantined review flows, explicit input validation, and supply-chain controls.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"permissions\": [\"move_money\"]",
+      "whyItMatters": "The agent has a tool permission that can move money, and it uses its own scoped credentials, so if the agent or its token is compromised it could be used to transfer funds even if human confirmation is attempted. Human confirmation alone does not prevent misuse if the agent or credentials are abused or if workflow enforcement is bypassed.",
+      "recommendedControl": "Restrict the agent so it cannot call the release API directly with its token: require an enforced out-of-band approval gateway or escrow service that validates multi-person approvals and issues a short-lived limited capability to release payments.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "\"For each held payment, the assistant looks up the beneficiary record, proposes a corrected field, and writes the proposal to the exception record.\"",
+      "whyItMatters": "The agent both generates corrections and writes proposals into the operational exception records, which could allow erroneous or maliciously-crafted suggestions to be persisted and later approved, enabling downstream financial errors or fraud. If proposals are not validated mechanically or by separate reviewers, tool outputs can be abused to alter payment data.",
+      "recommendedControl": "Prevent the agent from writing proposals directly to authoritative exception records; instead write proposals to a quarantined review queue and enforce automated validation checks plus explicit reviewer attestations before any change is applied.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI01",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": []",
+      "whyItMatters": "The profile declares no untrusted inputs, yet the agent processes external beneficiary data and proposals which can be manipulated to change agent behavior or task selection. Without explicit handling of untrusted inputs the agent is vulnerable to prompt- or data-based manipulations that could alter its decisions or outputs.",
+      "recommendedControl": "Declare and treat all external data sources as untrusted, implement input validation and canonicalization, and apply content sanitization and strict schema checks before the agent consumes or acts on beneficiary or payment data.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "\"provider\": \"OpenAI\"",
+      "whyItMatters": "The agent relies on a third-party model provider, introducing supply chain risk if the model or provider environment is compromised or if model updates change behavior. External model compromise could affect decision logic used in payment handling and beneficiary corrections.",
+      "recommendedControl": "Mitigate supply chain risk by using a vetted model gateway, enable model integrity/version pinning, log model responses for auditing, and consider an on-prem or isolated model for sensitive payment decisions.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [],
+  "rawModelOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"permissions\": [\"move_money\"]",
+        "whyItMatters": "The agent has a tool permission that can move money, and it uses its own scoped credentials, so if the agent or its token is compromised it could be used to transfer funds even if human confirmation is attempted. Human confirmation alone does not prevent misuse if the agent or credentials are abused or if workflow enforcement is bypassed.",
+        "recommendedControl": "Restrict the agent so it cannot call the release API directly with its token: require an enforced out-of-band approval gateway or escrow service that validates multi-person approvals and issues a short-lived limited capability to release payments."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"For each held payment, the assistant looks up the beneficiary record, proposes a corrected field, and writes the proposal to the exception record.\"",
+        "whyItMatters": "The agent both generates corrections and writes proposals into the operational exception records, which could allow erroneous or maliciously-crafted suggestions to be persisted and later approved, enabling downstream financial errors or fraud. If proposals are not validated mechanically or by separate reviewers, tool outputs can be abused to alter payment data.",
+        "recommendedControl": "Prevent the agent from writing proposals directly to authoritative exception records; instead write proposals to a quarantined review queue and enforce automated validation checks plus explicit reviewer attestations before any change is applied."
+      },
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": []",
+        "whyItMatters": "The profile declares no untrusted inputs, yet the agent processes external beneficiary data and proposals which can be manipulated to change agent behavior or task selection. Without explicit handling of untrusted inputs the agent is vulnerable to prompt- or data-based manipulations that could alter its decisions or outputs.",
+        "recommendedControl": "Declare and treat all external data sources as untrusted, implement input validation and canonicalization, and apply content sanitization and strict schema checks before the agent consumes or acts on beneficiary or payment data."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"provider\": \"OpenAI\"",
+        "whyItMatters": "The agent relies on a third-party model provider, introducing supply chain risk if the model or provider environment is compromised or if model updates change behavior. External model compromise could affect decision logic used in payment handling and beneficiary corrections.",
+        "recommendedControl": "Mitigate supply chain risk by using a vetted model gateway, enable model integrity/version pinning, log model responses for auditing, and consider an on-prem or isolated model for sensitive payment decisions."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The agent reads customer financial and personal data and has a tool permission that can move money, so this is Tier 3. Key risks: direct money-movement capability tied to agent credentials, the agent writing proposals into exception records, lack of declared handling for untrusted inputs, and reliance on a third-party model provider; mitigate with enforced approval gateways, quarantined review flows, explicit input validation, and supply-chain controls."
+  },
+  "usage": {
+    "inputTokens": 1901,
+    "inputTokenDetails": {
+      "noCacheTokens": 1901,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1579,
+    "outputTokenDetails": {
+      "textTokens": 747,
+      "reasoningTokens": 832
+    },
+    "totalTokens": 3480,
+    "raw": {
+      "input_tokens": 1901,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1579,
+      "output_tokens_details": {
+        "reasoning_tokens": 832
+      },
+      "total_tokens": 3480
+    }
+  },
+  "generationId": "gen_01M5GWDV9DHJ32512F2CHEDNKH",
+  "durationMs": 25240
+}

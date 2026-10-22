@@ -1,0 +1,133 @@
+{
+  "profileId": "profile-12",
+  "promptVersion": "v3",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 2,
+    "reasons": [
+      "Tier 2: can act beyond reading (Team chat notification)",
+      "Tier 2: reads confidential data"
+    ]
+  },
+  "proposedTier": 2,
+  "summary": "The profile shows several high-risk issues: persistent shared memory between sub-agents (enabling context poisoning), use of a shared credential token, and an agent ability to send chat messages while reading confidential data. Forwarding logs to the SIEM, per-agent credentials, memory isolation, and requiring human approval for outbound messages are concrete mitigations before launch.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI06",
+      "severity": "high",
+      "evidenceQuote": "coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations.",
+      "whyItMatters": "Persistent shared memory among multiple specialist sub-agents processing confidential data creates a high risk that a compromised or malicious sub-agent can poison context or inject malicious instructions that influence later recommendations.",
+      "recommendedControl": "Isolate agent memories per role and session, restrict what data is persisted, enforce integrity checks (signing or checksums) on memory entries, and add automated moderation/validation on data written to shared memory.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "Use of a shared token across agents increases the blast radius of credential compromise and prevents per-agent least-privilege auditing and revocation; a compromised sub-agent could act as any other actor holding the same token.",
+      "recommendedControl": "Replace the shared token with scoped, per-agent credentials and enforce short-lived tokens with automated rotation and per-credential audit logging.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI02",
+      "severity": "high",
+      "evidenceQuote": "{ \"name\": \"Team chat notification\", \"permissions\": [ \"send_messages\" ] }",
+      "whyItMatters": "An agent that reads confidential data and has permission to send messages can exfiltrate sensitive information to chat channels or mislead staff by posting fabricated summaries; the profile also states the orchestrator posts summaries, implying automated posting capability.",
+      "recommendedControl": "Require human approval for any outbound communication containing confidential content, restrict send_messages to scoped channels, and add content-filtering/ DLP on chat posts.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI10",
+      "severity": "medium",
+      "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+      "whyItMatters": "Logging is enabled but not forwarded to the SIEM, reducing centralized detection and response capability and increasing the chance that malicious or erroneous agent behavior goes unnoticed.",
+      "recommendedControl": "Ensure agent logs are forwarded in real time to the SIEM, create alerting rules for anomalous agent actions, and include immutable audit trails for agent decisions and tool invocations.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 2,
+    "findings": [
+      {
+        "category": "ASI06",
+        "severity": "high",
+        "evidenceQuote": "coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations.",
+        "whyItMatters": "Persistent shared memory among multiple specialist sub-agents processing confidential data creates a high risk that a compromised or malicious sub-agent can poison context or inject malicious instructions that influence later recommendations.",
+        "recommendedControl": "Isolate agent memories per role and session, restrict what data is persisted, enforce integrity checks (signing or checksums) on memory entries, and add automated moderation/validation on data written to shared memory."
+      },
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "Use of a shared token across agents increases the blast radius of credential compromise and prevents per-agent least-privilege auditing and revocation; a compromised sub-agent could act as any other actor holding the same token.",
+        "recommendedControl": "Replace the shared token with scoped, per-agent credentials and enforce short-lived tokens with automated rotation and per-credential audit logging."
+      },
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "{ \"name\": \"Team chat notification\", \"permissions\": [ \"send_messages\" ] }",
+        "whyItMatters": "An agent that reads confidential data and has permission to send messages can exfiltrate sensitive information to chat channels or mislead staff by posting fabricated summaries; the profile also states the orchestrator posts summaries, implying automated posting capability.",
+        "recommendedControl": "Require human approval for any outbound communication containing confidential content, restrict send_messages to scoped channels, and add content-filtering/ DLP on chat posts."
+      },
+      {
+        "category": "ASI10",
+        "severity": "medium",
+        "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+        "whyItMatters": "Logging is enabled but not forwarded to the SIEM, reducing centralized detection and response capability and increasing the chance that malicious or erroneous agent behavior goes unnoticed.",
+        "recommendedControl": "Ensure agent logs are forwarded in real time to the SIEM, create alerting rules for anomalous agent actions, and include immutable audit trails for agent decisions and tool invocations."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The profile shows several high-risk issues: persistent shared memory between sub-agents (enabling context poisoning), use of a shared credential token, and an agent ability to send chat messages while reading confidential data. Forwarding logs to the SIEM, per-agent credentials, memory isolation, and requiring human approval for outbound messages are concrete mitigations before launch."
+  },
+  "usage": {
+    "inputTokens": 1425,
+    "inputTokenDetails": {
+      "noCacheTokens": 1425,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1504,
+    "outputTokenDetails": {
+      "textTokens": 672,
+      "reasoningTokens": 832
+    },
+    "totalTokens": 2929,
+    "raw": {
+      "input_tokens": 1425,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1504,
+      "output_tokens_details": {
+        "reasoning_tokens": 832
+      },
+      "total_tokens": 2929
+    }
+  },
+  "generationId": "gen_01M5GV9QGFMYRDH8H61Y2Y06CF",
+  "durationMs": 16891
+}

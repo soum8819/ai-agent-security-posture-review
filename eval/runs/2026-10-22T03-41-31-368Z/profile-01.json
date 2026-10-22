@@ -1,0 +1,182 @@
+{
+  "profileId": "profile-01",
+  "promptVersion": "v3",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 4,
+    "reasons": [
+      "Tier 4: moves money with no person confirming (Wire transfer API)",
+      "Tier 4: acts with no person confirming (ERP financial system, Vendor invoices email inbox)",
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (ERP financial system, Vendor invoices email inbox, Wire transfer API)",
+      "Tier 2: reads confidential, customer_financial data"
+    ]
+  },
+  "proposedTier": 4,
+  "summary": "This agent is high-risk: it autonomously approves and sends wire transfers (up to $25,000) with no human confirmation and has move_money privileges, persistent shared memory, and processes untrusted email attachments. Immediate mitigations required include disabling autonomous payments, enforcing human approvals, tightening credential scope and model supply-chain controls, partitioning memory, and implementing an automated tested kill switch.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI10",
+      "severity": "critical",
+      "evidenceQuote": "approves and initiates wire transfers of up to $25,000 without human review.",
+      "whyItMatters": "The agent can autonomously approve and send wire transfers with no human in the loop, enabling large unauthorized financial transfers if the agent is compromised or misbehaves.",
+      "recommendedControl": "Require multi-person manual approval for any wire transfer and disable autonomous move_money actions; implement workflow gating so the agent only drafts payment requests that a human must explicitly authorize.",
+      "modelSeverity": "critical"
+    },
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"permissions\": [ \"move_money\" ]",
+      "whyItMatters": "The agent has direct privilege to move funds. Coupled with an attached credential, this allows abuse of identity/privilege to perform financial operations without additional checks.",
+      "recommendedControl": "Scope and restrict the agent's token to least privilege (remove direct move_money), require short-lived credentials with strong authorization checks and auditable service account usage, and enforce transaction limits with independent approval.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI02",
+      "severity": "critical",
+      "evidenceQuote": "\"untrustedInputs\": [ \"email\" ]",
+      "whyItMatters": "The agent consumes untrusted email input (including attachments) to trigger payments; email-based inputs are a common vector for injection, malformed attachments, or spoofed invoices that could cause fraudulent payments.",
+      "recommendedControl": "Block autonomous payments from email-derived inputs: require human validation of any invoice originating from email, sanitize and validate attachments, and apply strict vendor identity verification before any payment initiation.",
+      "modelSeverity": "high",
+      "raisedByRule": "R1"
+    },
+    {
+      "category": "ASI06",
+      "severity": "high",
+      "evidenceQuote": "It keeps a memory of vendor history to spot anomalies, but that memory store is shared across all vendor accounts with no per-vendor separation.",
+      "whyItMatters": "A shared persistent memory across vendors allows cross-account contamination or poisoning (e.g., attacker-controlled vendor history influencing payments for other vendors), undermining the agent's anomaly detection.",
+      "recommendedControl": "Partition the memory store by vendor with access controls and integrity checks, and implement input validation and rate limits plus mechanisms to audit and roll back memory updates.",
+      "modelSeverity": "medium",
+      "raisedByRule": "R5"
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "\"provider\": \"Self-hosted\", \"name\": \"Llama (version not specified)\"",
+      "whyItMatters": "A self-hosted, unspecified Llama model may have unpatched vulnerabilities or unknown provenance that introduce supply-chain risks (model compromise or malicious weights).",
+      "recommendedControl": "Pin and document the exact model/version, validate model integrity (checksums, signatures), keep the runtime patched, and perform an internal security review of the self-hosted model before production use.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"",
+      "whyItMatters": "The kill switch is manual and untested, so during an incident the agent may continue to operate and cause cascading financial damage before it can be reliably disabled.",
+      "recommendedControl": "Implement an automated, tested emergency stop that immediately blocks the agent's ability to transact (network-level or API gateway kill), document and test a runbook regularly, and ensure on-call staff training and escalation procedures.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R1",
+      "severity": "critical",
+      "reason": "Lists Wire transfer API, ERP financial system, Vendor invoices email inbox that can move money or change customer records, and no person confirms its actions.",
+      "field": "tools.permissions, humanConfirmsActions",
+      "category": "ASI02"
+    },
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (email) and lists ERP financial system, Vendor invoices email inbox that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    },
+    {
+      "ruleId": "R5",
+      "severity": "high",
+      "reason": "Keeps persistent memory and reads untrusted input (email).",
+      "field": "memory, untrustedInputs",
+      "category": "ASI06"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 4,
+    "findings": [
+      {
+        "category": "ASI10",
+        "severity": "critical",
+        "evidenceQuote": "approves and initiates wire transfers of up to $25,000 without human review.",
+        "whyItMatters": "The agent can autonomously approve and send wire transfers with no human in the loop, enabling large unauthorized financial transfers if the agent is compromised or misbehaves.",
+        "recommendedControl": "Require multi-person manual approval for any wire transfer and disable autonomous move_money actions; implement workflow gating so the agent only drafts payment requests that a human must explicitly authorize."
+      },
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"permissions\": [ \"move_money\" ]",
+        "whyItMatters": "The agent has direct privilege to move funds. Coupled with an attached credential, this allows abuse of identity/privilege to perform financial operations without additional checks.",
+        "recommendedControl": "Scope and restrict the agent's token to least privilege (remove direct move_money), require short-lived credentials with strong authorization checks and auditable service account usage, and enforce transaction limits with independent approval."
+      },
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "\"untrustedInputs\": [ \"email\" ]",
+        "whyItMatters": "The agent consumes untrusted email input (including attachments) to trigger payments; email-based inputs are a common vector for injection, malformed attachments, or spoofed invoices that could cause fraudulent payments.",
+        "recommendedControl": "Block autonomous payments from email-derived inputs: require human validation of any invoice originating from email, sanitize and validate attachments, and apply strict vendor identity verification before any payment initiation."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "It keeps a memory of vendor history to spot anomalies, but that memory store is shared across all vendor accounts with no per-vendor separation.",
+        "whyItMatters": "A shared persistent memory across vendors allows cross-account contamination or poisoning (e.g., attacker-controlled vendor history influencing payments for other vendors), undermining the agent's anomaly detection.",
+        "recommendedControl": "Partition the memory store by vendor with access controls and integrity checks, and implement input validation and rate limits plus mechanisms to audit and roll back memory updates."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"provider\": \"Self-hosted\", \"name\": \"Llama (version not specified)\"",
+        "whyItMatters": "A self-hosted, unspecified Llama model may have unpatched vulnerabilities or unknown provenance that introduce supply-chain risks (model compromise or malicious weights).",
+        "recommendedControl": "Pin and document the exact model/version, validate model integrity (checksums, signatures), keep the runtime patched, and perform an internal security review of the self-hosted model before production use."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"",
+        "whyItMatters": "The kill switch is manual and untested, so during an incident the agent may continue to operate and cause cascading financial damage before it can be reliably disabled.",
+        "recommendedControl": "Implement an automated, tested emergency stop that immediately blocks the agent's ability to transact (network-level or API gateway kill), document and test a runbook regularly, and ensure on-call staff training and escalation procedures."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent is high-risk: it autonomously approves and sends wire transfers (up to $25,000) with no human confirmation and has move_money privileges, persistent shared memory, and processes untrusted email attachments. Immediate mitigations required include disabling autonomous payments, enforcing human approvals, tightening credential scope and model supply-chain controls, partitioning memory, and implementing an automated tested kill switch."
+  },
+  "usage": {
+    "inputTokens": 1452,
+    "inputTokenDetails": {
+      "noCacheTokens": 1452,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1819,
+    "outputTokenDetails": {
+      "textTokens": 923,
+      "reasoningTokens": 896
+    },
+    "totalTokens": 3271,
+    "raw": {
+      "input_tokens": 1452,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1819,
+      "output_tokens_details": {
+        "reasoning_tokens": 896
+      },
+      "total_tokens": 3271
+    }
+  },
+  "generationId": "gen_01M5GV6849FREBTTVCJ95GNY1E",
+  "durationMs": 19369
+}

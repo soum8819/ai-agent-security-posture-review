@@ -1,0 +1,158 @@
+{
+  "profileId": "profile-12",
+  "promptVersion": "v2",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 2,
+    "reasons": [
+      "Tier 2: can act beyond reading (Team chat notification)",
+      "Tier 2: reads confidential data"
+    ]
+  },
+  "proposedTier": 3,
+  "summary": "This orchestrator reads confidential data and runs persistent shared memory across multiple sub-agents while using a shared credential and an untested manual kill switch. Major risks are context poisoning from shared persistent memory and weak incident controls (kill switch, logging, shared token), plus potential misuse of the chat-send tool. Apply per-agent credentials, compartmentalize memory, harden logging and automated kill mechanisms, and restrict chat outputs before approving deployment.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "A shared credential token increases risk of credential compromise and makes it harder to audit or revoke access per-agent or per-principal, enabling privilege abuse or lateral movement if the token is leaked or over-permissioned.",
+      "recommendedControl": "Use per-agent, short-lived credentials with least-privilege scopes and automated rotation; add audit logging linking actions to distinct identities.",
+      "modelSeverity": "medium",
+      "raisedByRule": "R4"
+    }
+  ],
+  "droppedFindings": [
+    {
+      "finding": {
+        "category": "ASI06",
+        "severity": "high",
+        "evidenceQuote": "\"An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations.\"",
+        "whyItMatters": "Persistent shared memory between multiple sub-agents plus confidential data reads enables context poisoning (malicious or corrupted inputs persisting across runs), which can corrupt recommendations and propagate incorrect/confidential state across agents.",
+        "recommendedControl": "Restrict and compartmentalize memory: avoid persistent shared memory for confidential contexts, implement input validation and integrity checks, version and sign memory snapshots, and provide per-request ephemeral contexts."
+      },
+      "reason": "evidence quote not found in the profile"
+    },
+    {
+      "finding": {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"logging\": {\"enabled\": true, \"destination\": \"Application logs, not yet forwarded to the SIEM\"}",
+        "whyItMatters": "Application logs containing confidential data that are not forwarded to the SIEM increase risk of undetected data leakage and make incident detection and response slower or impossible.",
+        "recommendedControl": "Ensure logs with confidential content are sanitized, encrypted in transit, and forwarded to the enterprise SIEM with alerting; apply access controls and retention policies."
+      },
+      "reason": "evidence quote not found in the profile"
+    },
+    {
+      "finding": {
+        "category": "ASI10",
+        "severity": "high",
+        "evidenceQuote": "\"killSwitch\": {\"available\": true, \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"}",
+        "whyItMatters": "Relying on an untested manual kill switch that requires disabling a service account risks slow or failed shutdown during incidents, allowing a misbehaving agent to continue acting on confidential data or sending messages.",
+        "recommendedControl": "Provide an automated, tested emergency disable mechanism (e.g., immediate runtime kill, network isolation, and automated orchestration stop) with documented runbooks and regular drills."
+      },
+      "reason": "evidence quote not found in the profile"
+    },
+    {
+      "finding": {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "{\"name\": \"Team chat notification\", \"permissions\": [\"send_messages\"]}",
+        "whyItMatters": "An agent that can send messages to team chat could be used to exfiltrate information or perform social-engineering actions (e.g., persuading humans to approve actions), especially given confidential data access.",
+        "recommendedControl": "Restrict chat outputs to templated, human-review-only summaries; sanitize outputs for sensitive data; enforce message approval or explicit human confirmation before any content is posted."
+      },
+      "reason": "evidence quote not found in the profile"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "A shared credential token increases risk of credential compromise and makes it harder to audit or revoke access per-agent or per-principal, enabling privilege abuse or lateral movement if the token is leaked or over-permissioned.",
+        "recommendedControl": "Use per-agent, short-lived credentials with least-privilege scopes and automated rotation; add audit logging linking actions to distinct identities."
+      },
+      {
+        "category": "ASI06",
+        "severity": "high",
+        "evidenceQuote": "\"An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations.\"",
+        "whyItMatters": "Persistent shared memory between multiple sub-agents plus confidential data reads enables context poisoning (malicious or corrupted inputs persisting across runs), which can corrupt recommendations and propagate incorrect/confidential state across agents.",
+        "recommendedControl": "Restrict and compartmentalize memory: avoid persistent shared memory for confidential contexts, implement input validation and integrity checks, version and sign memory snapshots, and provide per-request ephemeral contexts."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"logging\": {\"enabled\": true, \"destination\": \"Application logs, not yet forwarded to the SIEM\"}",
+        "whyItMatters": "Application logs containing confidential data that are not forwarded to the SIEM increase risk of undetected data leakage and make incident detection and response slower or impossible.",
+        "recommendedControl": "Ensure logs with confidential content are sanitized, encrypted in transit, and forwarded to the enterprise SIEM with alerting; apply access controls and retention policies."
+      },
+      {
+        "category": "ASI10",
+        "severity": "high",
+        "evidenceQuote": "\"killSwitch\": {\"available\": true, \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"}",
+        "whyItMatters": "Relying on an untested manual kill switch that requires disabling a service account risks slow or failed shutdown during incidents, allowing a misbehaving agent to continue acting on confidential data or sending messages.",
+        "recommendedControl": "Provide an automated, tested emergency disable mechanism (e.g., immediate runtime kill, network isolation, and automated orchestration stop) with documented runbooks and regular drills."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "{\"name\": \"Team chat notification\", \"permissions\": [\"send_messages\"]}",
+        "whyItMatters": "An agent that can send messages to team chat could be used to exfiltrate information or perform social-engineering actions (e.g., persuading humans to approve actions), especially given confidential data access.",
+        "recommendedControl": "Restrict chat outputs to templated, human-review-only summaries; sanitize outputs for sensitive data; enforce message approval or explicit human confirmation before any content is posted."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This orchestrator reads confidential data and runs persistent shared memory across multiple sub-agents while using a shared credential and an untested manual kill switch. Major risks are context poisoning from shared persistent memory and weak incident controls (kill switch, logging, shared token), plus potential misuse of the chat-send tool. Apply per-agent credentials, compartmentalize memory, harden logging and automated kill mechanisms, and restrict chat outputs before approving deployment."
+  },
+  "usage": {
+    "inputTokens": 1320,
+    "inputTokenDetails": {
+      "noCacheTokens": 1320,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1454,
+    "outputTokenDetails": {
+      "textTokens": 814,
+      "reasoningTokens": 640
+    },
+    "totalTokens": 2774,
+    "raw": {
+      "input_tokens": 1320,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1454,
+      "output_tokens_details": {
+        "reasoning_tokens": 640
+      },
+      "total_tokens": 2774
+    }
+  },
+  "generationId": "gen_01M5GV1GFPY8TNHDXDRFXCPMDT",
+  "durationMs": 17084
+}

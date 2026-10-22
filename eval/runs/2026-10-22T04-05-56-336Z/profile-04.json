@@ -1,0 +1,127 @@
+{
+  "profileId": "profile-04",
+  "promptVersion": "v4",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 4,
+    "reasons": [
+      "Tier 4: acts with no person confirming (Claims management system)",
+      "Tier 2: can act beyond reading (Claims management system, Team chat notification)",
+      "Tier 2: reads confidential, personal data"
+    ]
+  },
+  "proposedTier": 3,
+  "summary": "This agent autonomously reads confidential customer emails and performs writes to the claims system without human confirmation, which places it at Tier 3 because it handles customer data and can modify records. Key risks are autonomous tool writes, untrusted input poisoning, and a persistent scoped token; require human approval for writes or drafting-only behavior, input validation and attachment scanning, and least-privilege short-lived credentials.",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI02",
+      "severity": "critical",
+      "evidenceQuote": "{\"name\": \"Claims management system\", \"permissions\": [\"read\", \"write\"]}",
+      "whyItMatters": "The agent has autonomous write permission to claims records and human confirmation is disabled, so it can change priority and queue information without a person verifying those changes, which can cause incorrect handling or unauthorized modifications of customer records.",
+      "recommendedControl": "Require a human-in-the-loop approval for any write actions to the claims management system, or restrict the agent to creating draft records only and require an adjuster to commit changes.",
+      "modelSeverity": "high",
+      "raisedByRule": "R1"
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [\"email\", \"uploaded_files\"]",
+      "whyItMatters": "The agent ingests untrusted emails and attachments and uses extracted data to update records; adversarial or malformed inputs could poison extraction or classification logic, causing mis-prioritization, data corruption, or downstream propagation of malicious content.",
+      "recommendedControl": "Validate and sanitize all extracted fields, scan attachments for malware and malicious content, and require cross-checking of critical fields such as policy number against the authoritative policy database before any write.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI03",
+      "severity": "medium",
+      "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+      "whyItMatters": "The agent uses a persistent scoped token for accessing systems; if that credential is compromised or over-scoped it permits unauthorized automated writes to sensitive customer records.",
+      "recommendedControl": "Use least-privilege service accounts with narrow scopes and short-lived credentials, enforce strict rotation and audit of the token, and bind the token to required actions and caller identity.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R1",
+      "severity": "critical",
+      "reason": "Lists Claims management system that can move money or change customer records, and no person confirms its actions.",
+      "field": "tools.permissions, humanConfirmsActions",
+      "category": "ASI02"
+    },
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (email, uploaded_files) and lists Claims management system that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "{\"name\": \"Claims management system\", \"permissions\": [\"read\", \"write\"]}",
+        "whyItMatters": "The agent has autonomous write permission to claims records and human confirmation is disabled, so it can change priority and queue information without a person verifying those changes, which can cause incorrect handling or unauthorized modifications of customer records.",
+        "recommendedControl": "Require a human-in-the-loop approval for any write actions to the claims management system, or restrict the agent to creating draft records only and require an adjuster to commit changes."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [\"email\", \"uploaded_files\"]",
+        "whyItMatters": "The agent ingests untrusted emails and attachments and uses extracted data to update records; adversarial or malformed inputs could poison extraction or classification logic, causing mis-prioritization, data corruption, or downstream propagation of malicious content.",
+        "recommendedControl": "Validate and sanitize all extracted fields, scan attachments for malware and malicious content, and require cross-checking of critical fields such as policy number against the authoritative policy database before any write."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+        "whyItMatters": "The agent uses a persistent scoped token for accessing systems; if that credential is compromised or over-scoped it permits unauthorized automated writes to sensitive customer records.",
+        "recommendedControl": "Use least-privilege service accounts with narrow scopes and short-lived credentials, enforce strict rotation and audit of the token, and bind the token to required actions and caller identity."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent autonomously reads confidential customer emails and performs writes to the claims system without human confirmation, which places it at Tier 3 because it handles customer data and can modify records. Key risks are autonomous tool writes, untrusted input poisoning, and a persistent scoped token; require human approval for writes or drafting-only behavior, input validation and attachment scanning, and least-privilege short-lived credentials."
+  },
+  "usage": {
+    "inputTokens": 1907,
+    "inputTokenDetails": {
+      "noCacheTokens": 1907,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 1170,
+    "outputTokenDetails": {
+      "textTokens": 466,
+      "reasoningTokens": 704
+    },
+    "totalTokens": 3077,
+    "raw": {
+      "input_tokens": 1907,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 1170,
+      "output_tokens_details": {
+        "reasoning_tokens": 704
+      },
+      "total_tokens": 3077
+    }
+  },
+  "generationId": "gen_01M5GWMWH12BQNGJT2G6DT7BAC",
+  "durationMs": 12767
+}

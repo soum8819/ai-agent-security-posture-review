@@ -1,0 +1,148 @@
+{
+  "profileId": "profile-10",
+  "promptVersion": "v2",
+  "settings": {
+    "model": "openai/gpt-5-mini",
+    "reasoning": "low",
+    "maxOutputTokens": 6000
+  },
+  "ruleTier": {
+    "tier": 2,
+    "reasons": [
+      "Tier 2: can act beyond reading (Customer support CRM, Refund issuance API)",
+      "Tier 2: reads confidential data"
+    ]
+  },
+  "proposedTier": 4,
+  "summary": "This agent is high-risk because it can move money automatically for refunds up to $50 and holds its own scoped credential, yet has only manual/unverified shutdown and incomplete monitoring. Require removal or restriction of direct move-money permissions, enforce human approval for refunds, adopt short-lived least-privilege credentials, forward logs to SIEM, and implement an automated, tested kill switch/runbook before approval. ",
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "findings": [
+    {
+      "category": "ASI02",
+      "severity": "critical",
+      "evidenceQuote": "issues refunds of up to $50 automatically.",
+      "whyItMatters": "The agent can issue refunds automatically (no human confirmation for amounts ≤ $50) which combined with a payment API means it can move customer funds without an approving person, enabling theft or unintended transfers.",
+      "recommendedControl": "Remove automatic refund capability: require explicit human approval for all refunds, or remove the agent's direct refund/move-money permission and enforce refunds via a guarded human-operated workflow with auditable approvals.",
+      "modelSeverity": "critical"
+    },
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"own_scoped_token\",",
+      "whyItMatters": "The agent uses its own scoped credential to access systems and perform write/money-moving actions; if that token is compromised or misused the agent's privileges can be abused to modify CRM data or initiate refunds.",
+      "recommendedControl": "Use short-lived credentials with least privilege, rotate and bind tokens to a narrow set of allowed actions, require token use to be logged and approved by an external authorization service for sensitive operations.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [ \"chat\" ]",
+      "whyItMatters": "Chat is listed as an untrusted input while the agent keeps per-session conversation history ('memory': 'session'); malicious user input could poison session context and cause the agent to behave incorrectly or authorize actions.",
+      "recommendedControl": "Implement input sanitization, intent validation, and strict action authorization checks disconnected from session-memory (i.e., do not rely on session memory for authorization decisions); consider shorter/trusted-only context for any action triggers.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI10",
+      "severity": "high",
+      "evidenceQuote": "Manual: the on-call engineer disables the agent's service account. No tested runbook.",
+      "whyItMatters": "The kill switch is manual and untested, so in an incident the agent may continue harmful actions (including moving money) for an extended period before it can be stopped, increasing impact.",
+      "recommendedControl": "Provide an automated, tested emergency shutdown (automated service disable and API key revocation), document and test a runbook with regular drills and ensure monitoring/alerts trigger the shutdown when thresholds are exceeded.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "destination\": \"Application logs, not yet forwarded to the SIEM\"",
+      "whyItMatters": "Logs are enabled but not forwarded to SIEM/central monitoring, delaying detection of misuse or failures and increasing likelihood of cascading failures before humans respond.",
+      "recommendedControl": "Forward agent logs and audit trails to the SIEM with alerts for sensitive actions (refunds, writes, auth failures), and instrument metrics and runbook-driven thresholds for automated escalation.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "droppedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (chat) and lists Customer support CRM that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    }
+  ],
+  "rawModelOutput": {
+    "proposedTier": 4,
+    "findings": [
+      {
+        "category": "ASI02",
+        "severity": "critical",
+        "evidenceQuote": "issues refunds of up to $50 automatically.",
+        "whyItMatters": "The agent can issue refunds automatically (no human confirmation for amounts ≤ $50) which combined with a payment API means it can move customer funds without an approving person, enabling theft or unintended transfers.",
+        "recommendedControl": "Remove automatic refund capability: require explicit human approval for all refunds, or remove the agent's direct refund/move-money permission and enforce refunds via a guarded human-operated workflow with auditable approvals."
+      },
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"own_scoped_token\",",
+        "whyItMatters": "The agent uses its own scoped credential to access systems and perform write/money-moving actions; if that token is compromised or misused the agent's privileges can be abused to modify CRM data or initiate refunds.",
+        "recommendedControl": "Use short-lived credentials with least privilege, rotate and bind tokens to a narrow set of allowed actions, require token use to be logged and approved by an external authorization service for sensitive operations."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [ \"chat\" ]",
+        "whyItMatters": "Chat is listed as an untrusted input while the agent keeps per-session conversation history ('memory': 'session'); malicious user input could poison session context and cause the agent to behave incorrectly or authorize actions.",
+        "recommendedControl": "Implement input sanitization, intent validation, and strict action authorization checks disconnected from session-memory (i.e., do not rely on session memory for authorization decisions); consider shorter/trusted-only context for any action triggers."
+      },
+      {
+        "category": "ASI10",
+        "severity": "high",
+        "evidenceQuote": "Manual: the on-call engineer disables the agent's service account. No tested runbook.",
+        "whyItMatters": "The kill switch is manual and untested, so in an incident the agent may continue harmful actions (including moving money) for an extended period before it can be stopped, increasing impact.",
+        "recommendedControl": "Provide an automated, tested emergency shutdown (automated service disable and API key revocation), document and test a runbook with regular drills and ensure monitoring/alerts trigger the shutdown when thresholds are exceeded."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "destination\": \"Application logs, not yet forwarded to the SIEM\"",
+        "whyItMatters": "Logs are enabled but not forwarded to SIEM/central monitoring, delaying detection of misuse or failures and increasing likelihood of cascading failures before humans respond.",
+        "recommendedControl": "Forward agent logs and audit trails to the SIEM with alerts for sensitive actions (refunds, writes, auth failures), and instrument metrics and runbook-driven thresholds for automated escalation."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent is high-risk because it can move money automatically for refunds up to $50 and holds its own scoped credential, yet has only manual/unverified shutdown and incomplete monitoring. Require removal or restriction of direct move-money permissions, enforce human approval for refunds, adopt short-lived least-privilege credentials, forward logs to SIEM, and implement an automated, tested kill switch/runbook before approval. "
+  },
+  "usage": {
+    "inputTokens": 1319,
+    "inputTokenDetails": {
+      "noCacheTokens": 1319,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0
+    },
+    "outputTokens": 2139,
+    "outputTokenDetails": {
+      "textTokens": 795,
+      "reasoningTokens": 1344
+    },
+    "totalTokens": 3458,
+    "raw": {
+      "input_tokens": 1319,
+      "input_tokens_details": {
+        "cache_write_tokens": 0,
+        "cached_tokens": 0
+      },
+      "output_tokens": 2139,
+      "output_tokens_details": {
+        "reasoning_tokens": 1344
+      },
+      "total_tokens": 3458
+    }
+  },
+  "generationId": "gen_01M5GV0PP5S2HW530T5JKRXCJB",
+  "durationMs": 26283
+}
