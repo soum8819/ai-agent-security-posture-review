@@ -99,4 +99,5 @@ Updated by the project owner after each step.
 - [x] Step 3: done (live at ai-agent-security-posture-review.vercel.app)
 - [x] Step 4: done
 - [x] Step 5: done
-- [ ] Step 6: scaffold built, answer key pending (not done)
+- [x] Step 6: done
+- [ ] Step 7: next (The rules that set a floor)
