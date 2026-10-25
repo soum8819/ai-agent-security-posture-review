@@ -1,0 +1,326 @@
+{
+  "profileId": "profile-10",
+  "tiers": {
+    "rule": 2,
+    "reviewer": 4,
+    "checker": 4,
+    "final": 4,
+    "setBy": [
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 2: can act beyond reading (Customer support CRM, Refund issuance API)",
+      "Tier 2: reads confidential data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI10",
+      "severity": "critical",
+      "evidenceQuote": "issues refunds of up to $50 automatically.",
+      "whyItMatters": "The agent is authorized to perform automatic refunds without human confirmation for transactions up to $50, so it can move customer funds autonomously and perform unauthorized or fraudulent transfers at scale.",
+      "recommendedControl": "Remove autonomous refund capability and require human approval for all refunds, or remove the move_money permission and route refund requests to a dedicated, audited payments service that enforces two-person review.",
+      "modelSeverity": "critical",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly states the agent can issue refunds up to $50 automatically, which directly supports the finding that it can move funds autonomously.",
+      "contested": false
+    },
+    {
+      "category": "ASI01",
+      "severity": "high",
+      "evidenceQuote": "\"humanConfirmsActions\": true",
+      "whyItMatters": "The profile claims human confirmation is required, but the description explicitly states some refunds are issued automatically, which is a contradictory policy that can lead to unintended autonomous actions or misrouted approvals if implementation follows the weaker behavior.",
+      "recommendedControl": "Resolve the contradiction by making the confirmation policy explicit and enforceable: either enforce human confirmation for all actionable operations in code and access control, or clearly scope and document any allowed autonomous actions and enforce them via policy and audit controls.",
+      "modelSeverity": "high",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile's `humanConfirmsActions: true` directly contradicts the description stating the agent \"issues refunds of up to $50 automatically,\" creating a significant policy and implementation risk.",
+      "contested": false
+    },
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+      "whyItMatters": "The agent uses its own scoped token to call backend systems including a move_money API, if that token is compromised or overprivileged the agent identity can be abused to read or modify customer data and move funds.",
+      "recommendedControl": "Use short-lived, least-privilege credentials provisioned from a secrets vault with fine-grained scopes, enforce token rotation, and apply conditional access and monitoring on the token usage.",
+      "modelSeverity": "high",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The use of an \"own_scoped_token\" for an agent with `move_money` and `write` permissions presents a clear risk of privilege abuse if compromised.",
+      "contested": false
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [\"chat\"]",
+      "whyItMatters": "The agent accepts untrusted chat input and retains per-session conversation history, so malicious or crafted inputs may poison session memory and influence future decisions, including triggering unintended refunds or data disclosures.",
+      "recommendedControl": "Treat chat input as untrusted: sanitize and validate inputs, do not store raw untrusted content in persistent memory, implement strict provenance tagging and periodic memory expiry, and run integrity checks on context before performing sensitive actions.",
+      "modelSeverity": "medium",
+      "id": "F4",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent accepts \"chat\" as untrusted input and retains \"session\" memory, making it vulnerable to memory poisoning from malicious inputs.",
+      "contested": false
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+      "whyItMatters": "Logging is enabled but not forwarded to central SIEM, limiting detection and incident response capability; an undetected fault or abuse in the agent could cascade across systems before being discovered.",
+      "recommendedControl": "Forward agent logs and security-relevant events to the enterprise SIEM with structured audit trails for actions that modify data or move funds, and alerting on anomalous patterns such as repeated refund calls.",
+      "modelSeverity": "medium",
+      "id": "F5",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "Logging to \"Application logs, not yet forwarded to the SIEM\" means critical events might not be centrally monitored or alerted upon, hindering incident response.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (chat) and lists Customer support CRM that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This agent is high-risk because it has move_money capability and the profile states it issues refunds automatically up to $50, creating autonomous fund-movement without reliable human confirmation. Additional risks include credential scope, untrusted chat input stored in session memory, contradictory confirmation policy, and insufficient centralized logging. Mitigations: remove or tightly constrain autonomous refunding, enforce least-privilege short-lived credentials, sanitize and isolate session context, clarify and enforce human confirmation policy, and forward logs to SIEM.",
+  "checkerSummary": "The agent is Tier 4 because it can move money automatically for refunds up to $50, as explicitly stated in its description, despite the `humanConfirmsActions: true` setting. The first reviewer correctly identified the critical risk of autonomous money movement and the contradiction in human confirmation. Additional risks include the agent's write access to the CRM and the untested manual kill switch.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [
+    {
+      "finding": {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "tools: [ { \"name\": \"Customer support CRM\", \"permissions\": [ \"read\", \"write\" ] }",
+        "whyItMatters": "The agent has write access to the Customer Support CRM, which could be misused to alter customer records, create fraudulent entries, or delete important data if the agent is compromised or misaligned. This could lead to data integrity issues or operational disruptions.",
+        "recommendedControl": "Implement fine-grained access controls on the CRM tool to restrict write permissions only to specific, necessary fields, and require human confirmation for any data modification actions."
+      },
+      "reason": "evidence quote not found in the profile"
+    },
+    {
+      "finding": {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "killSwitch: { \"available\": true, \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\" }",
+        "whyItMatters": "A manual kill switch without a tested runbook introduces significant delay and potential for error during an incident, increasing the risk of harm from a rogue or compromised agent. This could allow a cascading failure to continue longer than necessary.",
+        "recommendedControl": "Develop and regularly test a detailed runbook for the kill switch procedure to ensure rapid and effective agent shutdown in an emergency."
+      },
+      "reason": "evidence quote not found in the profile"
+    },
+    {
+      "finding": {
+        "category": "ASI04",
+        "severity": "low",
+        "evidenceQuote": "model: { \"provider\": \"Anthropic\", \"name\": \"Claude Sonnet (version not specified)\" }",
+        "whyItMatters": "Not specifying the exact version of the Claude Sonnet model makes it difficult to track known vulnerabilities, ensure consistent behavior, or reproduce issues, posing a supply chain risk. This could lead to unexpected model behavior or security flaws if the underlying model changes.",
+        "recommendedControl": "Pin the model to a specific, immutable version to ensure consistency and allow for proper vulnerability tracking and management."
+      },
+      "reason": "evidence quote not found in the profile"
+    }
+  ],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1894,
+      "inputTokenDetails": {
+        "noCacheTokens": 102,
+        "cacheReadTokens": 1792,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 2079,
+      "outputTokenDetails": {
+        "textTokens": 735,
+        "reasoningTokens": 1344
+      },
+      "totalTokens": 3973,
+      "raw": {
+        "input_tokens": 1894,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 1792
+        },
+        "output_tokens": 2079,
+        "output_tokens_details": {
+          "reasoning_tokens": 1344
+        },
+        "total_tokens": 3973
+      }
+    },
+    "latencyMs": 80231,
+    "generationId": "gen_01M5T8PSVWNAWWBZKP6Q4F3PE1",
+    "provider": "openai",
+    "costUsd": 0.0042283
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c2",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2952,
+      "inputTokenDetails": {
+        "noCacheTokens": 2952,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1600,
+      "outputTokenDetails": {
+        "textTokens": 872,
+        "reasoningTokens": 728
+      },
+      "totalTokens": 4552,
+      "raw": {
+        "thoughtsTokenCount": 728,
+        "promptTokenCount": 2952,
+        "candidatesTokenCount": 872,
+        "totalTokenCount": 4552,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2952
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 872
+          }
+        ]
+      }
+    },
+    "latencyMs": 10238,
+    "generationId": "gen_01M5T8S89HHH67C80DD1GXKJ8Q",
+    "provider": "vertex",
+    "costUsd": 0.0048856
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 4,
+    "findings": [
+      {
+        "category": "ASI10",
+        "severity": "critical",
+        "evidenceQuote": "issues refunds of up to $50 automatically.",
+        "whyItMatters": "The agent is authorized to perform automatic refunds without human confirmation for transactions up to $50, so it can move customer funds autonomously and perform unauthorized or fraudulent transfers at scale.",
+        "recommendedControl": "Remove autonomous refund capability and require human approval for all refunds, or remove the move_money permission and route refund requests to a dedicated, audited payments service that enforces two-person review."
+      },
+      {
+        "category": "ASI01",
+        "severity": "high",
+        "evidenceQuote": "\"humanConfirmsActions\": true",
+        "whyItMatters": "The profile claims human confirmation is required, but the description explicitly states some refunds are issued automatically, which is a contradictory policy that can lead to unintended autonomous actions or misrouted approvals if implementation follows the weaker behavior.",
+        "recommendedControl": "Resolve the contradiction by making the confirmation policy explicit and enforceable: either enforce human confirmation for all actionable operations in code and access control, or clearly scope and document any allowed autonomous actions and enforce them via policy and audit controls."
+      },
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+        "whyItMatters": "The agent uses its own scoped token to call backend systems including a move_money API, if that token is compromised or overprivileged the agent identity can be abused to read or modify customer data and move funds.",
+        "recommendedControl": "Use short-lived, least-privilege credentials provisioned from a secrets vault with fine-grained scopes, enforce token rotation, and apply conditional access and monitoring on the token usage."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [\"chat\"]",
+        "whyItMatters": "The agent accepts untrusted chat input and retains per-session conversation history, so malicious or crafted inputs may poison session memory and influence future decisions, including triggering unintended refunds or data disclosures.",
+        "recommendedControl": "Treat chat input as untrusted: sanitize and validate inputs, do not store raw untrusted content in persistent memory, implement strict provenance tagging and periodic memory expiry, and run integrity checks on context before performing sensitive actions."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+        "whyItMatters": "Logging is enabled but not forwarded to central SIEM, limiting detection and incident response capability; an undetected fault or abuse in the agent could cascade across systems before being discovered.",
+        "recommendedControl": "Forward agent logs and security-relevant events to the enterprise SIEM with structured audit trails for actions that modify data or move funds, and alerting on anomalous patterns such as repeated refund calls."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent is high-risk because it has move_money capability and the profile states it issues refunds automatically up to $50, creating autonomous fund-movement without reliable human confirmation. Additional risks include credential scope, untrusted chat input stored in session memory, contradictory confirmation policy, and insufficient centralized logging. Mitigations: remove or tightly constrain autonomous refunding, enforce least-privilege short-lived credentials, sanitize and isolate session context, clarify and enforce human confirmation policy, and forward logs to SIEM."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile explicitly states the agent can issue refunds up to $50 automatically, which directly supports the finding that it can move funds autonomously."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The profile's `humanConfirmsActions: true` directly contradicts the description stating the agent \"issues refunds of up to $50 automatically,\" creating a significant policy and implementation risk."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The use of an \"own_scoped_token\" for an agent with `move_money` and `write` permissions presents a clear risk of privilege abuse if compromised."
+      },
+      {
+        "findingId": "F4",
+        "verdict": "agree",
+        "reason": "The agent accepts \"chat\" as untrusted input and retains \"session\" memory, making it vulnerable to memory poisoning from malicious inputs."
+      },
+      {
+        "findingId": "F5",
+        "verdict": "agree",
+        "reason": "Logging to \"Application logs, not yet forwarded to the SIEM\" means critical events might not be centrally monitored or alerted upon, hindering incident response."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "tools: [ { \"name\": \"Customer support CRM\", \"permissions\": [ \"read\", \"write\" ] }",
+        "whyItMatters": "The agent has write access to the Customer Support CRM, which could be misused to alter customer records, create fraudulent entries, or delete important data if the agent is compromised or misaligned. This could lead to data integrity issues or operational disruptions.",
+        "recommendedControl": "Implement fine-grained access controls on the CRM tool to restrict write permissions only to specific, necessary fields, and require human confirmation for any data modification actions."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "killSwitch: { \"available\": true, \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\" }",
+        "whyItMatters": "A manual kill switch without a tested runbook introduces significant delay and potential for error during an incident, increasing the risk of harm from a rogue or compromised agent. This could allow a cascading failure to continue longer than necessary.",
+        "recommendedControl": "Develop and regularly test a detailed runbook for the kill switch procedure to ensure rapid and effective agent shutdown in an emergency."
+      },
+      {
+        "category": "ASI04",
+        "severity": "low",
+        "evidenceQuote": "model: { \"provider\": \"Anthropic\", \"name\": \"Claude Sonnet (version not specified)\" }",
+        "whyItMatters": "Not specifying the exact version of the Claude Sonnet model makes it difficult to track known vulnerabilities, ensure consistent behavior, or reproduce issues, posing a supply chain risk. This could lead to unexpected model behavior or security flaws if the underlying model changes.",
+        "recommendedControl": "Pin the model to a specific, immutable version to ensure consistency and allow for proper vulnerability tracking and management."
+      }
+    ],
+    "proposedTier": 4,
+    "summary": "The agent is Tier 4 because it can move money automatically for refunds up to $50, as explicitly stated in its description, despite the `humanConfirmsActions: true` setting. The first reviewer correctly identified the critical risk of autonomous money movement and the contradiction in human confirmation. Additional risks include the agent's write access to the CRM and the untested manual kill switch."
+  },
+  "costUsd": 0.009113900000000001,
+  "seconds": 90.469
+}

@@ -93,3 +93,5 @@ checker c1, rules unchanged). See eval/EVAL_PLAN.md and eval/results.md.
 | eval-v1-baseline | all 12 | v4 / c1 | $0.0969 | The step 13 baseline. |
 | eval-v1-variation-2, eval-v1-variation-3 | 01, 03, 10 | v4 / c1 | $0.0255, $0.0243 | Variation: the same profiles run twice more. |
 | eval-v1-before-2, eval-v1-before-3 | 02, 07 | v4 / c1 | $0.0144, $0.0137 | Extra frozen samples of the two worst tuning results, so the failure analysis compares 3 runs before with 3 runs after. |
+| eval-c2-after-1 | 07, 01, 09, 10 | v4 / c2 | $0.0324 | Failure analysis change A: the checker prompt now spells out the Tier 4 check (needs move money, write or run code, and no person confirming). 07 is the target; 01, 09 and 10 are tuning profiles whose key allows Tier 4, as a regression check. |
+| eval-c2-after-2, eval-c2-after-3 | 07 | v4 / c2 | $0.0070, $0.0090 | Two more samples of 07 after change A. |

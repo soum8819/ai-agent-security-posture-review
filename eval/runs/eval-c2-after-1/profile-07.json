@@ -1,0 +1,266 @@
+{
+  "profileId": "profile-07",
+  "tiers": {
+    "rule": 3,
+    "reviewer": 3,
+    "checker": 3,
+    "final": 3,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (Payment exceptions queue, Payment release API)",
+      "Tier 2: reads confidential, customer_financial, personal data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI02",
+      "severity": "high",
+      "evidenceQuote": "      \"permissions\": [\n        \"move_money\"\n      ]",
+      "whyItMatters": "The agent has direct permission to move funds via the Payment release API, so if the release action is invoked without correct controls or if confirmations are bypassed it can transfer money causing financial loss.",
+      "recommendedControl": "Require out-of-band multi-party authorization before any call to the release API, enforce strict least-privilege scopes on the agent token so it cannot directly invoke move_money without an ephemeral supervisor token, and add mandatory server-side checks that validate each release against policy and audit logs.",
+      "modelSeverity": "high",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile clearly states the agent has 'move_money' permissions, which inherently carries a high risk of financial loss if misused, even with human confirmation.",
+      "contested": false
+    },
+    {
+      "category": "ASI09",
+      "severity": "high",
+      "evidenceQuote": "An analyst reviews the proposal, and after the analyst clicks confirm the assistant calls the release API to send the payment.",
+      "whyItMatters": "The agent proposes corrections and then relies on an analyst confirmation to act, creating an opportunity for the agent to influence or sozially engineer analysts into approving incorrect or fraudulent payments.",
+      "recommendedControl": "Require the analyst UI to surface provenance, confidence, and suggested edits with an explicit human-review checklist, add training and simulated phishing tests for analysts, and enforce a second independent approver for payments above a low threshold.",
+      "modelSeverity": "high",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent's role in proposing corrections and then relying on analyst confirmation creates a clear pathway for social engineering or manipulation of human users, as described.",
+      "contested": false
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "    {\n      \"name\": \"Beneficiary lookup service\",\n      \"permissions\": [\n        \"read\"\n      ]\n    },",
+      "whyItMatters": "Dependence on an external lookup service introduces supply-chain risk: if the service or its data is compromised, the agent could base corrections on malicious or corrupted beneficiary records leading to misrouting or fraud.",
+      "recommendedControl": "Validate lookup responses with internal authoritative sources, add integrity checks and authenticated TLS with service identity verification, and restrict which external services the agent may query with allow-listing and regular attestation of third-party security.",
+      "modelSeverity": "medium",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent's reliance on an external 'Beneficiary lookup service' for critical data introduces supply chain risks, as a compromise of this service could lead to incorrect or malicious actions by the agent.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI01",
+      "severity": "high",
+      "evidenceQuote": "Help payments analysts clear the queue of payments held for repair, such as missing or mismatched beneficiary details.",
+      "whyItMatters": "The agent's core function is to process and propose corrections for payment exceptions, making it a prime target for prompt injection or data manipulation to alter its objectives and cause misrouting or fraud.",
+      "recommendedControl": "Implement robust input validation and sanitization for all data fed to the agent, and use a separate, hardened LLM for safety checks on proposed actions before they are presented to the analyst.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI03",
+      "severity": "medium",
+      "evidenceQuote": "credentials\": \"own_scoped_token\"",
+      "whyItMatters": "While using an own scoped token is good, the profile does not specify the scope of this token, which could be overly permissive and allow the agent to access or modify resources beyond its intended function if compromised.",
+      "recommendedControl": "Clearly define and enforce the principle of least privilege for the agent's token, ensuring it only has the minimum necessary permissions for its stated business purpose.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "For each held payment, the assistant looks up the beneficiary record, proposes a corrected field, and writes the proposal to the exception record.",
+      "whyItMatters": "A single fault, such as a corrupted beneficiary record or a hallucination in the proposed correction, could propagate through the system, leading to multiple incorrect proposals and potentially erroneous payment releases.",
+      "recommendedControl": "Implement cross-validation mechanisms for proposed corrections, such as comparing against multiple data sources or flagging proposals that deviate significantly from historical patterns.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "The agent runs on sensitive customer financial data and can trigger money transfers after human confirmation, so this profile is Tier 3. Key risks: the agent has move_money capability that could enable unauthorized transfers if confirmations or tokens are bypassed, it can influence analysts to approve incorrect payments, and it relies on an external beneficiary lookup service that could be compromised. Implement multi-party authorization, stronger UI provenance and second-approver requirements, scoped ephemeral credentials, and controls for third-party data integrity before approval.",
+  "checkerSummary": "The agent handles customer financial data and can initiate money movement, but human confirmation for all actions prevents it from being Tier 4. Several high-risk findings relate to potential manipulation of the agent's decision-making and the human confirmation process, which could lead to financial loss or data compromise. Stronger controls around input validation, token scope, and error propagation are recommended.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1901,
+      "inputTokenDetails": {
+        "noCacheTokens": 109,
+        "cacheReadTokens": 1792,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1818,
+      "outputTokenDetails": {
+        "textTokens": 538,
+        "reasoningTokens": 1280
+      },
+      "totalTokens": 3719,
+      "raw": {
+        "input_tokens": 1901,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 1792
+        },
+        "output_tokens": 1818,
+        "output_tokens_details": {
+          "reasoning_tokens": 1280
+        },
+        "total_tokens": 3719
+      }
+    },
+    "latencyMs": 14521,
+    "generationId": "gen_01M5T8KERECQ7E0EVNDWQ17VED",
+    "provider": "openai",
+    "costUsd": 0.00370805
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c2",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2733,
+      "inputTokenDetails": {
+        "noCacheTokens": 2733,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1430,
+      "outputTokenDetails": {
+        "textTokens": 712,
+        "reasoningTokens": 718
+      },
+      "totalTokens": 4163,
+      "raw": {
+        "thoughtsTokenCount": 718,
+        "promptTokenCount": 2733,
+        "candidatesTokenCount": 712,
+        "totalTokenCount": 4163,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2733
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 712
+          }
+        ]
+      }
+    },
+    "latencyMs": 9476,
+    "generationId": "gen_01M5T8KWS9JKJJRRM7Q136GRXY",
+    "provider": "vertex",
+    "costUsd": 0.0043949
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "      \"permissions\": [\n        \"move_money\"\n      ]",
+        "whyItMatters": "The agent has direct permission to move funds via the Payment release API, so if the release action is invoked without correct controls or if confirmations are bypassed it can transfer money causing financial loss.",
+        "recommendedControl": "Require out-of-band multi-party authorization before any call to the release API, enforce strict least-privilege scopes on the agent token so it cannot directly invoke move_money without an ephemeral supervisor token, and add mandatory server-side checks that validate each release against policy and audit logs."
+      },
+      {
+        "category": "ASI09",
+        "severity": "high",
+        "evidenceQuote": "An analyst reviews the proposal, and after the analyst clicks confirm the assistant calls the release API to send the payment.",
+        "whyItMatters": "The agent proposes corrections and then relies on an analyst confirmation to act, creating an opportunity for the agent to influence or sozially engineer analysts into approving incorrect or fraudulent payments.",
+        "recommendedControl": "Require the analyst UI to surface provenance, confidence, and suggested edits with an explicit human-review checklist, add training and simulated phishing tests for analysts, and enforce a second independent approver for payments above a low threshold."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "    {\n      \"name\": \"Beneficiary lookup service\",\n      \"permissions\": [\n        \"read\"\n      ]\n    },",
+        "whyItMatters": "Dependence on an external lookup service introduces supply-chain risk: if the service or its data is compromised, the agent could base corrections on malicious or corrupted beneficiary records leading to misrouting or fraud.",
+        "recommendedControl": "Validate lookup responses with internal authoritative sources, add integrity checks and authenticated TLS with service identity verification, and restrict which external services the agent may query with allow-listing and regular attestation of third-party security."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The agent runs on sensitive customer financial data and can trigger money transfers after human confirmation, so this profile is Tier 3. Key risks: the agent has move_money capability that could enable unauthorized transfers if confirmations or tokens are bypassed, it can influence analysts to approve incorrect payments, and it relies on an external beneficiary lookup service that could be compromised. Implement multi-party authorization, stronger UI provenance and second-approver requirements, scoped ephemeral credentials, and controls for third-party data integrity before approval."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile clearly states the agent has 'move_money' permissions, which inherently carries a high risk of financial loss if misused, even with human confirmation."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The agent's role in proposing corrections and then relying on analyst confirmation creates a clear pathway for social engineering or manipulation of human users, as described."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The agent's reliance on an external 'Beneficiary lookup service' for critical data introduces supply chain risks, as a compromise of this service could lead to incorrect or malicious actions by the agent."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI01",
+        "severity": "high",
+        "evidenceQuote": "Help payments analysts clear the queue of payments held for repair, such as missing or mismatched beneficiary details.",
+        "whyItMatters": "The agent's core function is to process and propose corrections for payment exceptions, making it a prime target for prompt injection or data manipulation to alter its objectives and cause misrouting or fraud.",
+        "recommendedControl": "Implement robust input validation and sanitization for all data fed to the agent, and use a separate, hardened LLM for safety checks on proposed actions before they are presented to the analyst."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "credentials\": \"own_scoped_token\"",
+        "whyItMatters": "While using an own scoped token is good, the profile does not specify the scope of this token, which could be overly permissive and allow the agent to access or modify resources beyond its intended function if compromised.",
+        "recommendedControl": "Clearly define and enforce the principle of least privilege for the agent's token, ensuring it only has the minimum necessary permissions for its stated business purpose."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "For each held payment, the assistant looks up the beneficiary record, proposes a corrected field, and writes the proposal to the exception record.",
+        "whyItMatters": "A single fault, such as a corrupted beneficiary record or a hallucination in the proposed correction, could propagate through the system, leading to multiple incorrect proposals and potentially erroneous payment releases.",
+        "recommendedControl": "Implement cross-validation mechanisms for proposed corrections, such as comparing against multiple data sources or flagging proposals that deviate significantly from historical patterns."
+      }
+    ],
+    "proposedTier": 3,
+    "summary": "The agent handles customer financial data and can initiate money movement, but human confirmation for all actions prevents it from being Tier 4. Several high-risk findings relate to potential manipulation of the agent's decision-making and the human confirmation process, which could lead to financial loss or data compromise. Stronger controls around input validation, token scope, and error propagation are recommended."
+  },
+  "costUsd": 0.008102950000000001,
+  "seconds": 23.997
+}
