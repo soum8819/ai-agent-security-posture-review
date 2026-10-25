@@ -13,6 +13,7 @@ import {
   SETUP_CHECK_SUBMITTER,
   STATUS_TEXT,
   asiName,
+  createdOn,
   formatTime,
   reviewCost,
   shortId,
@@ -66,6 +67,8 @@ async function ReviewDetail({ params }: { params: PageProps<"/app/reviews/[id]">
           <dd>{submitterName(review.submitter_id)}</dd>
           <dt className="text-zinc-600 dark:text-zinc-400">Submitted</dt>
           <dd>{formatTime(review.created_at)}</dd>
+          <dt className="text-zinc-600 dark:text-zinc-400">Created on</dt>
+          <dd>{createdOn(review.environment)}</dd>
         </dl>
         <p className="mt-4 text-lg">
           Status: <span className="font-medium">{STATUS_TEXT[review.status] ?? review.status}</span>

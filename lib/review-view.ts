@@ -173,10 +173,28 @@ export const OUTCOME_TEXT: Record<string, string> = {
   changes_requested: "Changes requested",
 };
 
+// What happened to the paused workflow run after a decision. The decision
+// stands in every case. "no_paused_run" is the wording used before the real
+// causes were recorded; two early decisions keep it.
 export const RESUME_TEXT: Record<string, string> = {
   resumed: "The paused review workflow was resumed.",
+  other_environment: "Not resumed: this review was created on another copy of the app, where its workflow run lives. The decision still stands.",
+  run_finished: "Not resumed: the workflow run had already finished. The decision still stands.",
+  run_not_found: "Not resumed: the workflow run was not found here. The decision still stands.",
+  hook_not_found: "Not resumed: the workflow run is still active but was not waiting for this decision. The decision still stands.",
+  resume_error: "Not resumed: resuming the workflow run failed. The decision still stands.",
   no_paused_run: "No paused workflow was waiting, so none was resumed. The decision still stands.",
 };
+
+const CREATED_ON: Record<string, string> = {
+  local: "a developer's computer (test)",
+  preview: "a Vercel preview",
+  production: "the live site",
+};
+
+export function createdOn(environment: string) {
+  return CREATED_ON[environment] ?? environment;
+}
 
 export const VERDICT_TEXT: Record<string, string> = {
   agree: "Agrees",

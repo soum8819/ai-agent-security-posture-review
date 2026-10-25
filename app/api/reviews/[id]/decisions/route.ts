@@ -1,12 +1,14 @@
 // Record a decision on a review. The decision is checked by lib/authz.ts,
 // written to the database first (with its audit event, in one statement), and
-// only then is the paused workflow run resumed. If no run is waiting (it
-// expired, or never existed), the decision still stands and the audit log
-// records which case happened.
+// only then is the paused workflow run resumed. If it cannot be resumed, the
+// decision still stands, and the audit log and the page record the real cause
+// (lib/resume-cause.ts).
+import { getRun } from "workflow/api";
 import { HookNotFoundError } from "workflow/errors";
 import { currentUser } from "@/lib/auth";
 import { checkDecision, OUTCOMES, STAGE_NAMES, STAGES, type DecisionInput } from "@/lib/authz";
-import { describeDbError } from "@/lib/db";
+import { appEnvironment, describeDbError } from "@/lib/db";
+import { classifyResume, type RunState } from "@/lib/resume-cause";
 import { canViewReview } from "@/lib/review-access";
 import { getDecisions, getReview, recordDecision, recordWorkflowResume } from "@/lib/store";
 import { appsecHook, appsecToken, modelRiskHook, modelRiskToken } from "@/workflows/review/hooks";
@@ -92,22 +94,40 @@ export async function POST(request: Request, ctx: RouteContext<"/api/reviews/[id
       : fail(409, "The review changed while you were deciding. Reload the page and try again.");
   }
 
-  // The decision stands from here on. Now try to wake the paused run.
-  let workflow: "resumed" | "no_paused_run" = "resumed";
-  try {
-    if (input.stage === "appsec") await appsecHook.resume(appsecToken(id), { decisionId });
-    else await modelRiskHook.resume(modelRiskToken(id), { decisionId });
-    await recordWorkflowResume(id, decisionId, "resumed");
-  } catch (error) {
-    workflow = "no_paused_run";
-    const detail = HookNotFoundError.is(error)
-      ? "No paused workflow run was waiting (expired or never started); the decision stands."
-      : `The workflow could not be resumed (${error instanceof Error ? error.name : "error"}); the decision stands.`;
-    if (!HookNotFoundError.is(error)) console.error("[decisions] resume failed:", error instanceof Error ? error.message : String(error));
-    await recordWorkflowResume(id, decisionId, "no_paused_run", detail).catch((e) =>
-      console.error("[decisions] could not record the resume result:", describeDbError(e)),
-    );
+  // The decision stands from here on. Now try to wake the paused run, but only
+  // where it lives: a run belongs to the copy of the app that created it.
+  const here = appEnvironment();
+  let resumed = false;
+  let hookNotFound = false;
+  let otherError: string | null = null;
+  let run: RunState = null;
+  if (found.review.environment === here) {
+    try {
+      if (input.stage === "appsec") await appsecHook.resume(appsecToken(id), { decisionId });
+      else await modelRiskHook.resume(modelRiskToken(id), { decisionId });
+      resumed = true;
+    } catch (error) {
+      if (HookNotFoundError.is(error)) hookNotFound = true;
+      else {
+        otherError = error instanceof Error ? error.name : "unknown error";
+        console.error("[decisions] resume failed:", error instanceof Error ? error.message : String(error));
+      }
+    }
+    // No waiting hook: ask the run itself whether it finished or is gone.
+    if (hookNotFound && found.review.workflow_run_id) {
+      try {
+        const r = getRun(found.review.workflow_run_id);
+        run = (await r.exists) ? { exists: true, status: await r.status } : { exists: false };
+      } catch (error) {
+        console.error("[decisions] could not read the run:", error instanceof Error ? error.name : "error");
+      }
+    }
   }
+  const outcome = classifyResume({ reviewEnvironment: found.review.environment, appEnvironment: here, resumed, hookNotFound, otherError, run });
+  await recordWorkflowResume(id, decisionId, outcome.cause, outcome.detail).catch((e) =>
+    console.error("[decisions] could not record the resume result:", describeDbError(e)),
+  );
+  const workflow = outcome.cause;
 
   return Response.json({ decisionId, status: check.nextStatus, workflow }, { status: 201 });
 }

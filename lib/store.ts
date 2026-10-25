@@ -104,6 +104,7 @@ export async function getReview(id: string): Promise<{ review: ReviewRow; result
 
 export type ReviewListRow = {
   id: string;
+  environment: string;
   profile_id: string;
   profile_name: string;
   submitter_id: string;
@@ -118,9 +119,9 @@ export async function listReviews(scope: ReviewScope, limit = 200): Promise<Revi
   const sql = getSql();
   const rows =
     scope.kind === "all"
-      ? await sql`SELECT id, profile_id, profile->>'name' AS profile_name, submitter_id, created_at, status, final_tier, contested_count
+      ? await sql`SELECT id, environment, profile_id, profile->>'name' AS profile_name, submitter_id, created_at, status, final_tier, contested_count
                   FROM reviews ORDER BY created_at DESC LIMIT ${limit}`
-      : await sql`SELECT id, profile_id, profile->>'name' AS profile_name, submitter_id, created_at, status, final_tier, contested_count
+      : await sql`SELECT id, environment, profile_id, profile->>'name' AS profile_name, submitter_id, created_at, status, final_tier, contested_count
                   FROM reviews WHERE submitter_id = ${scope.submitterId} ORDER BY created_at DESC LIMIT ${limit}`;
   return rows as ReviewListRow[];
 }
@@ -208,16 +209,13 @@ export async function recordDecision(input: {
   return row?.decision_id ?? null;
 }
 
-// After a decision: whether the paused workflow run was resumed, or could not
-// be (expired, or never started). The decision stands either way.
-export async function recordWorkflowResume(reviewId: string, decisionId: string, outcome: "resumed" | "no_paused_run", detail?: string) {
+// After a decision: whether the paused workflow run was resumed, and if not,
+// the real cause (see lib/resume-cause.ts). The decision stands either way.
+export async function recordWorkflowResume(reviewId: string, decisionId: string, cause: string, detail: string) {
   const sql = getSql();
   await sql.transaction([
-    sql`UPDATE decisions SET workflow_resume = ${outcome} WHERE id = ${decisionId}`,
-    audit(reviewId, null, outcome === "resumed" ? "workflow_resumed" : "workflow_not_resumed", {
-      decisionId,
-      ...(detail ? { detail } : {}),
-    }),
+    sql`UPDATE decisions SET workflow_resume = ${cause} WHERE id = ${decisionId}`,
+    audit(reviewId, null, cause === "resumed" ? "workflow_resumed" : "workflow_not_resumed", { decisionId, cause, detail }),
   ]);
 }
 

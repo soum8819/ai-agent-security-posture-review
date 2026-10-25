@@ -8,6 +8,7 @@ import {
   SETUP_CHECK_LABEL,
   SETUP_CHECK_SUBMITTER,
   STATUS_TEXT,
+  createdOn,
   formatTime,
   shortId,
   submitterName,
@@ -58,7 +59,7 @@ async function Queue() {
               </td>
               <td className="py-2 pr-3">
                 {formatTime(r.created_at)}
-                <span className="block text-xs text-zinc-600 dark:text-zinc-400">by {submitterName(r.submitter_id)}</span>
+                <span className="block text-xs text-zinc-600 dark:text-zinc-400">by {submitterName(r.submitter_id)}, on {createdOn(r.environment)}</span>
               </td>
               <td className="py-2 pr-3">{STATUS_TEXT[r.status] ?? r.status}</td>
               <td className="py-2 pr-3">{r.final_tier ?? "not yet"}</td>
@@ -83,6 +84,8 @@ async function Queue() {
               <dd className="font-mono">{shortId(r.id)}</dd>
               <dt className="text-zinc-600 dark:text-zinc-400">Submitted</dt>
               <dd>{formatTime(r.created_at)}</dd>
+              <dt className="text-zinc-600 dark:text-zinc-400">Created on</dt>
+              <dd>{createdOn(r.environment)}</dd>
               <dt className="text-zinc-600 dark:text-zinc-400">Status</dt>
               <dd>{STATUS_TEXT[r.status] ?? r.status}</dd>
               <dt className="text-zinc-600 dark:text-zinc-400">Final tier</dt>
