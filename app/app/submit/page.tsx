@@ -1,4 +1,12 @@
+import { Suspense } from "react";
+import { requireUser } from "@/lib/auth";
 import { SubmitForm } from "./submit-form";
+
+// Only Submitters may open this page; the check runs on the server.
+async function Guarded() {
+  await requireUser("submit_profile");
+  return <SubmitForm />;
+}
 
 export default function SubmitPage() {
   return (
@@ -10,7 +18,9 @@ export default function SubmitPage() {
         Fill in the form and press Validate to check it against the profile
         schema. Nothing is saved or sent anywhere yet.
       </p>
-      <SubmitForm />
+      <Suspense fallback={<p className="mt-8 text-zinc-500">Loading...</p>}>
+        <Guarded />
+      </Suspense>
     </main>
   );
 }

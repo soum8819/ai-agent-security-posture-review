@@ -76,6 +76,18 @@ reviewer app lives in the `app/app/` folder.
 - Step 9: the final tier is the higher of the rule tier and the models'
   proposed tier (models can raise it, never lower it). Needed for profile-10,
   where the rules give tier 2 but the answer key says 3.
+- Step 10 decisions (merged with step 11a): review state lives in Neon
+  Postgres (Vercel Marketplace, free plan), which will also hold the
+  append-only audit events in step 11b. Sign-in is a stand-in: four fictional
+  users, a shared demo passcode (DEMO_PASSCODE) and a signed session cookie
+  (SESSION_SECRET); production would use OIDC or SAML. At most 10 submissions
+  per user per day (built in slice B, with the database). "Request changes"
+  ends the review; the submitter resubmits as a new review linked to the old
+  one. Built in slices: A sign-in and roles, B submit to stored review,
+  C screens, D approvals.
+- Assumption to confirm with the customer (decided in step 10): the card says
+  Tier 1 needs "one approver" but does not name the role. The project owner's
+  reading is that the Tier 1 approver is AppSec, the same as Tier 2.
 - Step 13: test a blind-first checker against the current one on the same 12
   profiles and report both. Show all three tiers on the approver screen in
   step 10.
@@ -115,4 +127,4 @@ Updated by the project owner after each step.
 - [x] Step 7: done
 - [ ] Step 8: built, my read-through of the results pending
 - [ ] Step 9: built; finish line partly met: 1 of 12 contested, reported as is
-- [ ] Step 10: next (The human approval gate and reviewer screens)
+- [ ] Step 10: in progress, merged with step 11a (slice A: sign-in and roles built)

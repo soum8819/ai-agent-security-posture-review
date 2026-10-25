@@ -28,9 +28,17 @@ of step 6, to be updated and reused in step 15.
 - `app/favicon.ico`: the small icon shown on the browser tab.
 - `app/page.tsx`: the overview page at `/`, with the title and one sentence about Harborline.
 - `app/app/page.tsx`: the reviewer app's placeholder page at `/app`.
-- `app/app/submit/page.tsx`: the page at `/app/submit`, giving the heading and holding the form.
+- `app/app/page.tsx`: the reviewer app home at `/app`, showing who is signed in and what their role may do.
+- `app/app/sign-in/page.tsx`: the sign-in page at `/app/sign-in`, labelled as a stand-in for Harborline's corporate sign-in, with four fictional users and a demo passcode.
+- `app/app/sign-in/actions.ts`: the server code behind signing in and out, which checks the passcode and sets or clears the signed session cookie.
+- `app/app/not-allowed/page.tsx`: shown when a signed-in user's role may not open a page.
+- `app/app/submit/page.tsx`: the page at `/app/submit`, giving the heading and holding the form; only Submitters may open it.
 - `app/app/submit/submit-form.tsx`: the form itself, which checks a profile against the schema in the browser and shows what to fix, without saving or sending anything.
 - `public/*.svg`: the default Next.js images, not used by any page yet.
+
+## Protection
+
+- `proxy.ts`: runs on the server before every `/app` page and `/api` route and sends anyone without a valid session to sign-in; the public overview at `/` and Workflow's internal paths are left alone.
 
 ## Shared building blocks
 
@@ -46,6 +54,10 @@ of step 6, to be updated and reused in step 15.
 - `lib/crosscheck.ts`: sends the profile and the first model's findings to the checker model, gets a verdict for each finding plus anything missed, drops missed findings with no real quote, and marks contested findings.
 - `lib/review.ts`: one full review: reviewer, then checker, then contested marking and the final tier, saving both models' names, tokens, time and cost.
 - `lib/rules.ts`: eight fixed rules that set a minimum severity from what a profile lists, the tier assignment, the check that a model can never lower a rule's severity, and the final tier (the highest of the rule tier and both models' tiers).
+- `lib/users.ts`: the four fictional users and their roles, a stand-in for the corporate directory.
+- `lib/permissions.ts`: what each role may do, checked on the server by every page and route.
+- `lib/session.ts`: creates and checks the signed session cookie, and compares the demo passcode safely.
+- `lib/auth.ts`: the sign-in check used inside pages and routes, sending visitors to sign-in or to the not-allowed page.
 - `lib/local-only.ts`: the lock that makes test routes answer "not found" anywhere except on this computer under `npm run dev`.
 
 ## Temporary spikes (to be replaced)
@@ -68,6 +80,7 @@ of step 6, to be updated and reused in step 15.
 - `tests/rules.test.ts`: one test for each rule, for tier assignment and for the severity floor, using made-up profiles; run with `npm test`.
 - `tests/analyze.test.ts`: proves the evidence check drops a made-up finding and the rule floor raises a severity that is too low; calls no model.
 - `scripts/run-reviews.ts`: a developer tool that runs full reviews (both models) over the evaluation profiles and saves raw results and actual cost to `eval/runs`; run with `npm run reviews -- --set tuning` or `--set all`, or `--checker-only --from <run folder>` to test the checker on saved reviewer results.
+- `tests/session.test.ts`: proves a session cookie cannot be altered, forged with another secret or used after it expires, that the passcode must match exactly, and what each role may do.
 - `tests/crosscheck.test.ts`: proves contested marking, kept floors, the evidence check on missed findings, the final tier, and that the checker never sees a rule floor; calls no model.
 - `scripts/compare-rules.ts`: a developer tool, not part of the app, that compares the rules' tier with the answer key and lists the held-out profiles separately; run with `npm run compare-rules`.
 

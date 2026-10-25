@@ -6,6 +6,19 @@ Live site: https://ai-agent-security-posture-review.vercel.app (reviewer app: ht
 
 Diagram key: green is built, amber dashed is planned, and purple is the customer's own AWS.
 
+## Reviewer app sign-in
+
+The reviewer app under `/app` requires sign-in. The overview at `/` stays public.
+
+**Stand-in for Harborline's corporate sign-in.** The app has four fictional
+users, one per role (Submitter, AppSec Reviewer, Model Risk Reviewer, Auditor
+read-only), plus a shared demo passcode. A signed session cookie is checked on
+the server for every `/app` page and `/api` route. Production would use
+Harborline's corporate sign-in through OIDC or SAML. Vercel's team SSO
+protects the Vercel dashboard, not this app's users.
+
+All data is synthetic.
+
 ## Architecture
 
 System view.
