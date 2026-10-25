@@ -154,6 +154,22 @@ textarea {
 }
 
 /* Minimal motion, and none at all when the system asks for less. */
+/* Overview site: the highlight that moves through the five review steps.
+   Used only under motion-safe, so reduced motion shows a static diagram. */
+@keyframes flow-step {
+  0%,
+  24%,
+  100% {
+    border-color: var(--line);
+    background-color: var(--page);
+  }
+  6%,
+  16% {
+    border-color: var(--accent);
+    background-color: var(--subtle);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

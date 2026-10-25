@@ -233,3 +233,26 @@ crops keep the top of each page, where the approver's summary is.
 **Things left for the project owner's words** carry the marker that
 `scripts/check-todo-sam.ts` searches for. `npm run check:final` fails while
 any remain, and must pass before the project is submitted.
+
+## 2026-10-25: overview site build choices and performance check
+
+**Static page.** `/` reads no cookies and no database, so it is prerendered
+(the build lists it as static).
+
+**Images.** The four screenshots are imported statically, so next/image knows
+each one's width and height and reserves the space before it loads; each
+has a `sizes` value matching its layout width, a blurred placeholder, and is
+served as WebP. Only the hero image loads eagerly with high priority (the
+Next.js 16 docs prefer this over `preload` or the deprecated `priority`);
+the rest load lazily. The phone screenshot beside the hero is hidden on
+phones and is not downloaded there.
+
+**Animation.** One highlight moves through the five review steps. It runs
+only under `motion-safe`, so with reduced motion the diagram is static.
+
+**Measured on a local production build** (Chromium through Playwright, run
+with npx, so no package was added): layout shift 0 at 1440 and 390 pixels
+wide; all 4 images with width and height; image transfer 68 KB at desktop
+and 59 KB on a phone at 2x density, down from 78 to 175 KB per source PNG;
+step animation "flow-step" normally and "none" with reduced motion. Load
+times on a local machine are not meaningful and are not reported.
