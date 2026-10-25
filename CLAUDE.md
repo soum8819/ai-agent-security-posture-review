@@ -158,4 +158,5 @@ Updated by the project owner after each step.
 - [x] Step 7: done
 - [ ] Step 8: built, my read-through of the results pending
 - [ ] Step 9: built; finish line partly met: 1 of 12 contested, reported as is
-- [ ] Step 10: in progress, merged with step 11a (slices A to D built; the project owner's check on the live site is pending, including deciding review 080fc26e)
+- [x] Step 10: done, with step 11a (live check passed: review 080fc26e resumed across deployments and completed)
+- [ ] Step 11: in progress (11b audit page and 11d data handling next; 11c skipped, registry described in the README)
