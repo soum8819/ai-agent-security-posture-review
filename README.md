@@ -2,8 +2,8 @@
 
 A security review workflow for internal AI agents: fixed rules and two AI
 models review each agent's profile against the OWASP Top 10 for Agentic
-Applications, then a named person must record a decision before the agent can
-launch. It is built for **Harborline Financial Group, a fictional customer**;
+Applications, then a person must decide before the agent can launch, and
+every decision is recorded with who made it. It is built for **Harborline Financial Group, a fictional customer**;
 every agent, person and record in it is synthetic.
 
 ![The review page, as a Model Risk Reviewer sees a Tier 3 review (synthetic data)](docs/design/after/review-tier3-model-risk-desktop.png)
@@ -209,6 +209,10 @@ What production at Harborline would add, none of it built here:
   against the agent's real configuration rather than what the team wrote.
 - Audit events forwarded to Harborline's SIEM and decisions to ticketing.
 - Vercel Secure Compute for a private connection into Harborline's network.
+- Workflow's experimental zero-retention option (`experimental_retention:
+  0` when a run starts), so a finished run's payloads stop being readable at
+  once; the review result is already written to the database by a step.
+  Described, not enabled.
 - Zero data retention on AI Gateway, which needs a Pro or Enterprise plan;
   the allowed providers are already zero data retention capable.
 - An AI Gateway budget on the key, recommended and not confirmed to be set.
@@ -248,7 +252,7 @@ from the platform (step 14).
 > - SIEM forwarding of the audit log
 > - Vercel Secure Compute into Harborline's private network
 > - Zero data retention on AI Gateway (needs Pro or Enterprise)
-> - Edge Gateway: TODO-SAM
+> - Edge Gateway is a separate project of mine, still a design: enforcing policy on live agent traffic at the edge. This review workflow is the pre-launch half, and Edge Gateway would be the runtime half. It is not part of this repo and not built here.
 
 ## Known limitations
 
@@ -257,9 +261,10 @@ from the platform (step 14).
   them (see the blind-first experiment above).
 - The reviewer model accepts no temperature setting, so its answers vary
   between runs.
-- The Hobby plan keeps Workflow run data for 1 day (project notes, step 10).
-  A decision on an older review still stands, because the database is the
-  record, but its paused run cannot be resumed.
+- On Hobby, Workflow keeps a finished run's payloads for 1 day after the run
+  finishes (a run still waiting on a hook keeps all its data). The review
+  and decision records live in our own database, so they do not depend on
+  it.
 - Locally, `npm run build` deletes paused workflow runs kept in
   `.next/workflow-data`.
 - Rule R2 fires for any run-code tool, because the profile has no sandbox

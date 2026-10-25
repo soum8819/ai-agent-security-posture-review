@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS decisions (
   note text NOT NULL CHECK (length(trim(note)) > 0),
   conditions text,
   contested_resolutions jsonb NOT NULL DEFAULT '[]'::jsonb,
-  -- Whether the paused workflow run was resumed, or had already expired.
+  -- Whether the paused workflow run was resumed, or why it could not be.
   workflow_resume text,
   environment text NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now(),

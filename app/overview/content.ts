@@ -45,7 +45,7 @@ export const TIERS = [
 export const DECISIONS = [
   { title: "A model can raise the tier, never lower it", fact: "Rules set a floor for severity and tier. The final tier is the highest of the rule, reviewer and checker tiers.", why: "TODO-SAM" },
   { title: "Evidence quotes stay word for word", fact: "A finding whose quote is not found in the profile by exact match is dropped, so every quote on screen can be checked against the profile.", why: "TODO-SAM" },
-  { title: "The database records the decision", fact: "A decision is written to the database first, then the paused workflow is resumed. If the run is gone, the decision still stands.", why: "TODO-SAM" },
+  { title: "The database records the decision", fact: "A decision is written to our own database first, then the paused workflow is resumed. If the run cannot be resumed, the decision still stands.", why: "TODO-SAM" },
   { title: "Providers restricted, no prompt training", fact: "Each call names the providers allowed to serve it and refuses any that may train on prompts. Zero data retention is not set: it needs a Pro or Enterprise plan.", why: "TODO-SAM" },
   { title: "Measure at a freeze, never tune on held-out profiles", fact: "Models, prompts and rules were frozen at a git tag before any evaluation run. Four of the 12 profiles were held out and never tuned on.", why: "TODO-SAM" },
 ];
@@ -78,9 +78,20 @@ export const HONEST_FINDINGS = [
   { title: "Profile 03 still fails", body: "Out of range in 5 of 6 runs: the reviewer model often calls this read-only research bot Tier 3. Left for the next round." },
   { title: "Profile 04 is Harborline's call", body: "The rules give Tier 4, because it changes live claim records with no person confirming. The answer key says Tier 3. It is a policy question for Harborline, and the rule was not changed." },
   { title: "ASI01 or ASI06", body: "In 7 of the 8 reviews where the models missed an expected Agent Goal Hijack (ASI01), they filed the same risk as Memory and Context Poisoning (ASI06)." },
-  { title: "The checker is not independent", body: "It agreed with 45 of 45 reviewer findings. Without the reviewer's list, the same model overlapped with the reviewer on 35% of categories, against 75% with it. A blind checker was not better: tiers did not change." },
+  { title: "The checker is not independent", body: "It agreed with 45 of 45 reviewer findings. Without the reviewer's list it raised a clearly different set. A blind checker was not better: tiers did not change. See the comparison below." },
   { title: "A small set", body: "12 profiles, one answer key, synthetic data. These are indications, not proof, and answers vary between runs." },
 ];
+
+// eval/BLIND_CHECKER.md, main run: current checker (sees the reviewer's
+// findings) against blind-first (sees the profile and rules only).
+export const CHECKER = {
+  rows: [
+    { measure: "Overlap with the reviewer's categories", tuning: ["75%", "35%"], heldOut: ["79%", "44%"] },
+    { measure: "Reviewer findings not supported", tuning: ["0 of 30", "17 of 30"], heldOut: ["1 of 16", "8 of 16"] },
+    { measure: "Final tier in the key's range", tuning: ["7 of 8", "7 of 8"], heldOut: ["3 of 4", "3 of 4"] },
+  ],
+  note: "The blind checker's extra disagreements were mostly risks it did not list that run, not reasoned objections; it also differed from its own earlier runs. No production change.",
+};
 
 // eval/security-tests.md
 export const SECURITY = [
@@ -115,7 +126,7 @@ export const BUILT_ON_VERCEL = [
 
 export const LIMITS = [
   "Sign-in is a stand-in: anyone with the demo passcode can choose any role.",
-  "On the Hobby plan, Workflow keeps run data for 1 day. An older decision still stands, because the database is the record, but its run cannot be resumed.",
+  "On Hobby, Workflow keeps a finished run's payloads for 1 day after it finishes. Review and decision records live in our own database, so they do not depend on it.",
   "Zero data retention is not switched on (it needs Pro or Enterprise).",
   "The evidence check proves a quote is in the profile, not that it supports the finding. The approver judges that.",
 ];
@@ -125,4 +136,5 @@ export const NEXT = [
   "Ask Harborline to settle profile 04's tier.",
   "Test a checker that runs several times and keeps only risks it raises consistently.",
   "Real corporate sign-in, the registry, SIEM forwarding and Secure Compute.",
+  "Workflow's experimental zero-retention option for finished runs: described, not enabled.",
 ];

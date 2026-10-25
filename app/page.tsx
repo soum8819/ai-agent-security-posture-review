@@ -14,6 +14,7 @@ import {
   AFTER,
   BLIND_URL,
   BUILT_ON_VERCEL,
+  CHECKER,
   DECISIONS,
   DECISIONS_URL,
   FEEDBACK_URL,
@@ -104,7 +105,7 @@ export default function Overview() {
           <div className={shell}>
             <p className="text-sm font-medium text-muted">For Harborline Financial Group, a fictional customer. All data is synthetic.</p>
             <h1 id="hero-title" className="mt-3 max-w-3xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl sm:leading-[1.1]">
-              A security review for every AI agent, with a named person accountable for each decision.
+              A security review for every AI agent, and every decision is recorded with who made it.
             </h1>
             <p className="mt-5 max-w-2xl text-lg text-pretty text-muted">
               Fixed rules and two AI models review each agent against the OWASP Top 10 for Agentic Applications. They show their
@@ -237,17 +238,61 @@ export default function Overview() {
             </table>
           </div>
 
+          <h3 className="mt-10 font-semibold">What did not go well</h3>
+          <ul className="mt-3 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {HONEST_FINDINGS.map((h) => (
+              <Card as="li" key={h.title} className="p-4">
+                <h4 className="text-sm font-semibold">{h.title}</h4>
+                <p className="mt-1 text-sm text-muted text-pretty">{h.body}</p>
+              </Card>
+            ))}
+          </ul>
+
+          <h3 className="mt-10 font-semibold">Is the checker an independent second opinion?</h3>
+          <p className="mt-1 max-w-3xl text-sm text-muted text-pretty">
+            The same checker model, run two ways on the same reviews: as built (it sees the reviewer&apos;s findings first) and blind-first
+            (it sees only the profile and the rules output).
+          </p>
+          <div className="mt-3 overflow-x-auto rounded-lg border border-line">
+            <table className="w-full min-w-[640px] border-collapse text-left text-sm">
+              <thead className="bg-subtle text-xs text-muted">
+                <tr className="border-b border-line">
+                  <th scope="col" rowSpan={2} className="px-4 py-2.5 align-bottom font-medium">Measure</th>
+                  <th scope="colgroup" colSpan={2} className="px-4 pt-2.5 font-medium">Tuning set (8)</th>
+                  <th scope="colgroup" colSpan={2} className="px-4 pt-2.5 font-medium">Held-out set (4)</th>
+                </tr>
+                <tr className="border-b border-line">
+                  <th scope="col" className="px-4 pb-2.5 font-medium">As built</th>
+                  <th scope="col" className="px-4 pb-2.5 font-medium">Blind-first</th>
+                  <th scope="col" className="px-4 pb-2.5 font-medium">As built</th>
+                  <th scope="col" className="px-4 pb-2.5 font-medium">Blind-first</th>
+                </tr>
+              </thead>
+              <tbody>
+                {CHECKER.rows.map((r) => (
+                  <tr key={r.measure} className="border-b border-line last:border-0">
+                    <th scope="row" className="px-4 py-2.5 font-normal">{r.measure}</th>
+                    {[...r.tuning, ...r.heldOut].map((v, i) => (
+                      <td key={i} className="px-4 py-2.5 tabular">{v}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-2 max-w-3xl text-sm text-muted text-pretty">{CHECKER.note}</p>
+
           <h3 className="mt-10 font-semibold">After two checker fixes (labelled separately)</h3>
           <div className="mt-3 grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
             <dl className="grid grid-cols-2 gap-3">
               <Card className="p-4">
                 <dt className="text-xs font-medium text-muted">Tuning set, final tier in range</dt>
-                <dd className="mt-2 text-2xl font-semibold tabular">{AFTER.tuning}</dd>
+                <dd className="mt-1 text-lg font-semibold tabular">{AFTER.tuning}</dd>
                 <dd className="mt-1 text-xs text-muted">{AFTER.tuningNote}</dd>
               </Card>
               <Card className="p-4">
                 <dt className="text-xs font-medium text-muted">Held-out set, final tier in range</dt>
-                <dd className="mt-2 text-2xl font-semibold tabular">{AFTER.heldOut}</dd>
+                <dd className="mt-1 text-lg font-semibold tabular">{AFTER.heldOut}</dd>
                 <dd className="mt-1 text-xs text-muted">{AFTER.heldOutNote}</dd>
               </Card>
             </dl>
@@ -258,16 +303,6 @@ export default function Overview() {
               <li className="text-muted">Each fix is one sentence in the checker&apos;s instructions, measured on 3 runs before and 3 after.</li>
             </ul>
           </div>
-
-          <h3 className="mt-10 font-semibold">What did not go well</h3>
-          <ul className="mt-3 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {HONEST_FINDINGS.map((h) => (
-              <Card as="li" key={h.title} className="p-4">
-                <h4 className="text-sm font-semibold">{h.title}</h4>
-                <p className="mt-1 text-sm text-muted text-pretty">{h.body}</p>
-              </Card>
-            ))}
-          </ul>
 
           <h3 className="mt-10 font-semibold">Security tests</h3>
           <ul className="mt-3 max-w-3xl list-disc space-y-1.5 pl-5 text-sm text-pretty marker:text-muted">

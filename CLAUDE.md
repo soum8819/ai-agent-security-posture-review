@@ -95,10 +95,16 @@ reviewer app lives in the `app/app/` folder.
   database, not from the paused workflow run. The approval route checks the
   user, role, tier and stage against the review's database row, writes the
   decision there first (one per review and stage), then tries to resume the
-  workflow. If the run has expired (the Hobby plan keeps run data for 1 day),
-  the decision still stands and the review's status is set from the database.
-  The decision records whether the run was resumed or had expired, and both
-  cases go in the audit log.
+  workflow. The review and decision records live in our own database because
+  Workflow keeps a finished run's payloads only for its retention period
+  (Hobby 1 day after the run finishes; a run that is still waiting on a hook
+  keeps all its data with no time limit). If the run cannot be resumed (it
+  was started by another environment, has already finished, or a local build
+  deleted it), the decision still stands and the review's status is set from
+  the database. The decision records whether the run was resumed or why not,
+  and both cases go in the audit log. (Corrected 2026-10-25: an earlier note
+  here said a paused run expires after 1 day on Hobby, which is wrong; see
+  vercel.com/docs/workflows/retention.)
 - Slice D decisions (decided in step 10): four choices, Approve, Approve with
   conditions (a required Conditions box, final status approved with
   conditions), Reject (final status rejected) and Request changes (ends the

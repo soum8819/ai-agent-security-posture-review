@@ -221,9 +221,16 @@ days per manual review) are shown only as the scenario's brief, labelled as
 fictional, and no claim is made that the tool shortens review time, because
 only machine time was measured.
 
-**The 1-day run retention** comes from the project notes (CLAUDE.md, slice D
-design), not from the four result files; the bundled Workflow docs do not
-state a Hobby figure. It is shown as a known limit.
+**Workflow run retention (corrected the same day).** An earlier version of
+the site and README said a paused run expires after 1 day on Hobby. That is
+wrong. Vercel's docs (vercel.com/docs/workflows/retention) say a run keeps
+all its data with no time limit while it is running, sleeping or waiting on a
+hook, and the retention period (Hobby 1 day, Pro 7, Enterprise 30) starts
+only when the run finishes. The site and README now say that a finished
+run's payloads are kept 1 day on Hobby, and that the review and decision
+records live in our own database. Workflow's experimental zero-retention
+option (`experimental_retention: 0` when a run starts) is described in the
+enterprise path, not enabled.
 
 **Screenshots on the site** are cropped copies of the consistent screenshots
 in docs/design/after (Tier 3 review f4e813da, Tier 4 review 94a0d174, the
