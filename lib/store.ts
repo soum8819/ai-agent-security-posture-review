@@ -4,6 +4,7 @@
 import { appEnvironment, getSql } from "./db.ts";
 import { SUBMISSION_WINDOW_MS, type ReviewStatus } from "./limits.ts";
 import type { AgentProfile } from "./profile-schema.ts";
+import type { ReviewScope } from "./review-access.ts";
 import type { ReviewRecord } from "./review.ts";
 import type { Tier, TierSource } from "./rules.ts";
 
@@ -99,4 +100,27 @@ export async function getReview(id: string): Promise<{ review: ReviewRow; result
   if (!review) return null;
   const [res] = await sql`SELECT result FROM review_results WHERE review_id = ${id}`;
   return { review: review as ReviewRow, result: (res?.result as ReviewRecord) ?? null };
+}
+
+export type ReviewListRow = {
+  id: string;
+  profile_id: string;
+  profile_name: string;
+  submitter_id: string;
+  created_at: string;
+  status: ReviewStatus;
+  final_tier: Tier | null;
+  contested_count: number;
+};
+
+// The review queue, newest first, limited to what this scope may see.
+export async function listReviews(scope: ReviewScope, limit = 200): Promise<ReviewListRow[]> {
+  const sql = getSql();
+  const rows =
+    scope.kind === "all"
+      ? await sql`SELECT id, profile_id, profile->>'name' AS profile_name, submitter_id, created_at, status, final_tier, contested_count
+                  FROM reviews ORDER BY created_at DESC LIMIT ${limit}`
+      : await sql`SELECT id, profile_id, profile->>'name' AS profile_name, submitter_id, created_at, status, final_tier, contested_count
+                  FROM reviews WHERE submitter_id = ${scope.submitterId} ORDER BY created_at DESC LIMIT ${limit}`;
+  return rows as ReviewListRow[];
 }

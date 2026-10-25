@@ -1,0 +1,26 @@
+// Plain words for the profile's fixed choices, shared by the submit form and
+// the review screens so both say things the same way.
+export const VALUE_LABELS: Record<string, string> = {
+  public: "Public",
+  internal: "Internal",
+  confidential: "Confidential",
+  customer_financial: "Customer financial",
+  personal: "Personal",
+  read: "Read",
+  write: "Write",
+  run_code: "Run code",
+  send_messages: "Send messages",
+  move_money: "Move money",
+  email: "Email",
+  web: "Web",
+  uploaded_files: "Uploaded files",
+  chat: "Chat",
+  logs_or_alerts: "Logs or alerts",
+  own_scoped_token: "Its own scoped token",
+  shared_token: "A shared token",
+  none: "None",
+  session: "Session only",
+  persistent: "Persistent",
+  yes: "Yes",
+  no: "No",
+};

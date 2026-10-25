@@ -27,11 +27,12 @@ of step 6, to be updated and reused in step 15.
 - `app/globals.css`: site-wide styling, where Tailwind is switched on.
 - `app/favicon.ico`: the small icon shown on the browser tab.
 - `app/page.tsx`: the overview page at `/`, with the title and one sentence about Harborline.
-- `app/app/page.tsx`: the reviewer app's placeholder page at `/app`.
-- `app/app/page.tsx`: the reviewer app home at `/app`, showing who is signed in and what their role may do.
+- `app/app/page.tsx`: the reviewer app home at `/app`, showing who is signed in, what their role may do, and a Reviews link for every role.
 - `app/app/sign-in/page.tsx`: the sign-in page at `/app/sign-in`, labelled as a stand-in for Harborline's corporate sign-in, with four fictional users and a demo passcode.
 - `app/app/sign-in/actions.ts`: the server code behind signing in and out, which checks the passcode and sets or clears the signed session cookie.
-- `app/app/reviews/[id]/page.tsx`: a review's status page, showing its status, the rule, reviewer, checker and final tiers and the contested count; Submitters see only their own reviews, and anything else shows not found. Slice C turns it into the full review screen.
+- `app/app/reviews/page.tsx`: the review queue at `/app/reviews`, newest first, with status, final tier and contested count; a table on wide screens and one card per review on a phone. Submitters see only their own reviews.
+- `app/app/reviews/[id]/page.tsx`: one review, read-only: who submitted it and when, its status, the four tiers, the rules that fired, the findings (contested first), the findings the evidence check dropped, and the cost when it is stored. Submitters see only their own reviews, and anything else shows not found.
+- `app/app/reviews/[id]/sections.tsx`: the parts of the review page: the severity badge (always with its word, never colour alone), the tier panel, the rules that fired with the triggering field highlighted, the findings and the dropped findings.
 - `app/app/reviews/[id]/auto-refresh.tsx`: reloads the review page every few seconds while the models are still working.
 - `app/app/not-allowed/page.tsx`: shown when a signed-in user's role may not open a page.
 - `app/app/submit/page.tsx`: the page at `/app/submit`, giving the heading and holding the form; only Submitters may open it.
@@ -46,7 +47,7 @@ of step 6, to be updated and reused in step 15.
 
 - `db/schema.sql`: the four tables: reviews, the saved model results, decisions (one per review and stage) and the audit trail, which the database itself refuses to change or delete.
 - `lib/db.ts`: connects to the Neon Postgres database on first use, records which copy of the app wrote each row, and describes database errors without revealing connection details.
-- `lib/store.ts`: reads and writes reviews, results and audit events; every change to a review writes its audit event in the same transaction.
+- `lib/store.ts`: reads and writes reviews, results and audit events, and lists reviews for the queue; every change to a review writes its audit event in the same transaction.
 - `scripts/db-check.ts`: checks the database connection and prints only "connected"; run with `npm run db:check`.
 - `scripts/db-setup.ts`: creates the tables and lists them, and is safe to run again; run with `npm run db:setup`.
 
@@ -65,6 +66,9 @@ of step 6, to be updated and reused in step 15.
 - `lib/review.ts`: one full review: reviewer, then checker, then contested marking and the final tier, saving both models' names, tokens, time and cost.
 - `lib/rules.ts`: eight fixed rules that set a minimum severity from what a profile lists, the tier assignment, the check that a model can never lower a rule's severity, and the final tier (the highest of the rule tier and both models' tiers).
 - `lib/limits.ts`: the daily submission limit (10 per user in any 24 hours) and where a finished review goes next (tier 4 to the committee, other tiers to AppSec).
+- `lib/review-access.ts`: the one rule for who may see a review, used by both the queue and the review page.
+- `lib/review-view.ts`: turns stored review data into plain words: statuses, which tier set the final tier, model and provider names, what each rule requires, field values, finding order, badge colours and cost.
+- `lib/labels.ts`: plain words for the profile's fixed choices, shared by the submit form and the review screens.
 - `lib/users.ts`: the four fictional users and their roles, a stand-in for the corporate directory.
 - `lib/permissions.ts`: what each role may do, checked on the server by every page and route.
 - `lib/session.ts`: creates and checks the signed session cookie, and compares the demo passcode safely.
