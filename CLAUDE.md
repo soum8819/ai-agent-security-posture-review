@@ -81,10 +81,24 @@ reviewer app lives in the `app/app/` folder.
   append-only audit events in step 11b. Sign-in is a stand-in: four fictional
   users, a shared demo passcode (DEMO_PASSCODE) and a signed session cookie
   (SESSION_SECRET); production would use OIDC or SAML. At most 10 submissions
-  per user per day (built in slice B, with the database). "Request changes"
+  per user per day, counted over a rolling 24 hours (built in slice B). "Request changes"
   ends the review; the submitter resubmits as a new review linked to the old
   one. Built in slices: A sign-in and roles, B submit to stored review,
   C screens, D approvals.
+- Slice B changes (decided in step 10): the sign-in attempt limit moves to
+  step 12; slice B keeps only the daily submission limit. DATABASE_URL is a
+  Sensitive variable on Vercel and is never pulled or printed; the project
+  owner copies the pooled connection string from the Neon console into
+  .env.local. Local runs and Vercel share one database, so every row records
+  its environment.
+- Slice D design (decided in step 10): an approval is recorded from the
+  database, not from the paused workflow run. The approval route checks the
+  user, role, tier and stage against the review's database row, writes the
+  decision there first (one per review and stage), then tries to resume the
+  workflow. If the run has expired (the Hobby plan keeps run data for 1 day),
+  the decision still stands and the review's status is set from the database.
+  The decision records whether the run was resumed or had expired, and both
+  cases go in the audit log.
 - Assumption to confirm with the customer (decided in step 10): the card says
   Tier 1 needs "one approver" but does not name the role. The project owner's
   reading is that the Tier 1 approver is AppSec, the same as Tier 2.
@@ -127,4 +141,4 @@ Updated by the project owner after each step.
 - [x] Step 7: done
 - [ ] Step 8: built, my read-through of the results pending
 - [ ] Step 9: built; finish line partly met: 1 of 12 contested, reported as is
-- [ ] Step 10: in progress, merged with step 11a (slice A: sign-in and roles built)
+- [ ] Step 10: in progress, merged with step 11a (slice A done; slice B: database and store built, workflow next)

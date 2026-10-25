@@ -9,9 +9,12 @@
     "lint": "eslint",
     "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/*.test.ts",
     "compare-rules": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/compare-rules.ts",
-    "reviews": "node --env-file=.env.local --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/run-reviews.ts"
+    "reviews": "node --env-file=.env.local --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/run-reviews.ts",
+    "db:check": "node --env-file=.env.local --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/db-check.ts",
+    "db:setup": "node --env-file=.env.local --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/db-setup.ts"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.2.0",
     "ai": "^7.0.143",
     "next": "16.4.2",
     "react": "19.3.0",

@@ -40,6 +40,14 @@ of step 6, to be updated and reused in step 15.
 
 - `proxy.ts`: runs on the server before every `/app` page and `/api` route and sends anyone without a valid session to sign-in; the public overview at `/` and Workflow's internal paths are left alone.
 
+## Database
+
+- `db/schema.sql`: the four tables: reviews, the saved model results, decisions (one per review and stage) and the audit trail, which the database itself refuses to change or delete.
+- `lib/db.ts`: connects to the Neon Postgres database on first use, records which copy of the app wrote each row, and describes database errors without revealing connection details.
+- `lib/store.ts`: reads and writes reviews, results and audit events; every change to a review writes its audit event in the same transaction.
+- `scripts/db-check.ts`: checks the database connection and prints only "connected"; run with `npm run db:check`.
+- `scripts/db-setup.ts`: creates the tables and lists them, and is safe to run again; run with `npm run db:setup`.
+
 ## Shared building blocks
 
 - `lib/models.ts`: the one place the two model names live, so a model can be swapped by changing a single line.
@@ -54,6 +62,7 @@ of step 6, to be updated and reused in step 15.
 - `lib/crosscheck.ts`: sends the profile and the first model's findings to the checker model, gets a verdict for each finding plus anything missed, drops missed findings with no real quote, and marks contested findings.
 - `lib/review.ts`: one full review: reviewer, then checker, then contested marking and the final tier, saving both models' names, tokens, time and cost.
 - `lib/rules.ts`: eight fixed rules that set a minimum severity from what a profile lists, the tier assignment, the check that a model can never lower a rule's severity, and the final tier (the highest of the rule tier and both models' tiers).
+- `lib/limits.ts`: the daily submission limit (10 per user in any 24 hours) and where a finished review goes next (tier 4 to the committee, other tiers to AppSec).
 - `lib/users.ts`: the four fictional users and their roles, a stand-in for the corporate directory.
 - `lib/permissions.ts`: what each role may do, checked on the server by every page and route.
 - `lib/session.ts`: creates and checks the signed session cookie, and compares the demo passcode safely.
@@ -80,6 +89,7 @@ of step 6, to be updated and reused in step 15.
 - `tests/rules.test.ts`: one test for each rule, for tier assignment and for the severity floor, using made-up profiles; run with `npm test`.
 - `tests/analyze.test.ts`: proves the evidence check drops a made-up finding and the rule floor raises a severity that is too low; calls no model.
 - `scripts/run-reviews.ts`: a developer tool that runs full reviews (both models) over the evaluation profiles and saves raw results and actual cost to `eval/runs`; run with `npm run reviews -- --set tuning` or `--set all`, or `--checker-only --from <run folder>` to test the checker on saved reviewer results.
+- `tests/limits.test.ts`: proves the 11th submission in 24 hours is refused and that tier 4 is routed to the committee.
 - `tests/session.test.ts`: proves a session cookie cannot be altered, forged with another secret or used after it expires, that the passcode must match exactly, and what each role may do.
 - `tests/crosscheck.test.ts`: proves contested marking, kept floors, the evidence check on missed findings, the final tier, and that the checker never sees a rule floor; calls no model.
 - `scripts/compare-rules.ts`: a developer tool, not part of the app, that compares the rules' tier with the answer key and lists the held-out profiles separately; run with `npm run compare-rules`.
