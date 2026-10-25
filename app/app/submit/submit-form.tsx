@@ -131,8 +131,8 @@ function Radios({ name, options, value, onChange }: { name: string; options: rea
   );
 }
 
-export function SubmitForm() {
-  const [d, setD] = useState<Draft>(EMPTY);
+export function SubmitForm({ initialProfile, supersedes }: { initialProfile?: unknown; supersedes?: string } = {}) {
+  const [d, setD] = useState<Draft>(() => (initialProfile ? toDraft(initialProfile) : EMPTY));
   const [result, setResult] = useState<Result>(null);
   const [sent, setSent] = useState<Sent>(null);
 
@@ -169,7 +169,7 @@ export function SubmitForm() {
       const res = await fetch("/api/reviews", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ profile: parsed.data }),
+        body: JSON.stringify({ profile: parsed.data, ...(supersedes ? { supersedes } : {}) }),
       });
       const body = await res.json().catch(() => ({}));
       setSent(

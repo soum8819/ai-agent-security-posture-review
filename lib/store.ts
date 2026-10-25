@@ -53,7 +53,7 @@ export async function createReview(input: { id: string; submitter: Actor & {}; p
     sql`INSERT INTO reviews (id, submitter_id, profile_id, profile, status, supersedes, environment)
         VALUES (${input.id}, ${input.submitter.id}, ${input.profile.id}, ${JSON.stringify(input.profile)}::jsonb,
                 'queued', ${input.supersedes ?? null}, ${appEnvironment()})`,
-    audit(input.id, input.submitter, "review_submitted", { profileId: input.profile.id }),
+    audit(input.id, input.submitter, "review_submitted", { profileId: input.profile.id, ...(input.supersedes ? { resubmissionOf: input.supersedes } : {}) }),
   ]);
 }
 

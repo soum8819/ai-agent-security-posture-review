@@ -7,7 +7,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { requireUser } from "@/lib/auth";
 import { STAGE_NAMES, stageYouMayDecide } from "@/lib/authz";
-import { canViewReview } from "@/lib/review-access";
+import { canResubmit, canViewReview } from "@/lib/review-access";
 import {
   SETUP_CHECK_LABEL,
   SETUP_CHECK_SUBMITTER,
@@ -15,12 +15,13 @@ import {
   asiName,
   formatTime,
   reviewCost,
+  shortId,
   submitterName,
 } from "@/lib/review-view";
-import { getDecisions, getReview } from "@/lib/store";
+import { getDecisions, getResubmission, getReview } from "@/lib/store";
 import { AutoRefresh } from "./auto-refresh";
 import { DecisionPanel } from "./decision-panel";
-import { DecisionHistory, DroppedFindings, Findings, RuleHits, TierPanel, focusRing } from "./sections";
+import { CommitteePanel, DecisionHistory, DroppedFindings, Findings, RuleHits, TierPanel, focusRing } from "./sections";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
@@ -37,6 +38,7 @@ async function ReviewDetail({ params }: { params: PageProps<"/app/reviews/[id]">
   const cost = result ? reviewCost(result.reviewer, result.checker) : null;
 
   const decisions = await getDecisions(review.id);
+  const resubmission = await getResubmission(review.id);
   const contested = (result?.findings ?? [])
     .filter((f) => f.contested)
     .map((f) => ({ id: f.id, label: `${f.category} ${asiName(f.category)}` }));
@@ -68,6 +70,32 @@ async function ReviewDetail({ params }: { params: PageProps<"/app/reviews/[id]">
         <p className="mt-4 text-lg">
           Status: <span className="font-medium">{STATUS_TEXT[review.status] ?? review.status}</span>
         </p>
+        {review.supersedes && (
+          <p className="mt-2">
+            This is a resubmission of{" "}
+            <Link href={`/app/reviews/${review.supersedes}`} className={`underline underline-offset-2 ${focusRing}`}>
+              review {shortId(review.supersedes)}
+            </Link>
+            , which had changes requested.
+          </p>
+        )}
+        {resubmission && (
+          <p className="mt-2">
+            Resubmitted as{" "}
+            <Link href={`/app/reviews/${resubmission.id}`} className={`underline underline-offset-2 ${focusRing}`}>
+              review {shortId(resubmission.id)}
+            </Link>
+            .
+          </p>
+        )}
+        {canResubmit(user, review, resubmission !== null) && (
+          <Link
+            href={`/app/submit?from=${review.id}`}
+            className={`mt-3 inline-block bg-zinc-900 px-5 py-2 font-medium text-white dark:bg-zinc-100 dark:text-zinc-900 ${focusRing}`}
+          >
+            Resubmit with changes
+          </Link>
+        )}
         {review.status === "failed" && review.error && (
           <p role="alert" className="mt-3 rounded border border-red-700 bg-red-50 p-3 text-red-900">
             {review.error}
@@ -77,7 +105,7 @@ async function ReviewDetail({ params }: { params: PageProps<"/app/reviews/[id]">
           <div role="note" className="mt-4 rounded border border-amber-700 bg-amber-50 p-3 text-amber-950">
             <p className="font-medium">The profile contains text that tries to instruct the reviewer.</p>
             <p className="mt-1 text-sm">The reviewer model flagged it and did not follow it:</p>
-            <blockquote className="mt-1 border-l-4 border-amber-700 pl-3 text-sm italic break-words">
+            <blockquote data-evidence-quote className="mt-1 border-l-4 border-amber-700 pl-3 text-sm italic break-words">
               “{result.manipulationAttempt.quote}”
             </blockquote>
           </div>
@@ -95,10 +123,12 @@ async function ReviewDetail({ params }: { params: PageProps<"/app/reviews/[id]">
       {result && (
         <>
           <RuleHits result={result} profile={review.profile} />
-          <Findings result={result} />
+          <Findings result={result} profile={review.profile} />
           <DroppedFindings result={result} />
         </>
       )}
+
+      {review.status === "routed_to_committee" && result && <CommitteePanel reviewId={review.id} />}
 
       <DecisionHistory decisions={decisions} findingLabels={findingLabels} />
 

@@ -201,3 +201,42 @@ export function reviewCost(reviewer: { costUsd: number | null }, checker: { cost
   if (typeof reviewer.costUsd !== "number" || typeof checker.costUsd !== "number") return null;
   return { total: reviewer.costUsd + checker.costUsd, reviewer: reviewer.costUsd, checker: checker.costUsd };
 }
+
+// Text that looks like JSON: a quoted key followed by a colon, or an opening
+// brace or bracket next to a quote.
+const JSON_LIKE = /"[A-Za-z_][A-Za-z0-9_.]*"\s*:|[{[]\s*"/;
+
+export function looksLikeJson(text: string) {
+  return JSON_LIKE.test(text);
+}
+
+const QUOTE_FIELD_NAMES: Record<string, string> = {
+  id: "Profile id",
+  name: "Name",
+  owner: "Owner",
+  businessPurpose: "Business purpose",
+  dataReads: "Data it reads",
+  tools: "Tools and permissions",
+  permissions: "Tools and permissions",
+  humanConfirmsActions: "A person confirms its actions",
+  untrustedInputs: "Untrusted inputs it reads",
+  credentials: "Credentials",
+  model: "Model and provider",
+  provider: "Model and provider",
+  memory: "Memory",
+  logging: "Logging",
+  enabled: "Logging",
+  destination: "Logging",
+  killSwitch: "Kill switch",
+  available: "Kill switch",
+  description: "Description",
+};
+
+// Evidence quotes are verbatim from the profile and are never rewritten (the
+// evidence check depends on exact matches). Many are field excerpts in the
+// profile's JSON form; for those, say which field they come from.
+export function quoteSource(quote: string): { jsonLike: boolean; field: string | null } {
+  if (!looksLikeJson(quote)) return { jsonLike: false, field: null };
+  const key = quote.match(/"([A-Za-z_][A-Za-z0-9_.]*)"\s*:/)?.[1];
+  return { jsonLike: true, field: key ? (QUOTE_FIELD_NAMES[key] ?? key) : null };
+}

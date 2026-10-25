@@ -14,3 +14,14 @@ export function canViewReview(user: User, review: { submitter_id: string }) {
   const scope = reviewScope(user);
   return scope.kind === "all" || review.submitter_id === scope.submitterId;
 }
+
+// Only the review's own submitter may resubmit it, only after "Request
+// changes", and only once (the database also refuses a second resubmission).
+export function canResubmit(user: User, review: { submitter_id: string; status: string }, alreadyResubmitted: boolean) {
+  return (
+    can(user.role, "submit_profile") &&
+    review.submitter_id === user.id &&
+    review.status === "changes_requested" &&
+    !alreadyResubmitted
+  );
+}

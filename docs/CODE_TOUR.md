@@ -10,6 +10,7 @@ of step 6, to be updated and reused in step 15.
 - `README.md`: the front page of the GitHub repo, with what the project is, the live links and the two architecture diagrams.
 - `docs/SCHEMA.md`: the agent profile and the review result explained in plain words.
 - `docs/CODE_TOUR.md`: this file, a one-line guide to every file.
+- `docs/DECISION_LOG.md`: decisions about how the review tool behaves and why, starting with keeping evidence quotes verbatim even when they look like JSON.
 - `docs/builder-feedback.md`: a running log of what was good or frustrating about each Vercel product, for step 15b.
 
 ## Settings
@@ -32,11 +33,12 @@ of step 6, to be updated and reused in step 15.
 - `app/app/sign-in/actions.ts`: the server code behind signing in and out, which checks the passcode and sets or clears the signed session cookie.
 - `app/app/reviews/page.tsx`: the review queue at `/app/reviews`, newest first, with status, final tier and contested count; a table on wide screens and one card per review on a phone. Submitters see only their own reviews.
 - `app/app/reviews/[id]/page.tsx`: one review, read-only: who submitted it and when, its status, the four tiers, the rules that fired, the findings (contested first), the findings the evidence check dropped, and the cost when it is stored. Submitters see only their own reviews, and anything else shows not found.
+- `app/app/reviews/[id]/evidence/route.ts`: downloads the evidence pack of a Tier 4 review as a text file for the review committee, with the same access rule as the review page.
 - `app/app/reviews/[id]/decision-panel.tsx`: the decision form, shown only to the person whose turn it is: four choices, a required note, a conditions box for Approve with conditions, and accept or dismiss for each contested finding; a double click gets a clear message.
 - `app/app/reviews/[id]/sections.tsx`: the parts of the review page, including the read-only decision history: the severity badge (always with its word, never colour alone), the tier panel, the rules that fired with the triggering field highlighted, the findings and the dropped findings.
 - `app/app/reviews/[id]/auto-refresh.tsx`: reloads the review page every few seconds while the models are still working.
 - `app/app/not-allowed/page.tsx`: shown when a signed-in user's role may not open a page.
-- `app/app/submit/page.tsx`: the page at `/app/submit`, giving the heading and holding the form; only Submitters may open it.
+- `app/app/submit/page.tsx`: the page at `/app/submit`, giving the heading and holding the form; only Submitters may open it. Opened from a review with changes requested, it starts from that profile, shows the reviewer's note, and links the new review to the old one.
 - `app/app/submit/submit-form.tsx`: the form itself, which checks a profile against the schema in the browser, shows what to fix, and sends a valid profile for review.
 - `public/*.svg`: the default Next.js images, not used by any page yet.
 
@@ -68,7 +70,9 @@ of step 6, to be updated and reused in step 15.
 - `lib/rules.ts`: eight fixed rules that set a minimum severity from what a profile lists, the tier assignment, the check that a model can never lower a rule's severity, and the final tier (the highest of the rule tier and both models' tiers).
 - `lib/limits.ts`: the daily submission limit (10 per user in any 24 hours) and where a finished review goes next (tier 4 to the committee, other tiers to AppSec).
 - `lib/authz.ts`: the one check that decides who may decide a review: the right role for the stage, the right stage for the tier, never your own submission, a different person for the second tier 3 stage, a note, conditions when needed, and every contested finding resolved before approving.
-- `lib/review-access.ts`: the one rule for who may see a review, used by both the queue and the review page.
+- `lib/review-access.ts`: the one rule for who may see a review, used by both the queue and the review page, and the rule for who may resubmit one (its own submitter, after Request changes, once).
+- `lib/evidence.ts`: the exact-match evidence check that drops findings whose quote is not in the profile, and the same check used on screen to tell verbatim profile excerpts in model text apart from everything else.
+- `lib/evidence-pack.ts`: writes the Tier 4 evidence pack in plain words: tiers and who set the final tier, the rules that fired, every finding with its quote and both models' views, and the profile as submitted.
 - `lib/review-view.ts`: turns stored review data into plain words: statuses, which tier set the final tier, model and provider names, what each rule requires, field values, finding order, badge colours and cost.
 - `lib/labels.ts`: plain words for the profile's fixed choices, shared by the submit form and the review screens.
 - `lib/users.ts`: the four fictional users and their roles, a stand-in for the corporate directory.
@@ -98,6 +102,7 @@ of step 6, to be updated and reused in step 15.
 - `tests/rules.test.ts`: one test for each rule, for tier assignment and for the severity floor, using made-up profiles; run with `npm test`.
 - `tests/analyze.test.ts`: proves the evidence check drops a made-up finding and the rule floor raises a severity that is too low; calls no model.
 - `scripts/run-reviews.ts`: a developer tool that runs full reviews (both models) over the evaluation profiles and saves raw results and actual cost to `eval/runs`; run with `npm run reviews -- --set tuning` or `--set all`, or `--checker-only --from <run folder>` to test the checker on saved reviewer results.
+- `tests/evidence-pack.test.ts`: proves the evidence pack holds what the committee needs, keeps every quote exactly as stored, and has no JSON-looking text outside quotes.
 - `tests/authz.test.ts`: proves every refusal of the decision check and the allowed path for each tier, and that the decision form is offered to exactly the people the route accepts.
 - `tests/limits.test.ts`: proves the 11th submission in 24 hours is refused and that tier 4 is routed to the committee.
 - `tests/session.test.ts`: proves a session cookie cannot be altered, forged with another secret or used after it expires, that the passcode must match exactly, and what each role may do.

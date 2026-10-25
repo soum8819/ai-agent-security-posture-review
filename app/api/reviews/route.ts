@@ -6,8 +6,11 @@ import { currentUser } from "@/lib/auth";
 import { describeDbError } from "@/lib/db";
 import { DAILY_SUBMISSION_LIMIT, submissionAllowed } from "@/lib/limits";
 import { can } from "@/lib/permissions";
+import { canResubmit } from "@/lib/review-access";
 import { agentProfileSchema } from "@/lib/profile-schema";
-import { countRecentSubmissions, createReview, markFailed } from "@/lib/store";
+import { countRecentSubmissions, createReview, getResubmission, getReview, markFailed } from "@/lib/store";
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 import { reviewWorkflow } from "@/workflows/review";
 
 export async function POST(request: Request) {
@@ -26,6 +29,24 @@ export async function POST(request: Request) {
     );
   }
 
+  // A resubmission must name a review this user may resubmit.
+  const supersedes = body?.supersedes ?? null;
+  if (supersedes !== null) {
+    if (typeof supersedes !== "string" || !UUID.test(supersedes)) {
+      return Response.json({ error: "The review being resubmitted was not found" }, { status: 404 });
+    }
+    const old = await getReview(supersedes);
+    if (!old || old.review.submitter_id !== user.id) {
+      return Response.json({ error: "The review being resubmitted was not found" }, { status: 404 });
+    }
+    if (!canResubmit(user, old.review, (await getResubmission(supersedes)) !== null)) {
+      return Response.json(
+        { error: "Only a review with changes requested can be resubmitted, and only once" },
+        { status: 409 },
+      );
+    }
+  }
+
   let reviewId: string;
   try {
     if (!submissionAllowed(await countRecentSubmissions(user.id))) {
@@ -35,8 +56,11 @@ export async function POST(request: Request) {
       );
     }
     reviewId = crypto.randomUUID();
-    await createReview({ id: reviewId, submitter: { id: user.id, role: user.role }, profile: parsed.data });
+    await createReview({ id: reviewId, submitter: { id: user.id, role: user.role }, profile: parsed.data, supersedes });
   } catch (error) {
+    if ((error as { code?: string }).code === "23505") {
+      return Response.json({ error: "This review has already been resubmitted" }, { status: 409 });
+    }
     console.error("[reviews] could not save the review:", describeDbError(error));
     return Response.json({ error: "Could not save the review" }, { status: 500 });
   }

@@ -5,7 +5,8 @@ import { generateText, Output } from "ai";
 import { REVIEWER_MODEL } from "./models.ts";
 import type { AgentProfile } from "./profile-schema.ts";
 import { modelReviewSchema, type ModelReview } from "./review-schema.ts";
-import { PROMPT_VERSION, SYSTEM_PROMPT, profileText, userPrompt } from "./review-prompt.ts";
+import { quoteIsInProfile } from "./evidence.ts";
+import { PROMPT_VERSION, SYSTEM_PROMPT, userPrompt } from "./review-prompt.ts";
 import { assignTier, enforceFloor, runRules, type RuleHit, type Severity } from "./rules.ts";
 
 export const REVIEW_SETTINGS = {
@@ -25,43 +26,8 @@ export type KeptFinding = ModelFinding & {
 
 export type DroppedFinding = { finding: ModelFinding; reason: string };
 
-const MIN_QUOTE_LENGTH = 4;
-
-// Lower case, straight quotes, single spaces and no spaces around JSON
-// symbols, so layout or quote style alone never decides whether a quote is real.
-// The words themselves must still match exactly.
-function normalize(text: string) {
-  return text
-    .toLowerCase()
-    .replace(/[‘’]/g, "'")
-    .replace(/[“”]/g, '"')
-    .replace(/\s+/g, " ")
-    .replace(/\s*([[\]{}:,])\s*/g, "$1")
-    .trim();
-}
-
-// Remove one pair of quote marks wrapped around the whole quote.
-function unwrap(quote: string) {
-  const q = quote.trim();
-  const m = q.match(/^(["'“‘])([\s\S]*)(["'”’])$/);
-  return m ? m[2] : q;
-}
-
-function stringValues(value: unknown): string[] {
-  if (typeof value === "string") return [value];
-  if (Array.isArray(value)) return value.flatMap(stringValues);
-  if (value && typeof value === "object") return Object.values(value).flatMap(stringValues);
-  return [];
-}
-
-// True if the quote appears in the profile, either in the JSON text the model
-// was shown or inside one of the profile's text values.
-export function quoteIsInProfile(quote: string, profile: AgentProfile) {
-  const q = normalize(unwrap(quote));
-  if (q.length < MIN_QUOTE_LENGTH) return false;
-  const sources = [profileText(profile), ...stringValues(profile)].map(normalize);
-  return sources.some((s) => s.includes(q));
-}
+// The exact-match evidence check lives in lib/evidence.ts; offered here too.
+export { quoteIsInProfile };
 
 export function checkEvidence(findings: ModelFinding[], profile: AgentProfile) {
   const kept: ModelFinding[] = [];

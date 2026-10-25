@@ -1,4 +1,5 @@
 // The parts of the review detail page. Server components, read-only.
+import { profileExcerpts } from "@/lib/evidence";
 import type { AgentProfile } from "@/lib/profile-schema";
 import type { ReviewRecord } from "@/lib/review";
 import type { DecisionRow } from "@/lib/store";
@@ -12,6 +13,7 @@ import {
   asiName,
   formatTime,
   modelLabel,
+  quoteSource,
   submitterName,
   splitFindings,
   tierSentence,
@@ -118,6 +120,25 @@ export function RuleHits({ result, profile }: { result: ReviewRecord; profile: A
   );
 }
 
+// Model-written text. Fragments that are verbatim from the profile (checked
+// with the same exact-match test as evidence quotes) are shown as quotes in
+// monospace; everything else is shown exactly as the model wrote it.
+function ModelText({ text, profile }: { text: string; profile: AgentProfile }) {
+  return (
+    <>
+      {profileExcerpts(text, profile).map((p, i) =>
+        p.excerpt ? (
+          <code key={i} data-evidence-quote className="rounded bg-zinc-100 px-1 font-mono text-sm break-words dark:bg-zinc-800" title="Quoted from the profile">
+            {p.text}
+          </code>
+        ) : (
+          <span key={i}>{p.text}</span>
+        ),
+      )}
+    </>
+  );
+}
+
 function FindingHeader({ category, severity }: { category: string; severity: Severity }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -129,13 +150,29 @@ function FindingHeader({ category, severity }: { category: string; severity: Sev
   );
 }
 
+// Evidence quotes are shown exactly as stored. Field excerpts in the
+// profile's JSON form get a monospace style and say which field they are from.
 function Evidence({ quote }: { quote: string }) {
+  const source = quoteSource(quote);
   return (
     <figure className="mt-3">
-      <figcaption className={`text-sm ${muted}`}>Evidence from the profile</figcaption>
-      <blockquote className="mt-1 border-l-4 border-zinc-300 pl-3 italic break-words dark:border-zinc-700">
-        “{quote}”
-      </blockquote>
+      <figcaption className={`text-sm ${muted}`}>
+        {source.jsonLike
+          ? `Evidence from the profile. Quoted from the profile field: ${source.field ?? "profile data"}`
+          : "Evidence from the profile"}
+      </figcaption>
+      {source.jsonLike ? (
+        <blockquote
+          data-evidence-quote
+          className="mt-1 border-l-4 border-zinc-300 bg-zinc-50 py-1 pl-3 font-mono text-sm whitespace-pre-wrap break-words dark:border-zinc-700 dark:bg-zinc-900"
+        >
+          {quote}
+        </blockquote>
+      ) : (
+        <blockquote data-evidence-quote className="mt-1 border-l-4 border-zinc-300 pl-3 italic break-words dark:border-zinc-700">
+          “{quote}”
+        </blockquote>
+      )}
     </figure>
   );
 }
@@ -151,7 +188,7 @@ function FloorNote({ f }: { f: { severity: Severity; modelSeverity: Severity; ra
   );
 }
 
-function CheckedFindingCard({ f, reviewer, checker }: { f: CheckedFinding; reviewer: string; checker: string }) {
+function CheckedFindingCard({ f, reviewer, checker, profile }: { f: CheckedFinding; reviewer: string; checker: string; profile: AgentProfile }) {
   const verdict = `${VERDICT_TEXT[f.secondModelVerdict] ?? f.secondModelVerdict}.`;
   return (
     <li className="rounded border border-zinc-200 p-4 dark:border-zinc-800">
@@ -161,40 +198,40 @@ function CheckedFindingCard({ f, reviewer, checker }: { f: CheckedFinding; revie
       <div className={`mt-3 grid gap-3 ${f.contested ? "md:grid-cols-2" : ""}`}>
         <div className={f.contested ? "rounded bg-zinc-50 p-3 dark:bg-zinc-900" : ""}>
           <p className="text-sm font-medium">Reviewer model, {reviewer}</p>
-          <p className="mt-1">{f.whyItMatters}</p>
+          <p className="mt-1"><ModelText text={f.whyItMatters} profile={profile} /></p>
         </div>
         <div className={f.contested ? "rounded bg-zinc-50 p-3 dark:bg-zinc-900" : ""}>
           <p className="text-sm font-medium">Checker model, {checker}</p>
           <p className="mt-1">
-            <span className="font-medium">{verdict}</span> {f.secondModelReason}
+            <span className="font-medium">{verdict}</span> <ModelText text={f.secondModelReason} profile={profile} />
           </p>
         </div>
       </div>
       <p className="mt-3 text-sm">
         <span className="font-medium">Suggested fix: </span>
-        {f.recommendedControl}
+        <ModelText text={f.recommendedControl} profile={profile} />
       </p>
     </li>
   );
 }
 
-function MissedFindingCard({ f, checker }: { f: MissedFinding; checker: string }) {
+function MissedFindingCard({ f, checker, profile }: { f: MissedFinding; checker: string; profile: AgentProfile }) {
   return (
     <li className="rounded border border-zinc-200 p-4 dark:border-zinc-800">
       <FindingHeader category={f.category} severity={f.severity} />
       <FloorNote f={f} />
       <Evidence quote={f.evidenceQuote} />
       <p className="mt-3 text-sm font-medium">Checker model, {checker}</p>
-      <p className="mt-1">{f.whyItMatters}</p>
+      <p className="mt-1"><ModelText text={f.whyItMatters} profile={profile} /></p>
       <p className="mt-3 text-sm">
         <span className="font-medium">Suggested fix: </span>
-        {f.recommendedControl}
+        <ModelText text={f.recommendedControl} profile={profile} />
       </p>
     </li>
   );
 }
 
-export function Findings({ result }: { result: ReviewRecord }) {
+export function Findings({ result, profile }: { result: ReviewRecord; profile: AgentProfile }) {
   const reviewer = modelName(result.reviewer.model);
   const checker = modelName(result.checker.model);
   const { contested, others } = splitFindings(result.findings);
@@ -210,7 +247,7 @@ export function Findings({ result }: { result: ReviewRecord }) {
           </p>
           <ul className="mt-3 space-y-4">
             {contested.map((f) => (
-              <CheckedFindingCard key={f.id} f={f} reviewer={reviewer} checker={checker} />
+              <CheckedFindingCard key={f.id} f={f} reviewer={reviewer} checker={checker} profile={profile} />
             ))}
           </ul>
         </div>
@@ -223,7 +260,7 @@ export function Findings({ result }: { result: ReviewRecord }) {
         ) : (
           <ul className="mt-3 space-y-4">
             {others.map((f) => (
-              <CheckedFindingCard key={f.id} f={f} reviewer={reviewer} checker={checker} />
+              <CheckedFindingCard key={f.id} f={f} reviewer={reviewer} checker={checker} profile={profile} />
             ))}
           </ul>
         )}
@@ -234,7 +271,7 @@ export function Findings({ result }: { result: ReviewRecord }) {
           <h3 className="text-lg font-semibold">Found only by the checker model</h3>
           <ul className="mt-3 space-y-4">
             {splitFindings(result.missedFindings.map((f) => ({ ...f, contested: false }))).others.map((f, i) => (
-              <MissedFindingCard key={i} f={f} checker={checker} />
+              <MissedFindingCard key={i} f={f} checker={checker} profile={profile} />
             ))}
           </ul>
         </div>
@@ -321,6 +358,27 @@ export function DecisionHistory({ decisions, findingLabels }: { decisions: Decis
           </li>
         ))}
       </ol>
+    </section>
+  );
+}
+
+// Tier 4: the committee decides, not this app. Offers the evidence pack.
+export function CommitteePanel({ reviewId }: { reviewId: string }) {
+  return (
+    <section aria-labelledby="committee" className="mt-10 rounded border-2 border-zinc-900 p-4 dark:border-zinc-100">
+      <h2 id="committee" className="text-xl font-semibold">Sent to the review committee</h2>
+      <p className="mt-2">
+        The final tier is 4, so this review is not decided in this app. The evidence pack holds what the committee needs:
+        the tiers and who set the final tier, the rules that fired, every finding with its evidence quote and both
+        models&apos; views, and the profile as submitted.
+      </p>
+      <a
+        href={`/app/reviews/${reviewId}/evidence`}
+        download
+        className={`mt-4 inline-block bg-zinc-900 px-5 py-2 font-medium text-white dark:bg-zinc-100 dark:text-zinc-900 ${focusRing}`}
+      >
+        Download evidence pack
+      </a>
     </section>
   );
 }

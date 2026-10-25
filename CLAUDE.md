@@ -111,6 +111,14 @@ reviewer app lives in the `app/app/` folder.
 - Assumption to confirm with the customer (decided in step 10): the card says
   Tier 1 needs "one approver" but does not name the role. The project owner's
   reading is that the Tier 1 approver is AppSec, the same as Tier 2.
+- Evidence quotes (decided in step 10, see docs/DECISION_LOG.md): quotes are
+  verbatim from the profile and many are field excerpts in its JSON form, such
+  as "memory": "session". This is deliberate so a reviewer can verify them;
+  they are never rewritten. No raw JSON on screen or in the evidence pack
+  except verbatim quotes, which are shown in monospace with the field they come
+  from. The slice C "no raw JSON" check was too narrow and has been tightened.
+- Step 13 (optional idea): prompt quoting style, asking the models to quote
+  sentences and values rather than JSON field excerpts.
 - Step 13: test a blind-first checker against the current one on the same 12
   profiles and report both. Show all three tiers on the approver screen in
   step 10.
@@ -150,4 +158,4 @@ Updated by the project owner after each step.
 - [x] Step 7: done
 - [ ] Step 8: built, my read-through of the results pending
 - [ ] Step 9: built; finish line partly met: 1 of 12 contested, reported as is
-- [ ] Step 10: in progress, merged with step 11a (slices A to C done; slice D: approvals, decision panel and history built; evidence pack and resubmission next)
+- [ ] Step 10: in progress, merged with step 11a (slices A to D built; the project owner's check on the live site is pending, including deciding review 080fc26e)

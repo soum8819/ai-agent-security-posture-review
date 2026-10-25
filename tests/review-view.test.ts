@@ -11,7 +11,9 @@ import {
   STATUS_TEXT,
   VERDICT_TEXT,
   contrastRatio,
+  looksLikeJson,
   modelLabel,
+  quoteSource,
   reviewCost,
   splitFindings,
   tierSentence,
@@ -80,4 +82,41 @@ test("every rule has a plain requirement, and no screen text uses an em dash", (
   for (const id of ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8"]) assert.ok(RULE_REQUIREMENTS[id]);
   const all = [STATUS_TEXT, RULE_REQUIREMENTS, VERDICT_TEXT, SEVERITY_WORDS].flatMap((m) => Object.values(m));
   for (const text of all) assert.equal(text.includes("\u2014"), false, text);
+});
+
+test("JSON-looking text is detected, and a field excerpt names its field", () => {
+  for (const t of ['"memory": "session"', '"untrustedInputs": [ "chat" ]', '{"enabled": true}', '"tools": [ { "name": "Wiki"']) {
+    assert.equal(looksLikeJson(t), true, t);
+  }
+  for (const t of ["It searches the published HR policy library.", 'The bot says "hello".', "Logs: none (see SIEM)"]) {
+    assert.equal(looksLikeJson(t), false, t);
+  }
+  assert.deepEqual(quoteSource('"memory": "session"'), { jsonLike: true, field: "Memory" });
+  assert.deepEqual(quoteSource('"logging": {"enabled": true}'), { jsonLike: true, field: "Logging" });
+  assert.deepEqual(quoteSource("Reads vendor invoices from an email inbox"), { jsonLike: false, field: null });
+});
+
+test("in model text, only fragments verbatim from the profile count as quotes", async () => {
+  const { profileExcerpts } = await import("../lib/evidence.ts");
+  const profile = {
+    id: "p-1", name: "Bot", owner: "Team", businessPurpose: "Answer.", dataReads: ["internal"],
+    tools: [{ name: "Wiki", permissions: ["read"] }], humanConfirmsActions: false, untrustedInputs: ["chat"],
+    credentials: "own_scoped_token", model: { provider: "X", name: "y" }, memory: "session",
+    logging: { enabled: true }, killSwitch: { available: true }, description: "Answers questions.",
+  } as unknown as AgentProfile;
+  const parts = profileExcerpts('The profile states "untrustedInputs": ["chat"] and "memory": "forever".', profile);
+  assert.deepEqual(parts.filter((p) => p.excerpt).map((p) => p.text), ['"untrustedInputs": ["chat"]']);
+  assert.ok(parts.some((p) => !p.excerpt && p.text.includes('"memory": "forever"')));
+  assert.equal(parts.map((p) => p.text).join(""), 'The profile states "untrustedInputs": ["chat"] and "memory": "forever".');
+});
+
+test("only the review's own submitter may resubmit, after Request changes, once", async () => {
+  const { canResubmit } = await import("../lib/review-access.ts");
+  const submitter = user("submitter");
+  const mine = { submitter_id: submitter.id, status: "changes_requested" };
+  assert.equal(canResubmit(submitter, mine, false), true);
+  assert.equal(canResubmit(submitter, mine, true), false); // already resubmitted
+  assert.equal(canResubmit(submitter, { ...mine, status: "approved" }, false), false);
+  assert.equal(canResubmit(submitter, { ...mine, submitter_id: "someone-else" }, false), false);
+  assert.equal(canResubmit(user("appsec_reviewer"), { ...mine, submitter_id: user("appsec_reviewer").id }, false), false);
 });
