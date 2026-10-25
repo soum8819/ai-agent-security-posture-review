@@ -30,6 +30,10 @@
   --sev-low-bg: #f0f0f0;
   --sev-low-fg: #454545;
 
+  --tier3-bg: #fffaeb;
+  --tier3-fg: #7a4a00;
+  --tier3-line: #b25e00;
+
   --mark-bg: #fff4bf;
   --mark-fg: #171717;
 
@@ -64,6 +68,10 @@
     --sev-low-bg: #222222;
     --sev-low-fg: #c9c9c9;
 
+    --tier3-bg: #1c1708;
+    --tier3-fg: #f2c94c;
+    --tier3-line: #d29922;
+
     --mark-bg: #3a3000;
     --mark-fg: #f5e6a6;
 
@@ -95,6 +103,9 @@
   --color-sev-medium-fg: var(--sev-medium-fg);
   --color-sev-low-bg: var(--sev-low-bg);
   --color-sev-low-fg: var(--sev-low-fg);
+  --color-tier3-bg: var(--tier3-bg);
+  --color-tier3-fg: var(--tier3-fg);
+  --color-tier3-line: var(--tier3-line);
   --color-mark-bg: var(--mark-bg);
   --color-mark-fg: var(--mark-fg);
   --color-dot-ok: var(--dot-ok);

@@ -24,6 +24,7 @@ const PAIRS: [string, string][] = [
   ["sev-critical-fg", "sev-critical-bg"], ["sev-high-fg", "sev-high-bg"],
   ["sev-medium-fg", "sev-medium-bg"], ["sev-low-fg", "sev-low-bg"],
   ["mark-fg", "mark-bg"],
+  ["tier3-fg", "tier3-bg"], ["tier3-fg", "page"],
 ];
 
 for (const [mode, t] of [["light", light], ["dark", dark]] as const) {
@@ -33,6 +34,9 @@ for (const [mode, t] of [["light", light], ["dark", dark]] as const) {
       const ratio = contrastRatio(t[fg], t[bg]);
       assert.ok(ratio >= 4.5, `${mode}: --${fg} on --${bg} is ${ratio.toFixed(2)}`);
     }
+  });
+  test(`the Tier 3 outline stands out from the page in ${mode} mode (at least 3 to 1)`, () => {
+    assert.ok(contrastRatio(t["tier3-line"], t.page) >= 3, `${mode}: ${contrastRatio(t["tier3-line"], t.page).toFixed(2)}`);
   });
   test(`the focus ring stands out from the page in ${mode} mode (at least 3 to 1)`, () => {
     assert.ok(contrastRatio(t.focus, t.page) >= 3, `${mode}: ${contrastRatio(t.focus, t.page).toFixed(2)}`);

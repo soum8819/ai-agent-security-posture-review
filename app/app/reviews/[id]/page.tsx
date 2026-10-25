@@ -85,10 +85,14 @@ async function ReviewDetail({ params }: { params: PageProps<"/app/reviews/[id]">
         }
         title={review.profile.name}
         description={
-          <span className="text-sm">
-            Owned by {review.profile.owner}. Submitted by {submitterName(review.submitter_id)} on{" "}
-            <span className="tabular">{formatTime(review.created_at)}</span>, on {createdOn(review.environment)}.{" "}
-            <span className="font-mono">Review {review.id}</span>
+          <span className="block space-y-0.5 text-sm">
+            <span className="block">
+              Submitted by {submitterName(review.submitter_id)} on <span className="tabular">{formatTime(review.created_at)}</span>, for{" "}
+              {review.profile.owner}
+            </span>
+            <span className="block text-xs">
+              <span className="font-mono break-all">Review {review.id}</span>, created on {createdOn(review.environment)}
+            </span>
           </span>
         }
         actions={
@@ -139,7 +143,7 @@ async function ReviewDetail({ params }: { params: PageProps<"/app/reviews/[id]">
       <dl className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Card className="p-4">
           <dt className="text-xs font-medium text-muted">Final tier</dt>
-          <dd className="mt-2"><TierChip tier={review.final_tier} size="lg" /></dd>
+          <dd className="mt-2"><TierChip tier={review.final_tier} size="xl" /></dd>
         </Card>
         <Card className="p-4">
           <dt className="text-xs font-medium text-muted">Contested findings</dt>

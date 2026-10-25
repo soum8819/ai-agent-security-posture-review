@@ -1,34 +1,53 @@
 // The review queue (design pass): newest first. Submitters see only their own
-// reviews; reviewers and the Auditor see every review. A table on wide
-// screens, compact cards on a phone.
+// reviews; reviewers and the Auditor see every review. Setup checks are hidden
+// unless ?setup=show is in the address, so the choice survives a reload and a
+// shared link. A table on wide screens, compact cards on a phone.
 import Link from "next/link";
 import { Suspense } from "react";
-import { EmptyState, PageHeader, Skeleton, StatusPill, TierChip, button } from "@/components/ui";
+import { EmptyState, PageHeader, Skeleton, StatusPill, TierChip, button, cx } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import { reviewScope } from "@/lib/review-access";
 import { SETUP_CHECK_LABEL, SETUP_CHECK_SUBMITTER, createdOn, formatTime, shortId, submitterName } from "@/lib/review-view";
 import { listReviews } from "@/lib/store";
 
-async function Queue() {
+async function Queue({ searchParams }: { searchParams: PageProps<"/app/reviews">["searchParams"] }) {
   const user = await requireUser();
   const scope = reviewScope(user);
-  const reviews = await listReviews(scope);
+  const all = await listReviews(scope);
   const mayRead = can(user.role, "submit_profile");
+  const showSetup = (await searchParams).setup === "show";
+  const setupCount = all.filter((r) => r.submitter_id === SETUP_CHECK_SUBMITTER).length;
+  const reviews = showSetup ? all : all.filter((r) => r.submitter_id !== SETUP_CHECK_SUBMITTER);
 
   return (
     <>
       <PageHeader
         title={scope.kind === "all" ? "Reviews" : "Your reviews"}
-        description={`${reviews.length} review${reviews.length === 1 ? "" : "s"}, newest first.`}
+        description={`${reviews.length} review${reviews.length === 1 ? "" : "s"}, newest first.${
+          setupCount && !showSetup ? ` ${setupCount} setup check${setupCount === 1 ? " is" : "s are"} hidden.` : ""
+        }`}
         actions={mayRead ? <Link href="/app/submit" className={button.primary}>Submit a profile</Link> : undefined}
       />
+
+      {setupCount > 0 && (
+        <div className="mt-4 flex justify-end">
+          <Link
+            href={showSetup ? "/app/reviews" : "/app/reviews?setup=show"}
+            className={button.secondary}
+            scroll={false}
+          >
+            <span aria-hidden className={cx("inline-block size-3.5 rounded-sm border", showSetup ? "border-ink bg-ink" : "border-line-strong")} />
+            {showSetup ? "Hide" : "Show"} setup checks <span className="tabular">({setupCount})</span>
+          </Link>
+        </div>
+      )}
 
       {reviews.length === 0 ? (
         <div className="mt-8">
           <EmptyState
-            title="No reviews yet"
-            body={mayRead ? "Submit an agent profile and its review appears here." : "Reviews appear here as soon as a team submits one."}
+            title={setupCount ? "No real reviews yet" : "No reviews yet"}
+            body={setupCount ? "Only setup checks so far. Use Show setup checks to see them." : mayRead ? "Submit an agent profile and its review appears here." : "Reviews appear here as soon as a team submits one."}
             action={mayRead ? { href: "/app/submit", label: "Submit a profile" } : undefined}
           />
         </div>
@@ -93,11 +112,11 @@ async function Queue() {
   );
 }
 
-export default function ReviewsPage() {
+export default function ReviewsPage({ searchParams }: PageProps<"/app/reviews">) {
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">
       <Suspense fallback={<Skeleton lines={8} />}>
-        <Queue />
+        <Queue searchParams={searchParams} />
       </Suspense>
     </main>
   );

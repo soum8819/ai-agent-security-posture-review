@@ -65,8 +65,19 @@ export function RuleHits({ result, profile }: { result: ReviewRecord; profile: A
       <SectionTitle id="rules" aside={result.ruleHits.length ? `${result.ruleHits.length} fired` : undefined}>
         Rules that fired
       </SectionTitle>
+      <Card className="mb-3 p-4">
+        <h3 className="text-sm font-medium">
+          Why the rules set <TierChip tier={result.tiers.rule} />
+        </h3>
+        <ul className="mt-2 space-y-1 text-sm text-muted">
+          {(result.tiers.ruleReasons ?? []).map((r) => (
+            <li key={r}>{r}</li>
+          ))}
+        </ul>
+        <p className="mt-2 text-xs text-muted">The tier rules look only at the data the agent reads and the actions it can take. The risk rules R1 to R8 below raise findings.</p>
+      </Card>
       {result.ruleHits.length === 0 ? (
-        <p className="text-sm text-muted">No rule fired for this profile.</p>
+        <p className="text-sm text-muted">None of the risk rules R1 to R8 fired for this profile.</p>
       ) : (
         <ul className="space-y-3">
           {result.ruleHits.map((hit) => (

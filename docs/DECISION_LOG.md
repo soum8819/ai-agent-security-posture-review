@@ -115,10 +115,10 @@ when the system asks for reduced motion.
 
 **Screenshots.** Before and after, at desktop and phone width, are in
 docs/design/before and docs/design/after (taken with Playwright run through
-npx, so the project gained no package). The first review-detail pair uses a
-setup-check review whose final tier was changed for testing, so its rule tier
-(4) is above its final tier (3); the review-tier3 and review-tier4 shots use
-consistent reviews and are the ones to use publicly.
+npx, so the project gained no package). The after set now uses consistent
+reviews only (f4e813da for Tier 3, 94a0d174 for Tier 4); the earlier
+review-detail shots came from a setup check whose tier was changed for
+testing and were removed.
 
 
 ## 2026-10-25: step 13 evaluation choices, and one open question
@@ -143,3 +143,23 @@ confirming, which matches the Tier 4 definition in CLAUDE.md ("acting on its
 own with write or run-code power"). The answer key says Tier 3. The rule was
 not changed, because 04 is held out. Either the key should accept Tier 4 for
 04, or the Tier 4 definition should say which kinds of write power count.
+
+## 2026-10-25: design polish after step 13
+
+**Setup checks hidden in the queue by default.** A "Show setup checks (N)"
+link adds `?setup=show` to the address, so the choice survives a reload and
+a shared link. It is a link, not a button, because it changes the address.
+
+**Tier chips get stronger with the tier.** Tier 1 quiet, Tier 2 a little
+stronger, Tier 3 an amber outline, Tier 4 filled. Every chip still says
+"Tier" and the digit (Tier 4 also says Committee), so colour is never the
+only signal. The new Tier 3 colours are checked by tests/design.test.ts:
+text at least 4.5 to 1 and the outline at least 3 to 1, in both modes.
+
+**Why the rule tier is what it is.** A check of the real reviews with rule
+tier 3 (f4e813da and 93ea2e59, both the payments assistant) found 0 rule
+hits, correctly: the rule tier comes from the tier rules (data read, actions
+possible), while R1 to R8 raise findings. The page never showed the tier
+rules' reasons, so a Tier 3 review said only "No rule fired". "Rules that
+fired" now starts with "Why the rules set Tier N" and its reasons. The data
+was not inconsistent; the page was missing a part.

@@ -64,16 +64,39 @@ export function SeverityBadge({ severity }: { severity: Severity }) {
 
 // "Tier 1" to "Tier 4". Higher tiers look stronger; Tier 4 also says Committee,
 // so the meaning never depends on colour.
-export function TierChip({ tier, size = "md" }: { tier: number | null; size?: "md" | "lg" }) {
+// Tier chips get stronger with the tier: Tier 1 quiet, Tier 2 a little
+// stronger, Tier 3 an amber outline, Tier 4 filled. Every chip keeps the word
+// "Tier" and the digit (Tier 4 also says Committee), so colour is never the
+// only signal.
+const TIER_TONE: Record<number, string> = {
+  1: "border-line bg-page text-muted",
+  2: "border-line-strong bg-fill text-ink",
+  3: "border-tier3-line bg-tier3-bg text-tier3-fg",
+  4: "border-ink bg-ink text-page",
+};
+
+const TIER_SIZE = {
+  md: "h-6 px-2 text-xs",
+  lg: "h-9 px-3 text-base",
+  xl: "h-12 px-3.5 text-3xl font-semibold",
+};
+
+export function TierChip({ tier, size = "md" }: { tier: number | null; size?: keyof typeof TIER_SIZE }) {
   if (tier === null) return <span className="text-sm text-muted">Not yet</span>;
-  const tone =
-    tier >= 4 ? "bg-ink text-page border-ink" : tier === 3 ? "bg-fill-hover text-ink border-line-strong" : "bg-fill text-ink border-line";
   return (
-    <span className={cx("inline-flex items-center gap-1.5 rounded-md border font-medium whitespace-nowrap", tone, size === "lg" ? "h-9 px-3 text-base" : "h-6 px-2 text-xs")}>
+    <span
+      data-tier={tier}
+      className={cx(
+        "inline-flex items-center gap-1.5 rounded-md font-medium whitespace-nowrap",
+        tier === 3 ? "border-2" : "border",
+        TIER_TONE[Math.min(Math.max(tier, 1), 4)],
+        TIER_SIZE[size],
+      )}
+    >
       <span>
         Tier <span className="tabular font-mono">{tier}</span>
       </span>
-      {tier >= 4 && <span className="font-normal opacity-80">Committee</span>}
+      {tier >= 4 && <span className={cx("font-normal opacity-80", size === "xl" && "text-base")}>Committee</span>}
     </span>
   );
 }
