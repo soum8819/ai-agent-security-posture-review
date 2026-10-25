@@ -18,7 +18,7 @@ import {
 } from "./review-prompt.ts";
 import type { ModelReview } from "./review-schema.ts";
 
-export const CHECK_PROMPT_VERSION = "c2";
+export const CHECK_PROMPT_VERSION = "c3";
 
 export { REVIEW_END, REVIEW_START };
 
@@ -34,6 +34,7 @@ How to check each finding of the first reviewer:
 
 How to report missed findings:
 - List only real risks the profile supports that none of the first reviewer's findings covers. Do not repeat a finding that is already listed, and leave the list empty if nothing was missed.
+- Missing human confirmation is a risk only for an agent with a tool that can do more than read. If every tool the profile lists has only read permission, "humanConfirmsActions": false is not a finding and does not raise the tier: there is no action to confirm.
 ${JUDGING_RULES}
 ${EVIDENCE_RULES}
 ${FINDING_RULES}

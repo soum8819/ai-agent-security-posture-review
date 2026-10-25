@@ -1,0 +1,217 @@
+{
+  "profileId": "profile-02",
+  "tiers": {
+    "rule": 1,
+    "reviewer": 1,
+    "checker": 1,
+    "final": 1,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI01",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [ \"chat\" ]",
+      "whyItMatters": "User chat is treated as untrusted input, so a malicious or crafted chat message could manipulate the agent's instructions or goals and cause it to produce incorrect, misleading, or policy-violating answers to employees.",
+      "recommendedControl": "Apply input sanitization and prompt hardening: strip or neutralize embedded instructions from chat, enforce a strict system prompt that prioritizes official policy sources, and log instances where user input attempts to override the system prompt for human review.",
+      "modelSeverity": "medium",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile clearly states untrusted chat input, which is a direct vector for prompt injection and goal hijacking, making the finding and its severity appropriate.",
+      "contested": false
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"memory\": \"session\"",
+      "whyItMatters": "Session-scoped memory means user-provided content can persist for the remainder of a session, so a poisoned or adversarial message could bias subsequent responses within that session and propagate incorrect guidance to employees.",
+      "recommendedControl": "Limit what is stored in session memory to validated metadata, discard or isolate user-provided instructions from remembered context, and implement integrity checks that favor canonical policy content over session history when answering.",
+      "modelSeverity": "medium",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "Session memory can indeed retain malicious input, potentially poisoning subsequent responses within a session, so the finding is valid.",
+      "contested": false
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "\"provider\": \"OpenAI\",",
+      "whyItMatters": "The model is provided by a third party, so internal HR policy content and user queries may be exposed to an external model provider unless contractual and technical protections are in place, creating supply chain and data leakage risk.",
+      "recommendedControl": "Ensure a documented data handling agreement and model configuration that prevents sensitive data retention at the provider, or migrate to an approved on-premise or enterprise-hosted model; add filtering to avoid sending PII or non-public HR content to the external provider.",
+      "modelSeverity": "medium",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "Using a third-party model without explicit mention of data handling agreements or controls for sensitive internal data presents a supply chain and data leakage risk.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [],
+  "ruleHits": [],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This agent reads only internal HR policies and answers employee chat queries, so tier 1 is appropriate. Risks found are prompt-based manipulation via chat input, session memory poisoning, and use of a third-party model provider; implement input sanitization, memory restrictions, and contractual/technical data protections before deployment.",
+  "checkerSummary": "The agent is a read-only Q&A bot for internal HR policies, which places it in Tier 1. The first reviewer's findings are accurate and highlight valid risks related to untrusted input, memory poisoning, and third-party model usage. No critical risks were missed that would elevate the tier.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1844,
+      "inputTokenDetails": {
+        "noCacheTokens": 52,
+        "cacheReadTokens": 1792,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1380,
+      "outputTokenDetails": {
+        "textTokens": 484,
+        "reasoningTokens": 896
+      },
+      "totalTokens": 3224,
+      "raw": {
+        "input_tokens": 1844,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 1792
+        },
+        "output_tokens": 1380,
+        "output_tokens_details": {
+          "reasoning_tokens": 896
+        },
+        "total_tokens": 3224
+      }
+    },
+    "latencyMs": 14156,
+    "generationId": "gen_01M5T917SWAT47MP8GS6KJDGTB",
+    "provider": "openai",
+    "costUsd": 0.0028178
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c3",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2671,
+      "inputTokenDetails": {
+        "noCacheTokens": 2671,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1130,
+      "outputTokenDetails": {
+        "textTokens": 271,
+        "reasoningTokens": 859
+      },
+      "totalTokens": 3801,
+      "raw": {
+        "thoughtsTokenCount": 859,
+        "promptTokenCount": 2671,
+        "candidatesTokenCount": 271,
+        "totalTokenCount": 3801,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2671
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 271
+          }
+        ]
+      }
+    },
+    "latencyMs": 6566,
+    "generationId": "gen_01M5T91NHP96AQ9XD2D0T4H5T8",
+    "provider": "vertex",
+    "costUsd": 0.0036263
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 1,
+    "findings": [
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [ \"chat\" ]",
+        "whyItMatters": "User chat is treated as untrusted input, so a malicious or crafted chat message could manipulate the agent's instructions or goals and cause it to produce incorrect, misleading, or policy-violating answers to employees.",
+        "recommendedControl": "Apply input sanitization and prompt hardening: strip or neutralize embedded instructions from chat, enforce a strict system prompt that prioritizes official policy sources, and log instances where user input attempts to override the system prompt for human review."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"memory\": \"session\"",
+        "whyItMatters": "Session-scoped memory means user-provided content can persist for the remainder of a session, so a poisoned or adversarial message could bias subsequent responses within that session and propagate incorrect guidance to employees.",
+        "recommendedControl": "Limit what is stored in session memory to validated metadata, discard or isolate user-provided instructions from remembered context, and implement integrity checks that favor canonical policy content over session history when answering."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"provider\": \"OpenAI\",",
+        "whyItMatters": "The model is provided by a third party, so internal HR policy content and user queries may be exposed to an external model provider unless contractual and technical protections are in place, creating supply chain and data leakage risk.",
+        "recommendedControl": "Ensure a documented data handling agreement and model configuration that prevents sensitive data retention at the provider, or migrate to an approved on-premise or enterprise-hosted model; add filtering to avoid sending PII or non-public HR content to the external provider."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent reads only internal HR policies and answers employee chat queries, so tier 1 is appropriate. Risks found are prompt-based manipulation via chat input, session memory poisoning, and use of a third-party model provider; implement input sanitization, memory restrictions, and contractual/technical data protections before deployment."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile clearly states untrusted chat input, which is a direct vector for prompt injection and goal hijacking, making the finding and its severity appropriate."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "Session memory can indeed retain malicious input, potentially poisoning subsequent responses within a session, so the finding is valid."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "Using a third-party model without explicit mention of data handling agreements or controls for sensitive internal data presents a supply chain and data leakage risk."
+      }
+    ],
+    "missedFindings": [],
+    "proposedTier": 1,
+    "summary": "The agent is a read-only Q&A bot for internal HR policies, which places it in Tier 1. The first reviewer's findings are accurate and highlight valid risks related to untrusted input, memory poisoning, and third-party model usage. No critical risks were missed that would elevate the tier."
+  },
+  "costUsd": 0.0064440999999999995,
+  "seconds": 20.723
+}

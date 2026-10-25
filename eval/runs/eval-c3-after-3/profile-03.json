@@ -1,0 +1,256 @@
+{
+  "profileId": "profile-03",
+  "tiers": {
+    "rule": 1,
+    "reviewer": 3,
+    "checker": 1,
+    "final": 3,
+    "setBy": [
+      "reviewer"
+    ],
+    "ruleReasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "A shared credential lets any holder access all resources the token permits, enabling lateral access or exfiltration of CRM data without per-agent accountability. If the token is leaked or reused by other services, it also broadens the blast radius.",
+      "recommendedControl": "Replace the shared token with a short-lived, per-agent credential (scoped least-privilege token or mTLS client cert) and enforce per-agent audit logging and automated rotation.",
+      "modelSeverity": "high",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The use of a shared token for credentials is a clear risk for identity and privilege abuse, as it lacks granular control and increases the blast radius if compromised.",
+      "contested": false
+    },
+    {
+      "category": "ASI01",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [ \"web\" ]",
+      "whyItMatters": "The agent consumes untrusted web content which can contain adversarial inputs or poisoned data that manipulates the agent's objectives, outputs, or tool use, producing misleading briefs or enabling exfiltration paths.",
+      "recommendedControl": "Apply input validation and provenance checks, restrict web sources to a curated allowlist, and add output provenance markers that flag claims derived from untrusted web content.",
+      "modelSeverity": "medium",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "Consuming untrusted web inputs without specified validation or sanitization creates a direct vector for prompt injection or data poisoning, which can manipulate the agent's output.",
+      "contested": false
+    },
+    {
+      "category": "ASI09",
+      "severity": "medium",
+      "evidenceQuote": "\"The brief is advisory only and a person reads it before using it.\"",
+      "whyItMatters": "The profile frames outputs as advisory which can create implicit trust by relationship managers; without enforced human-in-the-loop confirmation the agent may still be treated as authoritative, increasing risk of bad decisions based on incorrect or biased summaries.",
+      "recommendedControl": "Enforce explicit, documented human review steps in the UI before any operational use, add clear provenance/warning labels on briefs, and instrument mandatory confirmation logs capturing reviewer identity and action taken.",
+      "modelSeverity": "medium",
+      "id": "F3",
+      "secondModelVerdict": "disagree",
+      "secondModelReason": "The profile explicitly states 'a person reads it before using it,' which indicates a human-in-the-loop control, making the severity of 'Human-Agent Trust Exploitation' lower than suggested, as the brief is advisory and not acted upon directly by the agent.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"killSwitch\": { \"available\": true, \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\" }",
+      "whyItMatters": "A manual kill switch without a tested runbook introduces significant delay in responding to a rogue agent or system malfunction, potentially allowing harm to propagate before mitigation. Without a tested runbook, the effectiveness and speed of the kill switch are uncertain.",
+      "recommendedControl": "Develop and regularly test a comprehensive runbook for the kill switch, including clear steps, roles, and expected response times, to ensure rapid and effective incident response.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"logging\": { \"enabled\": true, \"destination\": \"Application logs, not yet forwarded to the SIEM\" }",
+      "whyItMatters": "Logs not being forwarded to a SIEM means that security teams lack centralized visibility into agent activities, making it difficult to detect anomalous behavior, investigate incidents, or perform forensic analysis in a timely manner. This hinders effective monitoring and threat detection.",
+      "recommendedControl": "Integrate agent logs with the central SIEM system to enable real-time monitoring, correlation with other security events, and long-term retention for auditing and incident response.",
+      "modelSeverity": "medium",
+      "raisedByRule": "R4"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "The agent reads internal CRM data and untrusted web sources while using a shared credential and no human-confirmation for actions, creating medium to high risks. Mitigations should include per-agent scoped credentials with rotation, stricter handling and provenance of web inputs, and enforced human-review controls and logging before briefs are used.",
+  "checkerSummary": "The agent is read-only, accessing public and internal documents, which places it in Tier 1. While the first reviewer identified valid concerns regarding shared credentials and untrusted inputs, I disagree with the severity of the human-agent trust exploitation finding given the explicit human review step. I've also identified missed findings related to the untested kill switch and inadequate logging, which are important for operational security.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1881,
+      "inputTokenDetails": {
+        "noCacheTokens": 89,
+        "cacheReadTokens": 1792,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1124,
+      "outputTokenDetails": {
+        "textTokens": 484,
+        "reasoningTokens": 640
+      },
+      "totalTokens": 3005,
+      "raw": {
+        "input_tokens": 1881,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 1792
+        },
+        "output_tokens": 1124,
+        "output_tokens_details": {
+          "reasoning_tokens": 640
+        },
+        "total_tokens": 3005
+      }
+    },
+    "latencyMs": 8856,
+    "generationId": "gen_01M5T948KAVG11J3E9M6ATCK42",
+    "provider": "openai",
+    "costUsd": 0.00231505
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c3",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2716,
+      "inputTokenDetails": {
+        "noCacheTokens": 2716,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1353,
+      "outputTokenDetails": {
+        "textTokens": 645,
+        "reasoningTokens": 708
+      },
+      "totalTokens": 4069,
+      "raw": {
+        "thoughtsTokenCount": 708,
+        "promptTokenCount": 2716,
+        "candidatesTokenCount": 645,
+        "totalTokenCount": 4069,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2716
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 645
+          }
+        ]
+      }
+    },
+    "latencyMs": 6918,
+    "generationId": "gen_01M5T94H6H8EYMCE9HAJ9Z63CH",
+    "provider": "vertex",
+    "costUsd": 0.0041973
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "A shared credential lets any holder access all resources the token permits, enabling lateral access or exfiltration of CRM data without per-agent accountability. If the token is leaked or reused by other services, it also broadens the blast radius.",
+        "recommendedControl": "Replace the shared token with a short-lived, per-agent credential (scoped least-privilege token or mTLS client cert) and enforce per-agent audit logging and automated rotation."
+      },
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [ \"web\" ]",
+        "whyItMatters": "The agent consumes untrusted web content which can contain adversarial inputs or poisoned data that manipulates the agent's objectives, outputs, or tool use, producing misleading briefs or enabling exfiltration paths.",
+        "recommendedControl": "Apply input validation and provenance checks, restrict web sources to a curated allowlist, and add output provenance markers that flag claims derived from untrusted web content."
+      },
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "\"The brief is advisory only and a person reads it before using it.\"",
+        "whyItMatters": "The profile frames outputs as advisory which can create implicit trust by relationship managers; without enforced human-in-the-loop confirmation the agent may still be treated as authoritative, increasing risk of bad decisions based on incorrect or biased summaries.",
+        "recommendedControl": "Enforce explicit, documented human review steps in the UI before any operational use, add clear provenance/warning labels on briefs, and instrument mandatory confirmation logs capturing reviewer identity and action taken."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The agent reads internal CRM data and untrusted web sources while using a shared credential and no human-confirmation for actions, creating medium to high risks. Mitigations should include per-agent scoped credentials with rotation, stricter handling and provenance of web inputs, and enforced human-review controls and logging before briefs are used."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The use of a shared token for credentials is a clear risk for identity and privilege abuse, as it lacks granular control and increases the blast radius if compromised."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "Consuming untrusted web inputs without specified validation or sanitization creates a direct vector for prompt injection or data poisoning, which can manipulate the agent's output."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "disagree",
+        "reason": "The profile explicitly states 'a person reads it before using it,' which indicates a human-in-the-loop control, making the severity of 'Human-Agent Trust Exploitation' lower than suggested, as the brief is advisory and not acted upon directly by the agent."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"killSwitch\": { \"available\": true, \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\" }",
+        "whyItMatters": "A manual kill switch without a tested runbook introduces significant delay in responding to a rogue agent or system malfunction, potentially allowing harm to propagate before mitigation. Without a tested runbook, the effectiveness and speed of the kill switch are uncertain.",
+        "recommendedControl": "Develop and regularly test a comprehensive runbook for the kill switch, including clear steps, roles, and expected response times, to ensure rapid and effective incident response."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"logging\": { \"enabled\": true, \"destination\": \"Application logs, not yet forwarded to the SIEM\" }",
+        "whyItMatters": "Logs not being forwarded to a SIEM means that security teams lack centralized visibility into agent activities, making it difficult to detect anomalous behavior, investigate incidents, or perform forensic analysis in a timely manner. This hinders effective monitoring and threat detection.",
+        "recommendedControl": "Integrate agent logs with the central SIEM system to enable real-time monitoring, correlation with other security events, and long-term retention for auditing and incident response."
+      }
+    ],
+    "proposedTier": 1,
+    "summary": "The agent is read-only, accessing public and internal documents, which places it in Tier 1. While the first reviewer identified valid concerns regarding shared credentials and untrusted inputs, I disagree with the severity of the human-agent trust exploitation finding given the explicit human review step. I've also identified missed findings related to the untested kill switch and inadequate logging, which are important for operational security."
+  },
+  "costUsd": 0.00651235,
+  "seconds": 15.774
+}

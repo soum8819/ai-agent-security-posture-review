@@ -95,3 +95,5 @@ checker c1, rules unchanged). See eval/EVAL_PLAN.md and eval/results.md.
 | eval-v1-before-2, eval-v1-before-3 | 02, 07 | v4 / c1 | $0.0144, $0.0137 | Extra frozen samples of the two worst tuning results, so the failure analysis compares 3 runs before with 3 runs after. |
 | eval-c2-after-1 | 07, 01, 09, 10 | v4 / c2 | $0.0324 | Failure analysis change A: the checker prompt now spells out the Tier 4 check (needs move money, write or run code, and no person confirming). 07 is the target; 01, 09 and 10 are tuning profiles whose key allows Tier 4, as a regression check. |
 | eval-c2-after-2, eval-c2-after-3 | 07 | v4 / c2 | $0.0070, $0.0090 | Two more samples of 07 after change A. |
+| eval-c3-after-1 | 02, 03, 01 | v4 / c3 | $0.0241 | Failure analysis change B: the checker prompt now says missing human confirmation is not a finding, and does not raise the tier, when every tool is read-only. 02 is the target; 03 is the other read-only tuning profile with no confirmation; 01 (write tools, no confirmation) is the regression check. |
+| eval-c3-after-2, eval-c3-after-3 | 02, 03 | v4 / c3 | $0.0136, $0.0124 | Two more samples of 02 and 03 after change B. |

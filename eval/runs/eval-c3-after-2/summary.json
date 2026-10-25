@@ -1,0 +1,9 @@
+{
+  "runName": "eval-c3-after-2",
+  "profiles": [
+    "02",
+    "03"
+  ],
+  "costUsd": 0.013638,
+  "createdAt": "2026-10-25T19:37:43.322Z"
+}
