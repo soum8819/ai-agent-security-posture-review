@@ -200,7 +200,10 @@ words is still to be written, here and on the site
 
 1. **A model can raise the tier, never lower it.** Rules set a floor for
    severity and tier; the final tier is the highest of the rule, reviewer and
-   checker tiers (CLAUDE.md, step 9). Why, in my words: TODO-SAM
+   checker tiers (CLAUDE.md, step 9). Why, in my words: Models can be
+   fooled into lowering the severity or risk floor, which is a security
+   risk. Erring on the lower side instead of the higher side can be
+   dangerous.
 2. **Evidence quotes stay verbatim and are checked by exact match** (first
    entry above). Why, in my words: TODO-SAM
 3. **The database, not the paused workflow run, is the record of a

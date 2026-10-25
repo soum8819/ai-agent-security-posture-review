@@ -43,7 +43,7 @@ export const TIERS = [
 
 // docs/DECISION_LOG.md, "the five decisions shown on the overview site".
 export const DECISIONS = [
-  { title: "A model can raise the tier, never lower it", fact: "Rules set a floor for severity and tier. The final tier is the highest of the rule, reviewer and checker tiers.", why: "TODO-SAM" },
+  { title: "A model can raise the tier, never lower it", fact: "Rules set a floor for severity and tier. The final tier is the highest of the rule, reviewer and checker tiers.", why: "Models can be fooled into lowering the severity or risk floor, which is a security risk. Erring on the lower side instead of the higher side can be dangerous." },
   { title: "Evidence quotes stay word for word", fact: "A finding whose quote is not found in the profile by exact match is dropped, so every quote on screen can be checked against the profile.", why: "TODO-SAM" },
   { title: "The database records the decision", fact: "A decision is written to our own database first, then the paused workflow is resumed. If the run cannot be resumed, the decision still stands.", why: "TODO-SAM" },
   { title: "Providers restricted, no prompt training", fact: "Each call names the providers allowed to serve it and refuses any that may train on prompts. Zero data retention is not set: it needs a Pro or Enterprise plan.", why: "TODO-SAM" },
