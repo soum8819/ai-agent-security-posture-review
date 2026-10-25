@@ -205,13 +205,21 @@ words is still to be written, here and on the site
    risk. Erring on the lower side instead of the higher side can be
    dangerous.
 2. **Evidence quotes stay verbatim and are checked by exact match** (first
-   entry above). Why, in my words: TODO-SAM
+   entry above). Why, in my words: So a reviewer can check every finding
+   against the profile itself. A paraphrase could hide a model's mistake or
+   quietly change the meaning.
 3. **The database, not the paused workflow run, is the record of a
-   decision** (CLAUDE.md, slice D design). Why, in my words: TODO-SAM
+   decision** (CLAUDE.md, slice D design). Why, in my words: The decision is
+   the part that has to be true. It is saved to our own database first, with
+   an audit entry, so it stands even if the paused run can't be resumed.
 4. **Providers restricted and no prompt training; zero data retention not
-   set on Hobby** (entry above). Why, in my words: TODO-SAM
+   set on Hobby** (entry above). Why, in my words: Today's profiles are
+   fictional, but a real customer's would describe real systems. So each
+   model call is limited to named providers that don't train on prompts.
 5. **Measure at a freeze and never tune on the held-out profiles**
-   (eval/results.md, step 13 entry above). Why, in my words: TODO-SAM
+   (eval/results.md, step 13 entry above). Why, in my words: If I tune on the
+   profiles I score, the score flatters me. So I froze the system, then
+   measured, and kept four profiles that were never used for tuning.
 
 ## 2026-10-25: how the overview site and README use numbers
 
