@@ -11,7 +11,8 @@
     "compare-rules": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/compare-rules.ts",
     "reviews": "node --env-file=.env.local --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/run-reviews.ts",
     "db:check": "node --env-file=.env.local --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/db-check.ts",
-    "db:setup": "node --env-file=.env.local --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/db-setup.ts"
+    "db:setup": "node --env-file=.env.local --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/db-setup.ts",
+    "check:final": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-todo-sam.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",

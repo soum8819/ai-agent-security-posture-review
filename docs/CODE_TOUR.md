@@ -1,17 +1,18 @@
 # Code tour
 
-One plain sentence per file: what it does and why. Draft written at the end
-of step 6, to be updated and reused in step 15.
+One plain sentence per file: what it does and why. Started at the end of
+step 6 and kept up to date since.
 
 ## Project notes
 
 - `CLAUDE.md`: the project's memory for Claude Code, holding the customer card, the routing plan, the 17 build steps, open decisions and progress.
 - `AGENTS.md`: a note written by Next.js telling AI assistants to check its bundled docs, because this version is newer than their training.
-- `README.md`: the front page of the GitHub repo, with what the project is, the live links and the two architecture diagrams.
+- `README.md`: the front page of the GitHub repo: what the project is, the live site and a 60-second demo path, the architecture diagram, how a review works, evaluation and security results with their limits, the enterprise path and how to run it.
+- `FEEDBACK.md`: my feedback on the Vercel products used, linked from the overview site.
 - `docs/SCHEMA.md`: the agent profile and the review result explained in plain words.
 - `docs/CODE_TOUR.md`: this file, a one-line guide to every file.
-- `docs/DECISION_LOG.md`: decisions about how the review tool behaves and why, starting with keeping evidence quotes verbatim even when they look like JSON.
-- `docs/builder-feedback.md`: a running log of what was good or frustrating about each Vercel product, for step 15b.
+- `docs/DECISION_LOG.md`: decisions about how the review tool behaves and why, from keeping evidence quotes verbatim to the evaluation, the blind-first checker experiment and the overview site.
+- `docs/builder-feedback.md`: a running log of what was good or frustrating about each Vercel product, the raw notes behind FEEDBACK.md.
 
 ## Settings
 
@@ -27,11 +28,14 @@ of step 6, to be updated and reused in step 15.
 - `app/layout.tsx`: the frame around every page, setting the fonts and the browser tab title.
 - `app/globals.css`: site-wide styling, where Tailwind is switched on.
 - `app/favicon.ico`: the small icon shown on the browser tab.
-- `app/page.tsx`: the overview page at `/`, with the title and one sentence about Harborline.
+- `app/page.tsx`: the public overview site at `/`: what the workflow does, how a review works, the four tiers, five decisions, the evaluation evidence with its limits, what runs on Vercel and what stays in Harborline's AWS.
+- `app/overview/content.ts`: every number and claim on the overview site in one place, each taken from eval/results.md, eval/BLIND_CHECKER.md, eval/security-tests.md or the decision log.
+- `app/overview/review-flow.tsx`: the five-step diagram on the overview site, with one gentle animation that stops when the system asks for reduced motion.
+- `public/overview/`: cropped copies of the consistent screenshots in docs/design/after, sized for the overview site.
 - `app/app/page.tsx`: the reviewer app home at `/app`: who is signed in, what is waiting for them, action cards for what their role can do, and how a review works.
 - `app/app/sign-in/page.tsx`: the sign-in page at `/app/sign-in`, labelled as a stand-in for Harborline's corporate sign-in, with four fictional users and a demo passcode.
 - `app/app/sign-in/actions.ts`: the server code behind signing in and out, which checks the passcode, refuses sign-in after 5 failed attempts in 15 minutes from one network address, and sets or clears the signed session cookie.
-- `app/app/reviews/page.tsx`: the review queue at `/app/reviews`, newest first, with status, final tier and contested count; a table on wide screens and one card per review on a phone. Submitters see only their own reviews.
+- `app/app/reviews/page.tsx`: the review queue at `/app/reviews`, newest first, with status, final tier and contested count; a table on wide screens and one card per review on a phone. Setup checks are hidden unless `?setup=show` is in the address. Submitters see only their own reviews.
 - `app/app/reviews/[id]/page.tsx`: one review, read-only: who submitted it and when, its status, the four tiers, the rules that fired, the findings (contested first), the findings the evidence check dropped, and the cost when it is stored. Submitters see only their own reviews, and anything else shows not found.
 - `app/app/reviews/[id]/evidence/route.ts`: downloads the evidence pack of a Tier 4 review as a text file for the review committee, with the same access rule as the review page.
 - `app/app/reviews/[id]/decision-panel.tsx`: the decision form, shown only to the person whose turn it is: four choices, a required note, a conditions box for Approve with conditions, and accept or dismiss for each contested finding; a double click gets a clear message.
@@ -42,12 +46,12 @@ of step 6, to be updated and reused in step 15.
 - `app/app/not-allowed/page.tsx`: shown when a signed-in user's role may not open a page.
 - `app/app/submit/page.tsx`: the page at `/app/submit`, giving the heading and holding the form; only Submitters may open it. Opened from a review with changes requested, it starts from that profile, shows the reviewer's note, and links the new review to the old one.
 - `app/app/submit/submit-form.tsx`: the form itself, which checks a profile against the schema in the browser, shows what to fix, and sends a valid profile for review.
-- `public/*.svg`: the default Next.js images, not used by any page yet.
+- `public/*.svg`: the default Next.js images, not used by any page.
 
 ## Design
 
 - `app/globals.css`: the design tokens: a neutral grey scale, one blue accent, severity and status colours, in light and dark mode, plus the focus ring, Geist as the page font and reduced motion.
-- `components/ui.tsx`: shared building blocks for every screen: page header, card, buttons, severity badge (word plus colour), tier chip, status pill, notices, and empty and loading states.
+- `components/ui.tsx`: shared building blocks for every screen: page header, card, buttons, severity badge (word plus colour), tier chip (stronger with each tier, always with its word and digit), status pill, notices, and empty and loading states.
 - `components/nav-link.tsx`: a top-bar link that marks the current page.
 - `app/app/layout.tsx`: the frame around every reviewer app page: product name, the pages your role can use, who is signed in, Sign out, and a footer naming the fictional customer.
 - `docs/design/`: before and after screenshots at desktop and phone width.
@@ -74,7 +78,7 @@ of step 6, to be updated and reused in step 15.
 - `lib/sample-profiles.ts`: loads the 12 test profiles so the form can offer them as samples.
 - `lib/review-prompt.ts`: the reviewer model's instructions, with the profile placed between clearly marked lines as data, never as instructions.
 - `lib/analyze.ts`: sends one profile to the reviewer model through AI Gateway, throws away findings whose evidence quote is not in the profile, and applies the rule floor.
-- `lib/crosscheck-prompt.ts`: the checker model's instructions, sharing the reviewer's rules and showing the profile and the first model's findings as data.
+- `lib/crosscheck-prompt.ts`: the checker model's instructions (version c3), sharing the reviewer's rules, showing the profile and the first model's findings as data, and two sentences added in step 13 on Tier 4 and on read-only agents.
 - `lib/crosscheck.ts`: sends the profile and the first model's findings to the checker model, gets a verdict for each finding plus anything missed, drops missed findings with no real quote, and marks contested findings.
 - `lib/review.ts`: one full review: reviewer, then checker, then contested marking and the final tier, saving both models' names, tokens, time and cost.
 - `lib/rules.ts`: eight fixed rules that set a minimum severity from what a profile lists, the tier assignment, the check that a model can never lower a rule's severity, and the final tier (the highest of the rule tier and both models' tiers).
@@ -106,7 +110,10 @@ of step 6, to be updated and reused in step 15.
 - `eval/profiles/profile-01.json` to `profile-12.json`: the 12 fictional agent profiles the tool will be tested on, one per file.
 - `eval/labels/profile-01.json` to `profile-12.json`: the answer key, one file per profile, with the expected tier, the critical risks a good review must catch, and whether the profile is held out.
 - `eval/labels/README.md`: where the answer key came from, the rule used to write it, and how the 4 held-out profiles were drawn.
-- `eval/runs/`: raw results of every reviewer model run, one folder per run, with a README logging what changed between runs.
+- `eval/runs/`: raw results of every model run, one folder per run, with a README logging what changed between runs and what each cost.
+- `eval/EVAL_PLAN.md`: the step 13 evaluation plan, written before any run.
+- `eval/results.md`: the step 13 results: the eval-v1 freeze and the after-fix numbers, tuning and held-out kept apart, the two failures with before and after, and the honest limits.
+- `eval/BLIND_CHECKER.md`: the blind-first checker experiment: its plan, committed before any run, its results and what they mean.
 - `eval/security-tests.md`: every step 12 attack and its result, including the failures found and fixed.
 - `eval/RULE_RUNS.md`: a log of every rules-versus-answer-key run, kept for the record, with what changed between runs.
 - `eval/ASSUMPTIONS.md`: where each profile came from and every value chosen where the source did not say.
@@ -127,14 +134,17 @@ of step 6, to be updated and reused in step 15.
 - `tests/crosscheck.test.ts`: proves contested marking, kept floors, the evidence check on missed findings, the final tier, and that the checker never sees a rule floor; calls no model.
 - `scripts/security-attacks.ts`: the step 12 prompt-injection attacks, run by calling the review function directly, with no database write.
 - `scripts/security-http.ts`: the step 12 attacks on the routes: signed out, wrong role, another site, oversized requests, decision reuse and the public webhook address; locally it also tests the sign-in attempt limit.
+- `scripts/evaluate.ts`: the step 13 evaluation: runs the full pipeline on the profiles with no database write, records the actual cost of every call, and writes eval/results.md.
+- `scripts/experiment-blind-checker.ts`: the blind-first experiment: the unchanged pipeline plus one extra checker call that sees only the profile and the rules output.
+- `scripts/check-todo-sam.ts`: the final check before submission: fails while any place still waits for the project owner's own words; run with `npm run check:final`.
 - `scripts/compare-rules.ts`: a developer tool, not part of the app, that compares the rules' tier with the answer key and lists the held-out profiles separately; run with `npm run compare-rules`.
 
 ## Known limits
 
 - Rule 2 (runs code with no sandbox): the profile has no sandbox field, so any tool with run-code permission fires this rule, even if the team has a sandbox.
 - Rule 7 (customer financial data with no logging): weak OWASP fit. No category is mainly about missing logs; it is mapped to ASI10 Rogue Agents because that category's official mitigations call for audit logs of all agent actions.
-- ASI01 versus ASI06: the reviewer model often files untrusted-input risks under ASI06 (Memory & Context Poisoning) where the answer key expects ASI01 (Agent Goal Hijack). Prompt v4 added OWASP's own descriptions, but in its full run ASI01 matched the answer key on only one profile. See eval/runs/README.md.
-- Checker anchoring: the checker sees the first model's findings before forming its own view, so it tends to agree (48 of 49 findings in the step 9 record run). A blind first review by the checker would reduce this, at about $0.005 more per review.
+- ASI01 versus ASI06: the models often file untrusted-input risks under ASI06 (Memory & Context Poisoning) where the answer key expects ASI01 (Agent Goal Hijack): in step 13, 7 of the 8 missed ASI01 risks were filed as ASI06. See eval/results.md.
+- Checker anchoring: the checker sees the first model's findings before forming its own view, so it tends to agree (48 of 49 findings in the step 9 record run, 45 of 45 in the step 13 baseline). The blind-first experiment confirmed that its agreement says little on its own, but a blind checker was not better: tiers were unchanged and most of its extra disagreements were run-to-run noise. See eval/BLIND_CHECKER.md.
 - Reviewer model: openai/gpt-5-mini does not accept a temperature setting, so its answers vary between runs even with the same prompt; reasoning effort is fixed at low instead.
 - Local paused runs: on this computer, Workflow keeps paused runs in `.next/workflow-data`, and every `npm run build` recreates the `.next` folder, so it deletes all local paused runs. A decision on such a review still stands (the database is the record), but the run cannot be resumed. Runs on Vercel are not affected.
 - Tier 4 and money: an agent that moves money only after a person confirms is not Tier 4 by itself. This is the project owner's reading of ambiguous customer card wording, to be confirmed with the customer.

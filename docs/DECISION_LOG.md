@@ -190,3 +190,46 @@ were unchanged and its extra disagreements are mostly run-to-run noise.
 
 **Profile-04 left as it is.** No decision on its tier; the key is unchanged
 and the open question above stands as written.
+
+## 2026-10-25: the five decisions shown on the overview site
+
+The overview site at `/` shows five decisions. Each one's facts come from
+this log, CLAUDE.md or eval/results.md; the "why" in the project owner's own
+words is still to be written, here and on the site
+(`app/overview/content.ts`).
+
+1. **A model can raise the tier, never lower it.** Rules set a floor for
+   severity and tier; the final tier is the highest of the rule, reviewer and
+   checker tiers (CLAUDE.md, step 9). Why, in my words: TODO-SAM
+2. **Evidence quotes stay verbatim and are checked by exact match** (first
+   entry above). Why, in my words: TODO-SAM
+3. **The database, not the paused workflow run, is the record of a
+   decision** (CLAUDE.md, slice D design). Why, in my words: TODO-SAM
+4. **Providers restricted and no prompt training; zero data retention not
+   set on Hobby** (entry above). Why, in my words: TODO-SAM
+5. **Measure at a freeze and never tune on the held-out profiles**
+   (eval/results.md, step 13 entry above). Why, in my words: TODO-SAM
+
+## 2026-10-25: how the overview site and README use numbers
+
+**Only recorded numbers.** Every number on the site and in the README comes
+from eval/results.md, eval/BLIND_CHECKER.md, eval/security-tests.md or this
+log, and the freeze numbers come before the after-fix numbers, labelled. The
+problem section uses no market numbers. The fictional customer card's own
+figures (about 40 agents this year, heading toward 300; about 15 business
+days per manual review) are shown only as the scenario's brief, labelled as
+fictional, and no claim is made that the tool shortens review time, because
+only machine time was measured.
+
+**The 1-day run retention** comes from the project notes (CLAUDE.md, slice D
+design), not from the four result files; the bundled Workflow docs do not
+state a Hobby figure. It is shown as a known limit.
+
+**Screenshots on the site** are cropped copies of the consistent screenshots
+in docs/design/after (Tier 3 review f4e813da, Tier 4 review 94a0d174, the
+queue), made with the system's own image tool so no package was added. The
+crops keep the top of each page, where the approver's summary is.
+
+**Things left for the project owner's words** carry the marker that
+`scripts/check-todo-sam.ts` searches for. `npm run check:final` fails while
+any remain, and must pass before the project is submitted.
