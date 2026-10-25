@@ -15,6 +15,7 @@ export const REVIEW_STATUSES = [
   "awaiting_appsec",
   "awaiting_model_risk",
   "approved",
+  "approved_with_conditions",
   "rejected",
   "changes_requested",
   "routed_to_committee",

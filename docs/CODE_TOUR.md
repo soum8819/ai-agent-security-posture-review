@@ -32,7 +32,8 @@ of step 6, to be updated and reused in step 15.
 - `app/app/sign-in/actions.ts`: the server code behind signing in and out, which checks the passcode and sets or clears the signed session cookie.
 - `app/app/reviews/page.tsx`: the review queue at `/app/reviews`, newest first, with status, final tier and contested count; a table on wide screens and one card per review on a phone. Submitters see only their own reviews.
 - `app/app/reviews/[id]/page.tsx`: one review, read-only: who submitted it and when, its status, the four tiers, the rules that fired, the findings (contested first), the findings the evidence check dropped, and the cost when it is stored. Submitters see only their own reviews, and anything else shows not found.
-- `app/app/reviews/[id]/sections.tsx`: the parts of the review page: the severity badge (always with its word, never colour alone), the tier panel, the rules that fired with the triggering field highlighted, the findings and the dropped findings.
+- `app/app/reviews/[id]/decision-panel.tsx`: the decision form, shown only to the person whose turn it is: four choices, a required note, a conditions box for Approve with conditions, and accept or dismiss for each contested finding; a double click gets a clear message.
+- `app/app/reviews/[id]/sections.tsx`: the parts of the review page, including the read-only decision history: the severity badge (always with its word, never colour alone), the tier panel, the rules that fired with the triggering field highlighted, the findings and the dropped findings.
 - `app/app/reviews/[id]/auto-refresh.tsx`: reloads the review page every few seconds while the models are still working.
 - `app/app/not-allowed/page.tsx`: shown when a signed-in user's role may not open a page.
 - `app/app/submit/page.tsx`: the page at `/app/submit`, giving the heading and holding the form; only Submitters may open it.
@@ -66,6 +67,7 @@ of step 6, to be updated and reused in step 15.
 - `lib/review.ts`: one full review: reviewer, then checker, then contested marking and the final tier, saving both models' names, tokens, time and cost.
 - `lib/rules.ts`: eight fixed rules that set a minimum severity from what a profile lists, the tier assignment, the check that a model can never lower a rule's severity, and the final tier (the highest of the rule tier and both models' tiers).
 - `lib/limits.ts`: the daily submission limit (10 per user in any 24 hours) and where a finished review goes next (tier 4 to the committee, other tiers to AppSec).
+- `lib/authz.ts`: the one check that decides who may decide a review: the right role for the stage, the right stage for the tier, never your own submission, a different person for the second tier 3 stage, a note, conditions when needed, and every contested finding resolved before approving.
 - `lib/review-access.ts`: the one rule for who may see a review, used by both the queue and the review page.
 - `lib/review-view.ts`: turns stored review data into plain words: statuses, which tier set the final tier, model and provider names, what each rule requires, field values, finding order, badge colours and cost.
 - `lib/labels.ts`: plain words for the profile's fixed choices, shared by the submit form and the review screens.
@@ -78,7 +80,8 @@ of step 6, to be updated and reused in step 15.
 
 - `workflows/review/index.ts`: the durable review: rules and the first model, the second model, save the result, then pause for an AppSec decision; tier 4 ends as routed to committee instead.
 - `workflows/review/steps.ts`: the workflow's steps, each run outside the web request and kept once finished, so a later failure never repeats a paid model call; the two model steps retry at most once.
-- `workflows/review/hooks.ts`: the AppSec pause point, kept apart so the approval route can resume a review without loading model code.
+- `workflows/review/hooks.ts`: the AppSec pause and, for tier 3, the Model Risk pause, kept apart so the approval route can resume a review without loading model code.
+- `app/api/reviews/[id]/decisions/route.ts`: records one decision: checks it with `lib/authz.ts`, accepts requests only from this site's own pages, writes the decision and its audit event to the database first, then tries to resume the paused workflow, and records whether it could.
 - `app/api/reviews/route.ts`: receives a submitted profile from a signed-in Submitter, checks it and the daily limit, saves the review, starts the workflow and returns at once with the review id.
 
 ## Evaluation set
@@ -95,6 +98,7 @@ of step 6, to be updated and reused in step 15.
 - `tests/rules.test.ts`: one test for each rule, for tier assignment and for the severity floor, using made-up profiles; run with `npm test`.
 - `tests/analyze.test.ts`: proves the evidence check drops a made-up finding and the rule floor raises a severity that is too low; calls no model.
 - `scripts/run-reviews.ts`: a developer tool that runs full reviews (both models) over the evaluation profiles and saves raw results and actual cost to `eval/runs`; run with `npm run reviews -- --set tuning` or `--set all`, or `--checker-only --from <run folder>` to test the checker on saved reviewer results.
+- `tests/authz.test.ts`: proves every refusal of the decision check and the allowed path for each tier, and that the decision form is offered to exactly the people the route accepts.
 - `tests/limits.test.ts`: proves the 11th submission in 24 hours is refused and that tier 4 is routed to the committee.
 - `tests/session.test.ts`: proves a session cookie cannot be altered, forged with another secret or used after it expires, that the passcode must match exactly, and what each role may do.
 - `tests/crosscheck.test.ts`: proves contested marking, kept floors, the evidence check on missed findings, the final tier, and that the checker never sees a rule floor; calls no model.
@@ -107,6 +111,7 @@ of step 6, to be updated and reused in step 15.
 - ASI01 versus ASI06: the reviewer model often files untrusted-input risks under ASI06 (Memory & Context Poisoning) where the answer key expects ASI01 (Agent Goal Hijack). Prompt v4 added OWASP's own descriptions, but in its full run ASI01 matched the answer key on only one profile. See eval/runs/README.md.
 - Checker anchoring: the checker sees the first model's findings before forming its own view, so it tends to agree (48 of 49 findings in the step 9 record run). A blind first review by the checker would reduce this, at about $0.005 more per review.
 - Reviewer model: openai/gpt-5-mini does not accept a temperature setting, so its answers vary between runs even with the same prompt; reasoning effort is fixed at low instead.
+- Local paused runs: on this computer, Workflow keeps paused runs in `.next/workflow-data`, and every `npm run build` recreates the `.next` folder, so it deletes all local paused runs. A decision on such a review still stands (the database is the record), but the run cannot be resumed. Runs on Vercel are not affected.
 - Tier 4 and money: an agent that moves money only after a person confirms is not Tier 4 by itself. This is the project owner's reading of ambiguous customer card wording, to be confirmed with the customer.
 
 ## Not in git

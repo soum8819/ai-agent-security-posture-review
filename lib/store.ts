@@ -124,3 +124,105 @@ export async function listReviews(scope: ReviewScope, limit = 200): Promise<Revi
                   FROM reviews WHERE submitter_id = ${scope.submitterId} ORDER BY created_at DESC LIMIT ${limit}`;
   return rows as ReviewListRow[];
 }
+
+export type DecisionRow = {
+  id: string;
+  review_id: string;
+  stage: "appsec" | "model_risk";
+  decider_id: string;
+  decider_role: string;
+  outcome: "approved" | "approved_with_conditions" | "rejected" | "changes_requested";
+  note: string;
+  conditions: string | null;
+  contested_resolutions: { findingId: string; resolution: "accepted" | "dismissed"; reason?: string }[];
+  workflow_resume: string | null;
+  environment: string;
+  created_at: string;
+};
+
+export async function getDecisions(reviewId: string): Promise<DecisionRow[]> {
+  const rows = await getSql()`SELECT * FROM decisions WHERE review_id = ${reviewId} ORDER BY created_at`;
+  return rows as DecisionRow[];
+}
+
+// Records one decision as a single statement, so it cannot half-happen: it
+// only goes ahead if the review is still waiting for this stage (and, for
+// Model Risk, the decider did not make the AppSec decision). It then moves the
+// review on, inserts the decision and writes the audit event, all together.
+// Returns the new decision id, or null if nothing was recorded.
+export async function recordDecision(input: {
+  reviewId: string;
+  expectedStatus: ReviewStatus;
+  nextStatus: ReviewStatus;
+  stage: "appsec" | "model_risk";
+  decider: { id: string; role: string };
+  outcome: DecisionRow["outcome"];
+  note: string;
+  conditions: string | null;
+  resolutions: DecisionRow["contested_resolutions"];
+}): Promise<string | null> {
+  const details = {
+    stage: input.stage,
+    outcome: input.outcome,
+    note: input.note,
+    conditions: input.conditions,
+    resolutions: input.resolutions,
+    statusBefore: input.expectedStatus,
+    statusAfter: input.nextStatus,
+  };
+  const rows = await getSql().query(
+    `WITH target AS (
+       SELECT r.id FROM reviews r
+       WHERE r.id = $1 AND r.status = $2
+         AND NOT ($3 = 'model_risk' AND EXISTS (
+           SELECT 1 FROM decisions d WHERE d.review_id = r.id AND d.stage = 'appsec' AND d.decider_id = $4))
+       FOR UPDATE
+     ), moved AS (
+       UPDATE reviews SET status = $5, updated_at = now() WHERE id IN (SELECT id FROM target) RETURNING id
+     ), decided AS (
+       INSERT INTO decisions (review_id, stage, decider_id, decider_role, outcome, note, conditions, contested_resolutions, environment)
+       SELECT id, $3, $4, $6, $7, $8, $9, $10::jsonb, $11 FROM moved
+       RETURNING id, review_id
+     ), logged AS (
+       INSERT INTO audit_events (review_id, actor_id, actor_role, event_type, details, environment)
+       SELECT review_id, $4, $6, 'decision_recorded', $12::jsonb || jsonb_build_object('decisionId', id), $11 FROM decided
+       RETURNING id
+     )
+     SELECT (SELECT id FROM decided) AS decision_id, (SELECT count(*) FROM logged)::int AS logged`,
+    [
+      input.reviewId,
+      input.expectedStatus,
+      input.stage,
+      input.decider.id,
+      input.nextStatus,
+      input.decider.role,
+      input.outcome,
+      input.note,
+      input.conditions,
+      JSON.stringify(input.resolutions),
+      appEnvironment(),
+      JSON.stringify(details),
+    ],
+  );
+  const row = rows[0] as { decision_id: string | null } | undefined;
+  return row?.decision_id ?? null;
+}
+
+// After a decision: whether the paused workflow run was resumed, or could not
+// be (expired, or never started). The decision stands either way.
+export async function recordWorkflowResume(reviewId: string, decisionId: string, outcome: "resumed" | "no_paused_run", detail?: string) {
+  const sql = getSql();
+  await sql.transaction([
+    sql`UPDATE decisions SET workflow_resume = ${outcome} WHERE id = ${decisionId}`,
+    audit(reviewId, null, outcome === "resumed" ? "workflow_resumed" : "workflow_not_resumed", {
+      decisionId,
+      ...(detail ? { detail } : {}),
+    }),
+  ]);
+}
+
+// The newer review that resubmits this one, if any.
+export async function getResubmission(reviewId: string): Promise<{ id: string } | null> {
+  const [row] = await getSql()`SELECT id FROM reviews WHERE supersedes = ${reviewId}`;
+  return (row as { id: string }) ?? null;
+}

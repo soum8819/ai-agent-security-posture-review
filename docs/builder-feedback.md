@@ -13,3 +13,5 @@ AI Gateway returned a 403 until a card was added to unlock the free credits. The
 
 ## Workflow
 Hook registration only commits when the workflow suspends. The warning that you cannot resume right after start() is on the resumeHook page, not in the hooks guide where I was reading.
+
+On a local machine, Workflow keeps paused runs in `.next/workflow-data`, inside the build folder, so every `npm run build` silently deletes them. A paused review I was testing simply vanished and its hook could no longer be resumed, with no warning from the build. Keeping local run data outside `.next` by default, or warning when a build deletes paused runs, would prevent this.

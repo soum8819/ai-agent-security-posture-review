@@ -6,18 +6,21 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { requireUser } from "@/lib/auth";
+import { STAGE_NAMES, stageYouMayDecide } from "@/lib/authz";
 import { canViewReview } from "@/lib/review-access";
 import {
   SETUP_CHECK_LABEL,
   SETUP_CHECK_SUBMITTER,
   STATUS_TEXT,
+  asiName,
   formatTime,
   reviewCost,
   submitterName,
 } from "@/lib/review-view";
-import { getReview } from "@/lib/store";
+import { getDecisions, getReview } from "@/lib/store";
 import { AutoRefresh } from "./auto-refresh";
-import { DroppedFindings, Findings, RuleHits, TierPanel, focusRing } from "./sections";
+import { DecisionPanel } from "./decision-panel";
+import { DecisionHistory, DroppedFindings, Findings, RuleHits, TierPanel, focusRing } from "./sections";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
@@ -32,6 +35,16 @@ async function ReviewDetail({ params }: { params: PageProps<"/app/reviews/[id]">
 
   const working = review.status === "queued" || review.status === "reviewing";
   const cost = result ? reviewCost(result.reviewer, result.checker) : null;
+
+  const decisions = await getDecisions(review.id);
+  const contested = (result?.findings ?? [])
+    .filter((f) => f.contested)
+    .map((f) => ({ id: f.id, label: `${f.category} ${asiName(f.category)}` }));
+  const findingLabels = Object.fromEntries((result?.findings ?? []).map((f) => [f.id, `${f.category} ${asiName(f.category)}`]));
+  // The same check the approval route uses decides whether to show the form.
+  const myStage = result
+    ? stageYouMayDecide({ user, review, decisions, contestedIds: contested.map((c) => c.id) })
+    : null;
 
   return (
     <>
@@ -85,6 +98,12 @@ async function ReviewDetail({ params }: { params: PageProps<"/app/reviews/[id]">
           <Findings result={result} />
           <DroppedFindings result={result} />
         </>
+      )}
+
+      <DecisionHistory decisions={decisions} findingLabels={findingLabels} />
+
+      {myStage && (
+        <DecisionPanel reviewId={review.id} stage={myStage} stageName={STAGE_NAMES[myStage]} contested={contested} />
       )}
 
       {cost && (

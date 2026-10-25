@@ -13,6 +13,7 @@ export const STATUS_TEXT: Record<ReviewStatus, string> = {
   awaiting_appsec: "Waiting for an AppSec decision",
   awaiting_model_risk: "Waiting for a Model Risk decision",
   approved: "Approved",
+  approved_with_conditions: "Approved with conditions",
   rejected: "Rejected",
   changes_requested: "Changes requested",
   routed_to_committee: "Sent to the review committee (Tier 4 is never approved in this app)",
@@ -164,6 +165,18 @@ export function contrastRatio(a: string, b: string) {
   const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
   return (hi + 0.05) / (lo + 0.05);
 }
+
+export const OUTCOME_TEXT: Record<string, string> = {
+  approved: "Approved",
+  approved_with_conditions: "Approved with conditions",
+  rejected: "Rejected",
+  changes_requested: "Changes requested",
+};
+
+export const RESUME_TEXT: Record<string, string> = {
+  resumed: "The paused review workflow was resumed.",
+  no_paused_run: "No paused workflow was waiting, so none was resumed. The decision still stands.",
+};
 
 export const VERDICT_TEXT: Record<string, string> = {
   agree: "Agrees",

@@ -7,7 +7,7 @@ import { crosscheckReview, type CrosscheckResult } from "../../lib/crosscheck.ts
 import { statusAfterReview } from "../../lib/limits.ts";
 import { agentProfileSchema } from "../../lib/profile-schema.ts";
 import { combineReview } from "../../lib/review.ts";
-import { getReview, markFailed, markReviewing, recordAuditEvent, saveReviewResult } from "../../lib/store.ts";
+import { getReview, markFailed, markReviewing, saveReviewResult } from "../../lib/store.ts";
 
 async function loadProfile(reviewId: string) {
   const found = await getReview(reviewId);
@@ -48,9 +48,12 @@ export async function failStep(reviewId: string, message: string) {
   await markFailed(reviewId, message);
 }
 
-// Slice D records the decision in the database before resuming; this step
-// only notes that the paused run was resumed.
-export async function workflowResumedStep(reviewId: string, stage: "appsec", decisionId: string) {
+// After a pause: read where the review stands. The decision was already
+// recorded in the database by the approval route; the database, not the
+// resume message, decides what happens next.
+export async function reviewStatusStep(reviewId: string) {
   "use step";
-  await recordAuditEvent(reviewId, null, "workflow_resumed", { stage, decisionId });
+  const found = await getReview(reviewId);
+  if (!found) throw new FatalError(`review ${reviewId} not found`);
+  return found.review.status;
 }

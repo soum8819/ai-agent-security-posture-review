@@ -9,3 +9,10 @@ export const appsecHook = defineHook<{ decisionId: string }>();
 export function appsecToken(reviewId: string) {
   return `appsec-${reviewId}`;
 }
+
+// Tier 3 only: the second pause, for the Model Risk decision after AppSec.
+export const modelRiskHook = defineHook<{ decisionId: string }>();
+
+export function modelRiskToken(reviewId: string) {
+  return `model-risk-${reviewId}`;
+}

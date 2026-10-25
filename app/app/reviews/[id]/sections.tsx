@@ -1,13 +1,18 @@
 // The parts of the review detail page. Server components, read-only.
 import type { AgentProfile } from "@/lib/profile-schema";
 import type { ReviewRecord } from "@/lib/review";
+import type { DecisionRow } from "@/lib/store";
 import {
+  OUTCOME_TEXT,
+  RESUME_TEXT,
   RULE_REQUIREMENTS,
   SEVERITY_COLOURS,
   SEVERITY_WORDS,
   VERDICT_TEXT,
   asiName,
+  formatTime,
   modelLabel,
+  submitterName,
   splitFindings,
   tierSentence,
   triggeringFields,
@@ -268,5 +273,54 @@ export function DroppedFindings({ result }: { result: ReviewRecord }) {
         ))}
       </ul>
     </details>
+  );
+}
+
+const STAGE_TITLES: Record<string, string> = { appsec: "AppSec decision", model_risk: "Model Risk decision" };
+
+// Every recorded decision, read-only, for everyone who may see the review.
+export function DecisionHistory({ decisions, findingLabels }: { decisions: DecisionRow[]; findingLabels: Record<string, string> }) {
+  if (decisions.length === 0) return null;
+  return (
+    <section aria-labelledby="decisions" className="mt-10">
+      <h2 id="decisions" className="text-xl font-semibold">Decisions</h2>
+      <ol className="mt-3 space-y-4">
+        {decisions.map((d) => (
+          <li key={d.id} className="rounded border border-zinc-200 p-4 dark:border-zinc-800">
+            <p className="font-semibold">
+              {STAGE_TITLES[d.stage]}: {OUTCOME_TEXT[d.outcome] ?? d.outcome}
+            </p>
+            <p className={`text-sm ${muted}`}>
+              By {submitterName(d.decider_id)}, {formatTime(d.created_at)}
+            </p>
+            <p className="mt-2">
+              <span className="font-medium">Note: </span>
+              {d.note}
+            </p>
+            {d.conditions && (
+              <p className="mt-1">
+                <span className="font-medium">Conditions: </span>
+                {d.conditions}
+              </p>
+            )}
+            {d.contested_resolutions.length > 0 && (
+              <div className="mt-2">
+                <p className="font-medium">Contested findings</p>
+                <ul className="list-disc pl-5">
+                  {d.contested_resolutions.map((r) => (
+                    <li key={r.findingId}>
+                      {r.findingId}
+                      {findingLabels[r.findingId] ? ` (${findingLabels[r.findingId]})` : ""}:{" "}
+                      {r.resolution === "accepted" ? "accepted" : `dismissed. Reason: ${r.reason ?? ""}`}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {d.workflow_resume && <p className={`mt-2 text-sm ${muted}`}>{RESUME_TEXT[d.workflow_resume] ?? d.workflow_resume}</p>}
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }

@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS reviews (
   profile jsonb NOT NULL,
   status text NOT NULL CHECK (status IN (
     'queued', 'reviewing', 'awaiting_appsec', 'awaiting_model_risk',
-    'approved', 'rejected', 'changes_requested', 'routed_to_committee', 'failed'
+    'approved', 'approved_with_conditions', 'rejected', 'changes_requested',
+    'routed_to_committee', 'failed'
   )),
   rule_tier int CHECK (rule_tier BETWEEN 1 AND 4),
   reviewer_tier int CHECK (reviewer_tier BETWEEN 1 AND 4),
@@ -43,8 +44,9 @@ CREATE TABLE IF NOT EXISTS decisions (
   stage text NOT NULL CHECK (stage IN ('appsec', 'model_risk')),
   decider_id text NOT NULL,
   decider_role text NOT NULL,
-  outcome text NOT NULL CHECK (outcome IN ('approved', 'rejected', 'changes_requested')),
+  outcome text NOT NULL CHECK (outcome IN ('approved', 'approved_with_conditions', 'rejected', 'changes_requested')),
   note text NOT NULL CHECK (length(trim(note)) > 0),
+  conditions text,
   contested_resolutions jsonb NOT NULL DEFAULT '[]'::jsonb,
   -- Whether the paused workflow run was resumed, or had already expired.
   workflow_resume text,
@@ -85,3 +87,31 @@ DROP TRIGGER IF EXISTS audit_events_no_truncate ON audit_events;
 CREATE TRIGGER audit_events_no_truncate
   BEFORE TRUNCATE ON audit_events
   FOR EACH STATEMENT EXECUTE FUNCTION audit_events_refuse_change();
+
+-- Step 10, slice D changes for a database created before slice D. Each one is
+-- safe to run again.
+
+-- Approve with conditions is a fourth outcome and its own final status.
+ALTER TABLE reviews DROP CONSTRAINT IF EXISTS reviews_status_check;
+
+ALTER TABLE reviews ADD CONSTRAINT reviews_status_check CHECK (status IN (
+  'queued', 'reviewing', 'awaiting_appsec', 'awaiting_model_risk',
+  'approved', 'approved_with_conditions', 'rejected', 'changes_requested',
+  'routed_to_committee', 'failed'
+));
+
+ALTER TABLE decisions ADD COLUMN IF NOT EXISTS conditions text;
+
+ALTER TABLE decisions DROP CONSTRAINT IF EXISTS decisions_outcome_check;
+
+ALTER TABLE decisions ADD CONSTRAINT decisions_outcome_check
+  CHECK (outcome IN ('approved', 'approved_with_conditions', 'rejected', 'changes_requested'));
+
+-- Approve with conditions must say what the conditions are.
+ALTER TABLE decisions DROP CONSTRAINT IF EXISTS decisions_conditions_check;
+
+ALTER TABLE decisions ADD CONSTRAINT decisions_conditions_check
+  CHECK (outcome <> 'approved_with_conditions' OR length(trim(coalesce(conditions, ''))) > 0);
+
+-- A review can be resubmitted once, so old and new link one to one.
+CREATE UNIQUE INDEX IF NOT EXISTS reviews_one_resubmission ON reviews (supersedes) WHERE supersedes IS NOT NULL;

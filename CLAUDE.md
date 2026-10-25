@@ -99,6 +99,15 @@ reviewer app lives in the `app/app/` folder.
   the decision still stands and the review's status is set from the database.
   The decision records whether the run was resumed or had expired, and both
   cases go in the audit log.
+- Slice D decisions (decided in step 10): four choices, Approve, Approve with
+  conditions (a required Conditions box, final status approved with
+  conditions), Reject (final status rejected) and Request changes (ends the
+  review; the submitter resubmits once, as a new linked review). Notes are
+  required for every choice. Each approving stage records its own resolution
+  of every contested finding (accept, or dismiss with a reason). One check,
+  lib/authz.ts, decides who may decide; the review page uses the same check to
+  decide whether to show the decision form. Decision requests must come from
+  this site (Origin check).
 - Assumption to confirm with the customer (decided in step 10): the card says
   Tier 1 needs "one approver" but does not name the role. The project owner's
   reading is that the Tier 1 approver is AppSec, the same as Tier 2.
@@ -141,4 +150,4 @@ Updated by the project owner after each step.
 - [x] Step 7: done
 - [ ] Step 8: built, my read-through of the results pending
 - [ ] Step 9: built; finish line partly met: 1 of 12 contested, reported as is
-- [ ] Step 10: in progress, merged with step 11a (slices A and B done; slice C: read-only review queue and detail screens built; slice D approvals next)
+- [ ] Step 10: in progress, merged with step 11a (slices A to C done; slice D: approvals, decision panel and history built; evidence pack and resubmission next)
