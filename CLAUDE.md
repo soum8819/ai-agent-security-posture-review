@@ -159,4 +159,5 @@ Updated by the project owner after each step.
 - [ ] Step 8: built, my read-through of the results pending
 - [ ] Step 9: built; finish line partly met: 1 of 12 contested, reported as is
 - [x] Step 10: done, with step 11a (live check passed: review 080fc26e resumed across deployments and completed)
-- [ ] Step 11: in progress (11b audit page and 11d data handling next; 11c skipped, registry described in the README)
+- [ ] Step 11: in progress (11b audit page and 11d data handling built; 11c skipped, registry described in the README)
+- [ ] Step 12: next (attack tests, sign-in attempt limit, input limits, key scan)

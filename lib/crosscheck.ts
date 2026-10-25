@@ -4,12 +4,14 @@
 import { generateText, Output } from "ai";
 import { checkEvidence, type KeptFinding } from "./analyze.ts";
 import { CHECK_PROMPT_VERSION, CHECK_SYSTEM_PROMPT, checkUserPrompt } from "./crosscheck-prompt.ts";
-import { CHECKER_MODEL } from "./models.ts";
+import { CHECKER_MODEL, CHECKER_PROVIDERS, gatewayOptions, resolvedProvider } from "./models.ts";
 import type { AgentProfile } from "./profile-schema.ts";
 import { crosscheckSchema, type Crosscheck, type ModelReview } from "./review-schema.ts";
 
 export const CHECK_SETTINGS = {
   model: CHECKER_MODEL,
+  providers: CHECKER_PROVIDERS,
+  disallowPromptTraining: true,
   // google/gemini-2.5-flash accepts temperature (AI Gateway model listing, step 9).
   temperature: 0.2,
   reasoning: "low",
@@ -67,6 +69,7 @@ export async function crosscheckReview(profile: AgentProfile, firstFindings: Kep
     temperature: CHECK_SETTINGS.temperature,
     reasoning: CHECK_SETTINGS.reasoning,
     maxOutputTokens: CHECK_SETTINGS.maxOutputTokens,
+    providerOptions: gatewayOptions(CHECK_SETTINGS.providers),
     system: CHECK_SYSTEM_PROMPT,
     prompt: checkUserPrompt(profile, firstFindings.map(asFirstModelFinding)),
     output: Output.object({ name: "crosscheck", schema: crosscheckSchema }),
@@ -85,6 +88,7 @@ export async function crosscheckReview(profile: AgentProfile, firstFindings: Kep
     rawModelOutput: check,
     usage: result.usage,
     generationId: typeof gateway?.generationId === "string" ? gateway.generationId : null,
+    provider: resolvedProvider(result.providerMetadata),
     durationMs: Date.now() - started,
   };
 }

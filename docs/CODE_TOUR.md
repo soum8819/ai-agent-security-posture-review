@@ -37,6 +37,8 @@ of step 6, to be updated and reused in step 15.
 - `app/app/reviews/[id]/decision-panel.tsx`: the decision form, shown only to the person whose turn it is: four choices, a required note, a conditions box for Approve with conditions, and accept or dismiss for each contested finding; a double click gets a clear message.
 - `app/app/reviews/[id]/sections.tsx`: the parts of the review page, including the read-only decision history: the severity badge (always with its word, never colour alone), the tier panel, the rules that fired with the triggering field highlighted, the findings and the dropped findings.
 - `app/app/reviews/[id]/auto-refresh.tsx`: reloads the review page every few seconds while the models are still working.
+- `app/app/audit/page.tsx`: the audit log at `/app/audit`, for the Auditor only: every recorded event, newest first, in plain words, with one filter by review id.
+- `app/app/audit/export/route.ts`: downloads the audit log as JSON for the Auditor only, with the same permission check as the page.
 - `app/app/not-allowed/page.tsx`: shown when a signed-in user's role may not open a page.
 - `app/app/submit/page.tsx`: the page at `/app/submit`, giving the heading and holding the form; only Submitters may open it. Opened from a review with changes requested, it starts from that profile, shows the reviewer's note, and links the new review to the old one.
 - `app/app/submit/submit-form.tsx`: the form itself, which checks a profile against the schema in the browser, shows what to fix, and sends a valid profile for review.
@@ -56,7 +58,7 @@ of step 6, to be updated and reused in step 15.
 
 ## Shared building blocks
 
-- `lib/models.ts`: the one place the two model names live, so a model can be swapped by changing a single line.
+- `lib/models.ts`: the one place the two model names live, so a model can be swapped by changing a single line, together with the AI Gateway providers each model may use and the no-training setting sent with every call.
 - `lib/owasp.ts`: the ten OWASP agentic risk categories, with names and a description of each copied word for word from the official document, and the source and retrieval date.
 - `lib/profile-schema.ts`: the strict rules for what an agent profile must contain, including the allowed choices for data, permissions and untrusted inputs (email, web, uploaded files, chat, logs or alerts).
 - `lib/label-schema.ts`: the strict rules for what an answer-key file must contain, so a typing mistake in a label is caught.
@@ -75,6 +77,8 @@ of step 6, to be updated and reused in step 15.
 - `lib/evidence-pack.ts`: writes the Tier 4 evidence pack in plain words: tiers and who set the final tier, the rules that fired, every finding with its quote and both models' views, and the profile as submitted.
 - `lib/review-view.ts`: turns stored review data into plain words: statuses, which tier set the final tier, model and provider names, what each rule requires, field values, finding order, badge colours and cost.
 - `lib/labels.ts`: plain words for the profile's fixed choices, shared by the submit form and the review screens.
+- `lib/audit-view.ts`: puts audit event details into plain words for the screen and checks the review id filter.
+- `lib/resume-cause.ts`: decides why a paused workflow run was or was not resumed after a decision, without ever calling it expired.
 - `lib/users.ts`: the four fictional users and their roles, a stand-in for the corporate directory.
 - `lib/permissions.ts`: what each role may do, checked on the server by every page and route.
 - `lib/session.ts`: creates and checks the signed session cookie, and compares the demo passcode safely.
@@ -103,6 +107,8 @@ of step 6, to be updated and reused in step 15.
 - `tests/analyze.test.ts`: proves the evidence check drops a made-up finding and the rule floor raises a severity that is too low; calls no model.
 - `scripts/run-reviews.ts`: a developer tool that runs full reviews (both models) over the evaluation profiles and saves raw results and actual cost to `eval/runs`; run with `npm run reviews -- --set tuning` or `--set all`, or `--checker-only --from <run folder>` to test the checker on saved reviewer results.
 - `tests/evidence-pack.test.ts`: proves the evidence pack holds what the committee needs, keeps every quote exactly as stored, and has no JSON-looking text outside quotes.
+- `tests/audit.test.ts`: proves only the Auditor may read the audit log and that no code anywhere updates or deletes audit events.
+- `tests/resume-cause.test.ts`: proves every resume cause is told apart and none claims the run expired.
 - `tests/authz.test.ts`: proves every refusal of the decision check and the allowed path for each tier, and that the decision form is offered to exactly the people the route accepts.
 - `tests/limits.test.ts`: proves the 11th submission in 24 hours is refused and that tier 4 is routed to the committee.
 - `tests/session.test.ts`: proves a session cookie cannot be altered, forged with another secret or used after it expires, that the passcode must match exactly, and what each role may do.

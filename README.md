@@ -19,6 +19,30 @@ protects the Vercel dashboard, not this app's users.
 
 All data is synthetic.
 
+## Data handling
+
+All agent profiles in this project are synthetic: fictional agents, teams and
+data. No real customer or employee data is used.
+
+- **Providers are restricted per request.** Each model call tells Vercel AI
+  Gateway which providers may serve it (`providerOptions.gateway.only`):
+  `openai/gpt-5-mini` only through Azure or OpenAI, and
+  `google/gemini-2.5-flash` only through Vertex. The rule: allow only providers
+  that AI Gateway lists as both "no training" and "zero data retention
+  capable". The provider that actually served each call is saved with the
+  result.
+- **No training on prompts.** Every call sets `disallowPromptTraining: true`,
+  so AI Gateway refuses any provider that may train on the prompt. This is
+  free on every plan.
+- **Zero data retention is not switched on.** AI Gateway offers it only on Pro
+  and Enterprise plans, and this project runs on Hobby. Because the allowed
+  providers are already zero data retention capable, it can be turned on
+  later without changing providers. AI Gateway itself does not keep prompts or
+  outputs.
+- **Audit trail.** Every submission, decision and workflow resume is recorded
+  in an append-only audit log that the database refuses to change or delete.
+  The Auditor can read it at `/app/audit` and export it as JSON.
+
 ## Architecture
 
 System view.

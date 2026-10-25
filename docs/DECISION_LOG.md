@@ -34,3 +34,36 @@ which are now shown as verified quotes. The check now finds none.
 
 **Not done.** The reviewer prompts were not changed. Asking the models to quote
 sentences and values rather than JSON is an optional idea for step 13.
+
+## 2026-10-25: model providers restricted; zero data retention not set
+
+**Decision.** Each model call restricts AI Gateway to named providers with
+`providerOptions.gateway.only`: the reviewer (`openai/gpt-5-mini`) to Azure or
+OpenAI, the checker (`google/gemini-2.5-flash`) to Vertex. Every call also sets
+`disallowPromptTraining: true`. Zero data retention is not set.
+
+**Why.** The rule is to allow only providers that the AI Gateway listing marks
+as both "no training" and "zero data retention capable", so that zero data
+retention can be switched on later without a provider change. Google's own
+endpoint for the checker has an unknown zero data retention status, so it is
+left out. Zero data retention needs a Pro or Enterprise plan (AI Gateway docs,
+checked 2026-10-25); this project runs on Hobby. "No training" is free on
+every plan. All profiles are synthetic.
+
+**Cost of the choice.** The checker has no fallback provider: if Vertex is
+unavailable, checker calls fail instead of moving to Google.
+
+**Checked.** One direct run on profile-02 (no database write): the reviewer
+was served by OpenAI and the checker by Vertex, both inside the allow lists;
+results kept the same shape and every quote passed the evidence check. Cost
+$0.0077.
+
+## 2026-10-25: a second "workflow resumed" event on review 080fc26e
+
+Review 080fc26e has two "workflow resumed" events, 1.4 seconds apart. Event
+67 was written by the approval route. Event 68 was written by the workflow
+code of the older deployment that started the run (commit d4f3c0f), which had
+its own step recording a resume. Runs stay pinned to the deployment that
+started them, so that old step ran. Nothing was recorded twice by the current
+code. Audit events cannot be changed, so both stay.
+

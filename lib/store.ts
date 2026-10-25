@@ -224,3 +224,27 @@ export async function getResubmission(reviewId: string): Promise<{ id: string } 
   const [row] = await getSql()`SELECT id FROM reviews WHERE supersedes = ${reviewId}`;
   return (row as { id: string }) ?? null;
 }
+
+export type AuditEventRow = {
+  id: number;
+  review_id: string | null;
+  actor_id: string | null;
+  actor_role: string | null;
+  event_type: string;
+  details: Record<string, unknown>;
+  environment: string;
+  created_at: string;
+};
+
+// The audit trail, newest first, read-only. There is deliberately no function
+// that updates or deletes audit events, and the database refuses both.
+// reviewFilter is a full review id or its first characters (hex and dashes).
+export async function listAuditEvents(reviewFilter: string | null, limit: number): Promise<AuditEventRow[]> {
+  const sql = getSql();
+  const rows = reviewFilter
+    ? await sql`SELECT id, review_id, actor_id, actor_role, event_type, details, environment, created_at
+                FROM audit_events WHERE review_id::text LIKE ${reviewFilter + "%"} ORDER BY id DESC LIMIT ${limit}`
+    : await sql`SELECT id, review_id, actor_id, actor_role, event_type, details, environment, created_at
+                FROM audit_events ORDER BY id DESC LIMIT ${limit}`;
+  return rows.map((r) => ({ ...r, id: Number(r.id) })) as AuditEventRow[];
+}

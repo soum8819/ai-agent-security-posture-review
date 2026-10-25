@@ -24,6 +24,12 @@ async function Home() {
               : ": your own reviews"}
           </span>
         </li>
+        {can(user.role, "view_audit_log") && (
+          <li>
+            <Link href="/app/audit" className={linkClass}>Audit log</Link>
+            <span className="text-zinc-600 dark:text-zinc-400">: every recorded event, with a JSON export</span>
+          </li>
+        )}
         {can(user.role, "submit_profile") && (
           <li>
             <Link href="/app/submit" className={linkClass}>Submit an agent profile</Link>

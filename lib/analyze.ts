@@ -2,7 +2,7 @@
 // drops findings whose evidence is not in the profile and applies the rule floor.
 // Server-side only: it uses the AI Gateway key.
 import { generateText, Output } from "ai";
-import { REVIEWER_MODEL } from "./models.ts";
+import { REVIEWER_MODEL, REVIEWER_PROVIDERS, gatewayOptions, resolvedProvider } from "./models.ts";
 import type { AgentProfile } from "./profile-schema.ts";
 import { modelReviewSchema, type ModelReview } from "./review-schema.ts";
 import { quoteIsInProfile } from "./evidence.ts";
@@ -11,6 +11,8 @@ import { assignTier, enforceFloor, runRules, type RuleHit, type Severity } from 
 
 export const REVIEW_SETTINGS = {
   model: REVIEWER_MODEL,
+  providers: REVIEWER_PROVIDERS,
+  disallowPromptTraining: true,
   reasoning: "low",
   maxOutputTokens: 6000,
   // No temperature: openai/gpt-5-mini does not accept one (checked on the
@@ -60,6 +62,7 @@ export async function analyzeProfile(profile: AgentProfile) {
     model: REVIEW_SETTINGS.model,
     reasoning: REVIEW_SETTINGS.reasoning,
     maxOutputTokens: REVIEW_SETTINGS.maxOutputTokens,
+    providerOptions: gatewayOptions(REVIEW_SETTINGS.providers),
     system: SYSTEM_PROMPT,
     prompt: userPrompt(profile),
     output: Output.object({ name: "agent_review", schema: modelReviewSchema }),
@@ -88,6 +91,7 @@ export async function analyzeProfile(profile: AgentProfile) {
     rawModelOutput: review,
     usage: result.usage,
     generationId: typeof gateway?.generationId === "string" ? gateway.generationId : null,
+    provider: resolvedProvider(result.providerMetadata),
     durationMs: Date.now() - started,
   };
 }

@@ -36,6 +36,7 @@ export function combineReview(first: AnalysisResult, check: CrosscheckResult) {
       usage: first.usage,
       latencyMs: first.durationMs,
       generationId: first.generationId,
+      provider: first.provider ?? null,
       costUsd: null as number | null,
     },
     checker: {
@@ -45,6 +46,7 @@ export function combineReview(first: AnalysisResult, check: CrosscheckResult) {
       usage: check.usage,
       latencyMs: check.durationMs,
       generationId: check.generationId,
+      provider: check.provider ?? null,
       costUsd: null as number | null,
     },
     rawReviewerOutput: first.rawModelOutput,
