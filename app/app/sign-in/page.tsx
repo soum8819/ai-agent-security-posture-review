@@ -5,6 +5,8 @@ import { signIn } from "./actions";
 const ERRORS: Record<string, string> = {
   invalid: "Sign-in failed. Check the user and the demo passcode.",
   setup: "Sign-in is not set up on this server yet (SESSION_SECRET or DEMO_PASSCODE is missing).",
+  locked: "Too many failed sign-in attempts from your network. Try again in 15 minutes.",
+  unavailable: "Sign-in is unavailable right now. Try again in a minute.",
 };
 
 async function SignInForm({ searchParams }: { searchParams: PageProps<"/app/sign-in">["searchParams"] }) {

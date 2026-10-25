@@ -29,3 +29,17 @@ export type ReviewStatus = (typeof REVIEW_STATUSES)[number];
 export function statusAfterReview(finalTier: Tier): ReviewStatus {
   return finalTier === 4 ? "routed_to_committee" : "awaiting_appsec";
 }
+
+// Step 12: at most 5 failed sign-ins per 15 minutes from one network address.
+// After that, sign-in is refused (even with the right passcode) until the
+// window has passed.
+export const SIGN_IN_MAX_FAILURES = 5;
+export const SIGN_IN_WINDOW_MS = 15 * 60 * 1000;
+
+export function signInAllowed(recentFailures: number) {
+  return recentFailures < SIGN_IN_MAX_FAILURES;
+}
+
+// Request size limits, checked before a body is parsed.
+export const MAX_SUBMISSION_BYTES = 64 * 1024;
+export const MAX_DECISION_BYTES = 16 * 1024;

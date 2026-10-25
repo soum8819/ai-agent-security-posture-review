@@ -248,3 +248,13 @@ export async function listAuditEvents(reviewFilter: string | null, limit: number
                 FROM audit_events ORDER BY id DESC LIMIT ${limit}`;
   return rows.map((r) => ({ ...r, id: Number(r.id) })) as AuditEventRow[];
 }
+
+// Failed sign-ins from one network (identified only by its one-way code) in
+// the last window. Used by the sign-in attempt limit.
+export async function countRecentSignInFailures(network: string, windowMs: number) {
+  const since = new Date(Date.now() - windowMs).toISOString();
+  const [row] = await getSql()`
+    SELECT count(*)::int AS n FROM audit_events
+    WHERE event_type = 'sign_in_failed' AND details->>'network' = ${network} AND created_at > ${since}`;
+  return row.n as number;
+}

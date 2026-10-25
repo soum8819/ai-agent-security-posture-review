@@ -4,7 +4,8 @@
 import { start } from "workflow/api";
 import { currentUser } from "@/lib/auth";
 import { describeDbError } from "@/lib/db";
-import { DAILY_SUBMISSION_LIMIT, submissionAllowed } from "@/lib/limits";
+import { DAILY_SUBMISSION_LIMIT, MAX_SUBMISSION_BYTES, submissionAllowed } from "@/lib/limits";
+import { readJsonBody } from "@/lib/request-body";
 import { can } from "@/lib/permissions";
 import { canResubmit } from "@/lib/review-access";
 import { agentProfileSchema } from "@/lib/profile-schema";
@@ -14,13 +15,17 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 import { reviewWorkflow } from "@/workflows/review";
 
 export async function POST(request: Request) {
+  // Size first, so an oversized request is refused before anything else.
+  const read = await readJsonBody(request, MAX_SUBMISSION_BYTES);
+  if (!read.ok) return Response.json({ error: `The submission is too large (limit ${MAX_SUBMISSION_BYTES / 1024} KB)` }, { status: 413 });
+
   const user = await currentUser();
   if (!user) return Response.json({ error: "Sign in required" }, { status: 401 });
   if (!can(user.role, "submit_profile")) {
     return Response.json({ error: "Only Submitters can submit profiles" }, { status: 403 });
   }
 
-  const body = await request.json().catch(() => null);
+  const body = read.value as { profile?: unknown; supersedes?: unknown } | null;
   const parsed = agentProfileSchema.safeParse(body?.profile);
   if (!parsed.success) {
     return Response.json(

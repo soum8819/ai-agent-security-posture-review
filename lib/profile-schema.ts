@@ -31,7 +31,18 @@ export const CREDENTIALS = ["own_scoped_token", "shared_token"] as const;
 
 export const MEMORY = ["none", "session", "persistent"] as const;
 
-const text = (max: number) => z.string().trim().min(1).max(max);
+// Characters that can hide or reverse text from a human reader: control
+// characters (except tab and line breaks), zero-width characters, and
+// direction overrides. Ordinary accents, other scripts and emoji are fine.
+export const HIDDEN_CHARACTERS = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F\u200B-\u200F\u202A-\u202E\u2060-\u2064\u2066-\u2069\uFEFF]/;
+
+const text = (max: number) =>
+  z
+    .string()
+    .trim()
+    .min(1)
+    .max(max)
+    .refine((v) => !HIDDEN_CHARACTERS.test(v), { message: "contains hidden or direction-changing characters" });
 
 function unique<T extends z.ZodType>(item: T, label: string) {
   return z

@@ -59,3 +59,11 @@ export async function passcodeMatches(input: string, expected: string) {
   const expectedSig = await crypto.subtle.sign("HMAC", key, enc.encode(expected));
   return crypto.subtle.verify("HMAC", key, expectedSig, enc.encode(input));
 }
+
+// A one-way code for a network address, so the audit log can count failed
+// sign-ins per address without ever storing the address itself. Mixed with
+// the session secret, so the code cannot be matched to an address elsewhere.
+export async function networkCode(address: string, secret: string) {
+  const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", enc.encode(`${secret}|network|${address}`)));
+  return Array.from(digest.slice(0, 12), (b) => b.toString(16).padStart(2, "0")).join("");
+}

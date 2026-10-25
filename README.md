@@ -43,6 +43,15 @@ data. No real customer or employee data is used.
   in an append-only audit log that the database refuses to change or delete.
   The Auditor can read it at `/app/audit` and export it as JSON.
 
+## Security testing
+
+The app was attacked as an attacker would: prompt injection in the profile
+text, hidden characters, oversized requests, the approval route signed out or
+with the wrong role, decision reuse, and the public workflow webhook. A sign-in
+attempt limit (5 failures per 15 minutes per network address) and request
+size limits are in place. Every test and its result, including the failures
+found and fixed, is in `eval/security-tests.md`.
+
 ## Architecture
 
 System view.

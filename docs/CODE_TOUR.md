@@ -30,7 +30,7 @@ of step 6, to be updated and reused in step 15.
 - `app/page.tsx`: the overview page at `/`, with the title and one sentence about Harborline.
 - `app/app/page.tsx`: the reviewer app home at `/app`, showing who is signed in, what their role may do, and a Reviews link for every role.
 - `app/app/sign-in/page.tsx`: the sign-in page at `/app/sign-in`, labelled as a stand-in for Harborline's corporate sign-in, with four fictional users and a demo passcode.
-- `app/app/sign-in/actions.ts`: the server code behind signing in and out, which checks the passcode and sets or clears the signed session cookie.
+- `app/app/sign-in/actions.ts`: the server code behind signing in and out, which checks the passcode, refuses sign-in after 5 failed attempts in 15 minutes from one network address, and sets or clears the signed session cookie.
 - `app/app/reviews/page.tsx`: the review queue at `/app/reviews`, newest first, with status, final tier and contested count; a table on wide screens and one card per review on a phone. Submitters see only their own reviews.
 - `app/app/reviews/[id]/page.tsx`: one review, read-only: who submitted it and when, its status, the four tiers, the rules that fired, the findings (contested first), the findings the evidence check dropped, and the cost when it is stored. Submitters see only their own reviews, and anything else shows not found.
 - `app/app/reviews/[id]/evidence/route.ts`: downloads the evidence pack of a Tier 4 review as a text file for the review committee, with the same access rule as the review page.
@@ -60,7 +60,7 @@ of step 6, to be updated and reused in step 15.
 
 - `lib/models.ts`: the one place the two model names live, so a model can be swapped by changing a single line, together with the AI Gateway providers each model may use and the no-training setting sent with every call.
 - `lib/owasp.ts`: the ten OWASP agentic risk categories, with names and a description of each copied word for word from the official document, and the source and retrieval date.
-- `lib/profile-schema.ts`: the strict rules for what an agent profile must contain, including the allowed choices for data, permissions and untrusted inputs (email, web, uploaded files, chat, logs or alerts).
+- `lib/profile-schema.ts`: the strict rules for what an agent profile must contain, including the allowed choices for data, permissions and untrusted inputs (email, web, uploaded files, chat, logs or alerts), and refusing hidden or direction-changing characters.
 - `lib/label-schema.ts`: the strict rules for what an answer-key file must contain, so a typing mistake in a label is caught.
 - `lib/review-schema.ts`: the strict rules for what a review result must contain, including the five parts of every finding, and the simpler form the reviewer model fills in.
 - `lib/sample-profiles.ts`: loads the 12 test profiles so the form can offer them as samples.
@@ -70,7 +70,7 @@ of step 6, to be updated and reused in step 15.
 - `lib/crosscheck.ts`: sends the profile and the first model's findings to the checker model, gets a verdict for each finding plus anything missed, drops missed findings with no real quote, and marks contested findings.
 - `lib/review.ts`: one full review: reviewer, then checker, then contested marking and the final tier, saving both models' names, tokens, time and cost.
 - `lib/rules.ts`: eight fixed rules that set a minimum severity from what a profile lists, the tier assignment, the check that a model can never lower a rule's severity, and the final tier (the highest of the rule tier and both models' tiers).
-- `lib/limits.ts`: the daily submission limit (10 per user in any 24 hours) and where a finished review goes next (tier 4 to the committee, other tiers to AppSec).
+- `lib/limits.ts`: the daily submission limit (10 per user in any 24 hours), where a finished review goes next (tier 4 to the committee, other tiers to AppSec), the sign-in attempt limit and the request size limits.
 - `lib/authz.ts`: the one check that decides who may decide a review: the right role for the stage, the right stage for the tier, never your own submission, a different person for the second tier 3 stage, a note, conditions when needed, and every contested finding resolved before approving.
 - `lib/review-access.ts`: the one rule for who may see a review, used by both the queue and the review page, and the rule for who may resubmit one (its own submitter, after Request changes, once).
 - `lib/evidence.ts`: the exact-match evidence check that drops findings whose quote is not in the profile, and the same check used on screen to tell verbatim profile excerpts in model text apart from everything else.
@@ -79,6 +79,7 @@ of step 6, to be updated and reused in step 15.
 - `lib/labels.ts`: plain words for the profile's fixed choices, shared by the submit form and the review screens.
 - `lib/audit-view.ts`: puts audit event details into plain words for the screen and checks the review id filter.
 - `lib/resume-cause.ts`: decides why a paused workflow run was or was not resumed after a decision, without ever calling it expired.
+- `lib/request-body.ts`: reads a request body with a hard size limit, cutting off an oversized request before it is parsed.
 - `lib/users.ts`: the four fictional users and their roles, a stand-in for the corporate directory.
 - `lib/permissions.ts`: what each role may do, checked on the server by every page and route.
 - `lib/session.ts`: creates and checks the signed session cookie, and compares the demo passcode safely.
@@ -98,6 +99,7 @@ of step 6, to be updated and reused in step 15.
 - `eval/labels/profile-01.json` to `profile-12.json`: the answer key, one file per profile, with the expected tier, the critical risks a good review must catch, and whether the profile is held out.
 - `eval/labels/README.md`: where the answer key came from, the rule used to write it, and how the 4 held-out profiles were drawn.
 - `eval/runs/`: raw results of every reviewer model run, one folder per run, with a README logging what changed between runs.
+- `eval/security-tests.md`: every step 12 attack and its result, including the failures found and fixed.
 - `eval/RULE_RUNS.md`: a log of every rules-versus-answer-key run, kept for the record, with what changed between runs.
 - `eval/ASSUMPTIONS.md`: where each profile came from and every value chosen where the source did not say.
 
@@ -109,10 +111,13 @@ of step 6, to be updated and reused in step 15.
 - `tests/evidence-pack.test.ts`: proves the evidence pack holds what the committee needs, keeps every quote exactly as stored, and has no JSON-looking text outside quotes.
 - `tests/audit.test.ts`: proves only the Auditor may read the audit log and that no code anywhere updates or deletes audit events.
 - `tests/resume-cause.test.ts`: proves every resume cause is told apart and none claims the run expired.
+- `tests/security.test.ts`: proves hidden and direction-changing characters are refused, stuffed delimiters are removed from both prompts, oversized bodies are cut off, the sign-in limit holds, and network codes never contain the address.
 - `tests/authz.test.ts`: proves every refusal of the decision check and the allowed path for each tier, and that the decision form is offered to exactly the people the route accepts.
 - `tests/limits.test.ts`: proves the 11th submission in 24 hours is refused and that tier 4 is routed to the committee.
 - `tests/session.test.ts`: proves a session cookie cannot be altered, forged with another secret or used after it expires, that the passcode must match exactly, and what each role may do.
 - `tests/crosscheck.test.ts`: proves contested marking, kept floors, the evidence check on missed findings, the final tier, and that the checker never sees a rule floor; calls no model.
+- `scripts/security-attacks.ts`: the step 12 prompt-injection attacks, run by calling the review function directly, with no database write.
+- `scripts/security-http.ts`: the step 12 attacks on the routes: signed out, wrong role, another site, oversized requests, decision reuse and the public webhook address; locally it also tests the sign-in attempt limit.
 - `scripts/compare-rules.ts`: a developer tool, not part of the app, that compares the rules' tier with the answer key and lists the held-out profiles separately; run with `npm run compare-rules`.
 
 ## Known limits

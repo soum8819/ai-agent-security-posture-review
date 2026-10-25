@@ -9,6 +9,8 @@ import { currentUser } from "@/lib/auth";
 import { checkDecision, OUTCOMES, STAGE_NAMES, STAGES, type DecisionInput } from "@/lib/authz";
 import { appEnvironment, describeDbError } from "@/lib/db";
 import { classifyResume, type RunState } from "@/lib/resume-cause";
+import { MAX_DECISION_BYTES } from "@/lib/limits";
+import { readJsonBody } from "@/lib/request-body";
 import { canViewReview } from "@/lib/review-access";
 import { getDecisions, getReview, recordDecision, recordWorkflowResume } from "@/lib/store";
 import { appsecHook, appsecToken, modelRiskHook, modelRiskToken } from "@/workflows/review/hooks";
@@ -48,6 +50,9 @@ function parseInput(body: unknown): DecisionInput | null {
 }
 
 export async function POST(request: Request, ctx: RouteContext<"/api/reviews/[id]/decisions">) {
+  // Size first, so an oversized request is refused before anything else.
+  const read = await readJsonBody(request, MAX_DECISION_BYTES);
+  if (!read.ok) return fail(413, `The decision is too large (limit ${MAX_DECISION_BYTES / 1024} KB).`);
   if (!sameOrigin(request)) return fail(403, "Decisions can only be made from the review page.");
   const user = await currentUser();
   if (!user) return fail(401, "Sign in required.");
@@ -58,7 +63,7 @@ export async function POST(request: Request, ctx: RouteContext<"/api/reviews/[id
   // Same rule as the review page: if you cannot see it, it does not exist.
   if (!found || !canViewReview(user, found.review) || !found.result) return fail(404, "Review not found.");
 
-  const input = parseInput(await request.json().catch(() => null));
+  const input = parseInput(read.value);
   if (!input) return fail(400, "The decision is incomplete.");
 
   const decisions = await getDecisions(id);
