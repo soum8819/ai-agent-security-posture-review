@@ -1,0 +1,290 @@
+{
+  "profileId": "profile-04",
+  "tiers": {
+    "rule": 4,
+    "reviewer": 4,
+    "checker": 3,
+    "final": 4,
+    "setBy": [
+      "rule",
+      "reviewer"
+    ],
+    "ruleReasons": [
+      "Tier 4: acts with no person confirming (Claims management system)",
+      "Tier 2: can act beyond reading (Claims management system, Team chat notification)",
+      "Tier 2: reads confidential, personal data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI01",
+      "severity": "high",
+      "evidenceQuote": "\"untrustedInputs\": [\"email\",\"uploaded_files\"]",
+      "whyItMatters": "The agent accepts attacker-controlled emails and attachments and acts on them with no human confirmation, so malicious inputs can manipulate task selection and priority assignments at scale.",
+      "recommendedControl": "Validate and sanitize email content and attachments, block or quarantine claims from unverified senders, and require human review for priority changes that exceed a risk threshold.",
+      "modelSeverity": "high",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly lists untrusted inputs and states no human confirmation, supporting the finding that malicious inputs can manipulate the agent's goals.",
+      "contested": false
+    },
+    {
+      "category": "ASI02",
+      "severity": "critical",
+      "evidenceQuote": "{ \"name\": \"Team chat notification\", \"permissions\": [ \"send_messages\" ] }",
+      "whyItMatters": "The agent can send messages to a team channel, so a manipulated input could cause exfiltration of confidential personal data or broadcast deceptive claim details to staff.",
+      "recommendedControl": "Restrict outbound messages to vetted channels, redact or remove PII before posting, and require a human-in-the-loop approval for any message that includes confidential or sensitive fields.",
+      "modelSeverity": "high",
+      "raisedByRule": "R1",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent has permission to send messages to a team chat, and with untrusted inputs and no human confirmation, this poses a risk of data exfiltration or deceptive communication.",
+      "contested": false
+    },
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "{ \"name\": \"Claims management system\", \"permissions\": [ \"read\", \"write\" ] }",
+      "whyItMatters": "The agent has autonomous write access to the claims system using its scoped token, so if its credentials or logic are abused it can modify claim records without oversight, enabling large-scale tampering.",
+      "recommendedControl": "Limit the token scope to only specific low-risk fields, implement role-based authorization for writes, and require human authorization for changes to priorities or queues; log and alert on all write operations.",
+      "modelSeverity": "high",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile grants the agent write access to the claims management system with no human confirmation, which allows for autonomous modification of records if compromised.",
+      "contested": false
+    },
+    {
+      "category": "ASI09",
+      "severity": "medium",
+      "evidenceQuote": "\"posts urgent claims to the adjusters' team channel.\"",
+      "whyItMatters": "The agent proactively surfaces urgent items to adjusters, creating strong reliance on its outputs; incorrect or manipulated urgencies can cause adjusters to take inappropriate actions or miss real emergencies.",
+      "recommendedControl": "Display provenance, confidence scores, and automated reasoning summaries with each posted alert, and require adjuster confirmation before any operational escalation or action based on the agent's priority.",
+      "modelSeverity": "medium",
+      "id": "F4",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent's function of posting urgent claims to a team channel, combined with no human confirmation, creates a reliance that could be exploited to mislead adjusters.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI05",
+      "severity": "high",
+      "evidenceQuote": "Reads each new email sent to the public claims address, including attached photos and PDFs, extracts the policy number and claim type, sets a priority and queue on the claim record, and posts urgent claims to the adjusters' team channel.",
+      "whyItMatters": "The agent processes untrusted attachments (photos and PDFs) from external emails, which could contain malicious code or embedded exploits that the agent's processing pipeline might inadvertently execute or trigger, leading to system compromise.",
+      "recommendedControl": "Implement robust content disarm and reconstruction (CDR) or deep scanning for all attachments before they are processed by the agent, and ensure the processing environment is sandboxed.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI03",
+      "severity": "medium",
+      "evidenceQuote": "\"humanConfirmsActions\": false",
+      "whyItMatters": "The agent operates without human confirmation for its actions, including writing to the claims management system and sending notifications, which increases the risk of unauthorized or erroneous actions propagating without immediate oversight.",
+      "recommendedControl": "Implement a human-in-the-loop review for high-impact actions or for any changes to claim priority or status that exceed a predefined risk threshold.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R1",
+      "severity": "critical",
+      "reason": "Lists Claims management system that can move money or change customer records, and no person confirms its actions.",
+      "field": "tools.permissions, humanConfirmsActions",
+      "category": "ASI02"
+    },
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (email, uploaded_files) and lists Claims management system that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This agent autonomously reads untrusted emails and attachments and writes to the claims system and team chat without human confirmation, so it poses high-risk failure modes including manipulated priorities, data exfiltration, and unauthorized record changes. Mitigations should focus on input validation and quarantine, restricting and auditing write/post permissions, reducing token scope, and adding human approval for high-impact changes.",
+  "checkerSummary": "The agent handles confidential and personal customer financial data, and it has write access to the claims management system without human confirmation, which places it in Tier 3. While it does not move money or run code directly, its ability to modify claim records and process untrusted files presents significant risks. Additional controls are needed to mitigate the risks associated with untrusted inputs and autonomous write actions.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1907,
+      "inputTokenDetails": {
+        "noCacheTokens": 115,
+        "cacheReadTokens": 1792,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1659,
+      "outputTokenDetails": {
+        "textTokens": 571,
+        "reasoningTokens": 1088
+      },
+      "totalTokens": 3566,
+      "raw": {
+        "input_tokens": 1907,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 1792
+        },
+        "output_tokens": 1659,
+        "output_tokens_details": {
+          "reasoning_tokens": 1088
+        },
+        "total_tokens": 3566
+      }
+    },
+    "latencyMs": 15973,
+    "generationId": "gen_01M5T96BW6EHSFH9WXKP2ETD7F",
+    "provider": "openai",
+    "costUsd": 0.00339155
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c3",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2867,
+      "inputTokenDetails": {
+        "noCacheTokens": 2867,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1450,
+      "outputTokenDetails": {
+        "textTokens": 647,
+        "reasoningTokens": 803
+      },
+      "totalTokens": 4317,
+      "raw": {
+        "thoughtsTokenCount": 803,
+        "promptTokenCount": 2867,
+        "candidatesTokenCount": 647,
+        "totalTokenCount": 4317,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2867
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 647
+          }
+        ]
+      }
+    },
+    "latencyMs": 7436,
+    "generationId": "gen_01M5T96V8ZJDZASTA7KNPE12EH",
+    "provider": "vertex",
+    "costUsd": 0.0044851
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 4,
+    "findings": [
+      {
+        "category": "ASI01",
+        "severity": "high",
+        "evidenceQuote": "\"untrustedInputs\": [\"email\",\"uploaded_files\"]",
+        "whyItMatters": "The agent accepts attacker-controlled emails and attachments and acts on them with no human confirmation, so malicious inputs can manipulate task selection and priority assignments at scale.",
+        "recommendedControl": "Validate and sanitize email content and attachments, block or quarantine claims from unverified senders, and require human review for priority changes that exceed a risk threshold."
+      },
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "{ \"name\": \"Team chat notification\", \"permissions\": [ \"send_messages\" ] }",
+        "whyItMatters": "The agent can send messages to a team channel, so a manipulated input could cause exfiltration of confidential personal data or broadcast deceptive claim details to staff.",
+        "recommendedControl": "Restrict outbound messages to vetted channels, redact or remove PII before posting, and require a human-in-the-loop approval for any message that includes confidential or sensitive fields."
+      },
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "{ \"name\": \"Claims management system\", \"permissions\": [ \"read\", \"write\" ] }",
+        "whyItMatters": "The agent has autonomous write access to the claims system using its scoped token, so if its credentials or logic are abused it can modify claim records without oversight, enabling large-scale tampering.",
+        "recommendedControl": "Limit the token scope to only specific low-risk fields, implement role-based authorization for writes, and require human authorization for changes to priorities or queues; log and alert on all write operations."
+      },
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "\"posts urgent claims to the adjusters' team channel.\"",
+        "whyItMatters": "The agent proactively surfaces urgent items to adjusters, creating strong reliance on its outputs; incorrect or manipulated urgencies can cause adjusters to take inappropriate actions or miss real emergencies.",
+        "recommendedControl": "Display provenance, confidence scores, and automated reasoning summaries with each posted alert, and require adjuster confirmation before any operational escalation or action based on the agent's priority."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent autonomously reads untrusted emails and attachments and writes to the claims system and team chat without human confirmation, so it poses high-risk failure modes including manipulated priorities, data exfiltration, and unauthorized record changes. Mitigations should focus on input validation and quarantine, restricting and auditing write/post permissions, reducing token scope, and adding human approval for high-impact changes."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile explicitly lists untrusted inputs and states no human confirmation, supporting the finding that malicious inputs can manipulate the agent's goals."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The agent has permission to send messages to a team chat, and with untrusted inputs and no human confirmation, this poses a risk of data exfiltration or deceptive communication."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The profile grants the agent write access to the claims management system with no human confirmation, which allows for autonomous modification of records if compromised."
+      },
+      {
+        "findingId": "F4",
+        "verdict": "agree",
+        "reason": "The agent's function of posting urgent claims to a team channel, combined with no human confirmation, creates a reliance that could be exploited to mislead adjusters."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI05",
+        "severity": "high",
+        "evidenceQuote": "Reads each new email sent to the public claims address, including attached photos and PDFs, extracts the policy number and claim type, sets a priority and queue on the claim record, and posts urgent claims to the adjusters' team channel.",
+        "whyItMatters": "The agent processes untrusted attachments (photos and PDFs) from external emails, which could contain malicious code or embedded exploits that the agent's processing pipeline might inadvertently execute or trigger, leading to system compromise.",
+        "recommendedControl": "Implement robust content disarm and reconstruction (CDR) or deep scanning for all attachments before they are processed by the agent, and ensure the processing environment is sandboxed."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"humanConfirmsActions\": false",
+        "whyItMatters": "The agent operates without human confirmation for its actions, including writing to the claims management system and sending notifications, which increases the risk of unauthorized or erroneous actions propagating without immediate oversight.",
+        "recommendedControl": "Implement a human-in-the-loop review for high-impact actions or for any changes to claim priority or status that exceed a predefined risk threshold."
+      }
+    ],
+    "proposedTier": 3,
+    "summary": "The agent handles confidential and personal customer financial data, and it has write access to the claims management system without human confirmation, which places it in Tier 3. While it does not move money or run code directly, its ability to modify claim records and process untrusted files presents significant risks. Additional controls are needed to mitigate the risks associated with untrusted inputs and autonomous write actions."
+  },
+  "costUsd": 0.007876649999999999,
+  "seconds": 23.41
+}

@@ -190,9 +190,11 @@ function variation(runs: string[]) {
   for (const n of ids) {
     const first = load(runs[0], n);
     const base = new Set([...(first?.findings ?? []), ...(first?.missedFindings ?? [])].map((f) => f.category));
-    runs.forEach((run, i) => {
+    let i = -1;
+    runs.forEach((run) => {
       const r = load(run, n);
       if (!r) return;
+      i++;
       const cats = new Set([...r.findings, ...r.missedFindings].map((f) => f.category));
       const inter = [...cats].filter((c) => base.has(c)).length;
       const union = new Set([...cats, ...base]).size;

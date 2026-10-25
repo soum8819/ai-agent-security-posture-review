@@ -120,3 +120,26 @@ setup-check review whose final tier was changed for testing, so its rule tier
 (4) is above its final tier (3); the review-tier3 and review-tier4 shots use
 consistent reviews and are the ones to use publicly.
 
+
+## 2026-10-25: step 13 evaluation choices, and one open question
+
+**Measured at a freeze.** The git tag `eval-v1` fixes the models, the prompts
+(reviewer v4, checker c1) and the rules; the baseline in eval/results.md is
+measured on it. Changes after it are shown as before and after, never folded
+into the baseline.
+
+**Fixes went to the checker only.** Both of the two worst tuning results were
+raised by the checker's tier, so both changes are one sentence each in the
+checker prompt (c2, then c3). The reviewer prompt and the rules were not
+touched, so the rule tier (the floor) is exactly what it was at the freeze.
+
+**Three runs before and after.** Answers vary between runs, so each fix was
+judged on 3 runs of the target profile before the change and 3 after, not on
+one run each.
+
+**Open question for the project owner: profile-04 (held out).** The rules give
+Tier 4, because the agent changes live claim records with no person
+confirming, which matches the Tier 4 definition in CLAUDE.md ("acting on its
+own with write or run-code power"). The answer key says Tier 3. The rule was
+not changed, because 04 is held out. Either the key should accept Tier 4 for
+04, or the Tier 4 definition should say which kinds of write power count.
