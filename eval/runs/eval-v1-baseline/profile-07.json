@@ -1,0 +1,273 @@
+{
+  "profileId": "profile-07",
+  "tiers": {
+    "rule": 3,
+    "reviewer": 3,
+    "checker": 4,
+    "final": 4,
+    "setBy": [
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (Payment exceptions queue, Payment release API)",
+      "Tier 2: reads confidential, customer_financial, personal data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI02",
+      "severity": "high",
+      "evidenceQuote": "move_money",
+      "whyItMatters": "The agent has direct access to a payment release capability, so if tools or outputs are manipulated the agent could cause unauthorized transfers despite having human confirmation as a mitigation. A compromised or coerced workflow could still result in funds moving. ",
+      "recommendedControl": "Require cryptographic, per-transaction attestation from the confirming analyst (for example signed approval tokens bound to analyst identity), enforce two-person approval for high-value payments, and add strict rate limits and anomaly detection before any move_money call.",
+      "modelSeverity": "high",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent's ability to directly call the 'move_money' API, even with human confirmation, presents a high risk of financial loss if the confirmation process is compromised or the agent misinterprets instructions.",
+      "contested": false
+    },
+    {
+      "category": "ASI03",
+      "severity": "medium",
+      "evidenceQuote": "own_scoped_token",
+      "whyItMatters": "The agent uses its own scoped credential; if that token is overly broad, persistent, or can be reused it could be abused to escalate actions or be replayed to move funds without proper authorization. Token compromise would allow actions in the agent's name. ",
+      "recommendedControl": "Use short-lived, per-action tokens with least privilege scopes, bind tokens to the confirming analyst session and device, rotate credentials frequently, and audit token use with strict conditional checks.",
+      "modelSeverity": "medium",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "An 'own_scoped_token' for an agent with 'move_money' permissions is a significant risk, as its compromise could lead to unauthorized financial transactions.",
+      "contested": false
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"memory\": \"session\"",
+      "whyItMatters": "The agent retains session context which may include proposed corrections and previous exception records, so poisoned or manipulated context could bias future proposals and lead to repeated unsafe approvals. Session memory increases the attack surface for context poisoning. ",
+      "recommendedControl": "Limit retained context to minimal necessary fields, enforce integrity checks and provenance on data used to form proposals, expire session memory quickly, and log and review updates to exception records before they are used for decisions.",
+      "modelSeverity": "medium",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "Session memory for an agent handling financial data and proposing changes creates a clear risk of context poisoning, which could lead to incorrect or malicious proposals being approved.",
+      "contested": false
+    },
+    {
+      "category": "ASI01",
+      "severity": "medium",
+      "evidenceQuote": "For each held payment, the assistant looks up the beneficiary record, proposes a corrected field, and writes the proposal to the exception record. An analyst reviews the proposal, and after the analyst clicks confirm the assistant calls the release API to send the payment. Payments above the analyst's own limit still need a second analyst.",
+      "whyItMatters": "Because the agent autonomously proposes actionable changes that analysts rely on, manipulated tool outputs or crafted inputs could change the agent's proposals in ways that lead human reviewers to approve unsafe payments, effectively hijacking agent goals. ",
+      "recommendedControl": "Require clear provenance and automated validation for any proposed field changes, present diffs and risk indicators to reviewers, implement mandatory second-review for sensitive fields or values, and instrument the UI to show why the agent recommended the change.",
+      "modelSeverity": "medium",
+      "id": "F4",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent's role in proposing corrections that analysts rely on makes it vulnerable to goal hijacking if its proposals are manipulated, leading to incorrect payments.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "Payments above the analyst's own limit still need a second analyst.",
+      "whyItMatters": "The profile mentions a second analyst for high-value payments, but it does not specify how the agent enforces this or prevents an analyst from bypassing the control, which could lead to privilege escalation or unauthorized high-value transactions.",
+      "recommendedControl": "Implement strict technical controls within the Payment release API to enforce two-person approval for high-value payments, independent of the agent's logic or analyst input.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI05",
+      "severity": "medium",
+      "evidenceQuote": "Payment exceptions queue",
+      "whyItMatters": "The agent has 'write' permissions to the 'Payment exceptions queue', which could be exploited to inject malicious data or alter records in a way that influences subsequent agent actions or human decisions, potentially leading to financial errors or fraud.",
+      "recommendedControl": "Implement strict input validation and sanitization for all data written to the 'Payment exceptions queue' and ensure all changes are logged and auditable.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This agent reads customer financial data and can trigger money movement via a release API, so it is Tier 3. Main risks: misuse of the move_money capability, scoped credential abuse, session context poisoning, and agent proposals that could be manipulated to steer analysts. Mitigations include stronger per-transaction approvals, least-privilege short-lived credentials, tighter session data controls and provenance, and enforced multi-person approval for sensitive or high-value releases.",
+  "checkerSummary": "The Payments Operations Assistant is a Tier 4 agent due to its ability to move money with human confirmation and handle customer financial data. While human confirmation is a control, the agent's direct access to the 'move_money' API and 'write' permissions to the exceptions queue present critical risks that require robust technical safeguards beyond manual review.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1901,
+      "inputTokenDetails": {
+        "noCacheTokens": 1901,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 2021,
+      "outputTokenDetails": {
+        "textTokens": 677,
+        "reasoningTokens": 1344
+      },
+      "totalTokens": 3922,
+      "raw": {
+        "input_tokens": 1901,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 2021,
+        "output_tokens_details": {
+          "reasoning_tokens": 1344
+        },
+        "total_tokens": 3922
+      }
+    },
+    "latencyMs": 13516,
+    "generationId": "gen_01M5T7YMWJDBKK1NVF92R149NC",
+    "provider": "openai",
+    "costUsd": 0.00451725
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2803,
+      "inputTokenDetails": {
+        "noCacheTokens": 2803,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1397,
+      "outputTokenDetails": {
+        "textTokens": 626,
+        "reasoningTokens": 771
+      },
+      "totalTokens": 4200,
+      "raw": {
+        "thoughtsTokenCount": 771,
+        "promptTokenCount": 2803,
+        "candidatesTokenCount": 626,
+        "totalTokenCount": 4200,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2803
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 626
+          }
+        ]
+      }
+    },
+    "latencyMs": 8518,
+    "generationId": "gen_01M5T7Z20YGP87TEHM2AC96AA1",
+    "provider": "vertex",
+    "costUsd": 0.0043334
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "move_money",
+        "whyItMatters": "The agent has direct access to a payment release capability, so if tools or outputs are manipulated the agent could cause unauthorized transfers despite having human confirmation as a mitigation. A compromised or coerced workflow could still result in funds moving. ",
+        "recommendedControl": "Require cryptographic, per-transaction attestation from the confirming analyst (for example signed approval tokens bound to analyst identity), enforce two-person approval for high-value payments, and add strict rate limits and anomaly detection before any move_money call."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "own_scoped_token",
+        "whyItMatters": "The agent uses its own scoped credential; if that token is overly broad, persistent, or can be reused it could be abused to escalate actions or be replayed to move funds without proper authorization. Token compromise would allow actions in the agent's name. ",
+        "recommendedControl": "Use short-lived, per-action tokens with least privilege scopes, bind tokens to the confirming analyst session and device, rotate credentials frequently, and audit token use with strict conditional checks."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"memory\": \"session\"",
+        "whyItMatters": "The agent retains session context which may include proposed corrections and previous exception records, so poisoned or manipulated context could bias future proposals and lead to repeated unsafe approvals. Session memory increases the attack surface for context poisoning. ",
+        "recommendedControl": "Limit retained context to minimal necessary fields, enforce integrity checks and provenance on data used to form proposals, expire session memory quickly, and log and review updates to exception records before they are used for decisions."
+      },
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "For each held payment, the assistant looks up the beneficiary record, proposes a corrected field, and writes the proposal to the exception record. An analyst reviews the proposal, and after the analyst clicks confirm the assistant calls the release API to send the payment. Payments above the analyst's own limit still need a second analyst.",
+        "whyItMatters": "Because the agent autonomously proposes actionable changes that analysts rely on, manipulated tool outputs or crafted inputs could change the agent's proposals in ways that lead human reviewers to approve unsafe payments, effectively hijacking agent goals. ",
+        "recommendedControl": "Require clear provenance and automated validation for any proposed field changes, present diffs and risk indicators to reviewers, implement mandatory second-review for sensitive fields or values, and instrument the UI to show why the agent recommended the change."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent reads customer financial data and can trigger money movement via a release API, so it is Tier 3. Main risks: misuse of the move_money capability, scoped credential abuse, session context poisoning, and agent proposals that could be manipulated to steer analysts. Mitigations include stronger per-transaction approvals, least-privilege short-lived credentials, tighter session data controls and provenance, and enforced multi-person approval for sensitive or high-value releases."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The agent's ability to directly call the 'move_money' API, even with human confirmation, presents a high risk of financial loss if the confirmation process is compromised or the agent misinterprets instructions."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "An 'own_scoped_token' for an agent with 'move_money' permissions is a significant risk, as its compromise could lead to unauthorized financial transactions."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "Session memory for an agent handling financial data and proposing changes creates a clear risk of context poisoning, which could lead to incorrect or malicious proposals being approved."
+      },
+      {
+        "findingId": "F4",
+        "verdict": "agree",
+        "reason": "The agent's role in proposing corrections that analysts rely on makes it vulnerable to goal hijacking if its proposals are manipulated, leading to incorrect payments."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "Payments above the analyst's own limit still need a second analyst.",
+        "whyItMatters": "The profile mentions a second analyst for high-value payments, but it does not specify how the agent enforces this or prevents an analyst from bypassing the control, which could lead to privilege escalation or unauthorized high-value transactions.",
+        "recommendedControl": "Implement strict technical controls within the Payment release API to enforce two-person approval for high-value payments, independent of the agent's logic or analyst input."
+      },
+      {
+        "category": "ASI05",
+        "severity": "medium",
+        "evidenceQuote": "Payment exceptions queue",
+        "whyItMatters": "The agent has 'write' permissions to the 'Payment exceptions queue', which could be exploited to inject malicious data or alter records in a way that influences subsequent agent actions or human decisions, potentially leading to financial errors or fraud.",
+        "recommendedControl": "Implement strict input validation and sanitization for all data written to the 'Payment exceptions queue' and ensure all changes are logged and auditable."
+      }
+    ],
+    "proposedTier": 4,
+    "summary": "The Payments Operations Assistant is a Tier 4 agent due to its ability to move money with human confirmation and handle customer financial data. While human confirmation is a control, the agent's direct access to the 'move_money' API and 'write' permissions to the exceptions queue present critical risks that require robust technical safeguards beyond manual review."
+  },
+  "costUsd": 0.008850650000000002,
+  "seconds": 22.034
+}

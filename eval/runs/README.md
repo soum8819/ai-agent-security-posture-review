@@ -79,3 +79,17 @@ The reviewer reported its own scoped token as a high ASI03 risk, against its
 own instruction; the checker disagreed for that reason. The checker agreed
 with 48 of 49 findings, which is consistent with anchoring: it sees the first
 model's findings before forming a view.
+
+## Step 13: the evaluation
+
+Runs made with `scripts/evaluate.ts run`, which calls the full pipeline
+directly (no database write). Each folder holds one file per profile and a
+`summary.json` with the run's actual AI Gateway cost. The baseline and every
+run marked eval-v1 used the code at the git tag `eval-v1` (reviewer v4,
+checker c1, rules unchanged). See eval/EVAL_PLAN.md and eval/results.md.
+
+| Run folder | Profiles | Prompts | Cost | Why |
+|---|---|---|---|---|
+| eval-v1-baseline | all 12 | v4 / c1 | $0.0969 | The step 13 baseline. |
+| eval-v1-variation-2, eval-v1-variation-3 | 01, 03, 10 | v4 / c1 | $0.0255, $0.0243 | Variation: the same profiles run twice more. |
+| eval-v1-before-2, eval-v1-before-3 | 02, 07 | v4 / c1 | $0.0144, $0.0137 | Extra frozen samples of the two worst tuning results, so the failure analysis compares 3 runs before with 3 runs after. |

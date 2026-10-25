@@ -1,0 +1,260 @@
+{
+  "profileId": "profile-11",
+  "tiers": {
+    "rule": 3,
+    "reviewer": 3,
+    "checker": 3,
+    "final": 3,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (KYC case management system)",
+      "Tier 2: reads personal, customer_financial data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI01",
+      "severity": "high",
+      "evidenceQuote": "When a new onboarding case opens, the agent reads the documents the customer uploaded, such as passports, proof of address and company registration papers, and writes a draft summary note with any gaps it sees.",
+      "whyItMatters": "Untrusted uploaded documents can be crafted to manipulate the agent's objectives or outputs, causing biased, misleading, or harmful summaries that influence downstream case decisions. Although an analyst reviews the draft, poisoned documents could consistently steer summaries and analyst judgment.",
+      "recommendedControl": "Sanitize and validate uploaded document contents before ingestion, apply input provenance and integrity checks, and add adversarial-content detection plus explicit guidance and verification checks the model must follow when summarizing untrusted documents.",
+      "modelSeverity": "medium",
+      "raisedByRule": "R3",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly states the agent processes 'untrusted_inputs' from 'uploaded_files', which could be crafted to manipulate the agent's summarization task, aligning with ASI01.",
+      "contested": false
+    },
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "\"permissions\": [ \"read\", \"write\" ]",
+      "whyItMatters": "The agent has write permission to the KYC case management system, so if tool outputs are manipulated by untrusted inputs or prompt injection the agent could create or modify case data incorrectly. A write-capable tool amplifies the impact of any misbehaviour or injected content.",
+      "recommendedControl": "Restrict the agent to write only to a staging/draft area with explicit human approval required to promote content to the official case record, and add automated validation rules that block suspicious or high-risk changes before a human sees them.",
+      "modelSeverity": "medium",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent has 'write' permissions to the 'KYC case management system', which, despite human confirmation, presents a risk of unauthorized or incorrect data modification if the agent's output is compromised.",
+      "contested": false
+    },
+    {
+      "category": "ASI09",
+      "severity": "low",
+      "evidenceQuote": "A KYC analyst must review and accept the note before it is saved to the case.",
+      "whyItMatters": "The agent creates persuasive draft summaries that may induce undue trust from analysts, increasing the chance that analysts accept incorrect outputs without sufficient scrutiny. This is a human-agent trust exploitation risk even when final approval is manual.",
+      "recommendedControl": "Require the agent to include sources, confidence scores, and a clear, machine-readable provenance trail with each draft summary, and provide analyst training and UI nudges that highlight model limitations and prompt thorough verification.",
+      "modelSeverity": "low",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent generates draft summaries for human review, which can lead to over-reliance and reduced scrutiny by analysts, fitting the description of ASI09.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "\"permissions\": [ \"read\", \"write\" ]",
+      "whyItMatters": "The agent has write access to the KYC case management system, which could be misused to create or modify case data, even if a human confirms the final note, as the draft itself could contain malicious or misleading information that is then approved.",
+      "recommendedControl": "Implement strict validation and content filtering on the agent's proposed write operations to the KYC case management system, beyond just human review of the summary text.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"dataReads\": [ \"personal\", \"customer_financial\" ]",
+      "whyItMatters": "The agent reads highly sensitive 'personal' and 'customer_financial' data, which, if exfiltrated or misused due to a vulnerability, could lead to severe privacy breaches and financial harm.",
+      "recommendedControl": "Implement robust data loss prevention (DLP) measures and strict access controls to prevent the agent from outputting or transmitting raw sensitive data, even in draft form.",
+      "modelSeverity": "high"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (uploaded_files) and lists KYC case management system that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "The agent handles personal and customer financial data and has write access to the case system, so it is Tier 3. Key risks are adversarial or malformed uploaded documents that can manipulate summaries, the agent's write permission which increases impact of malicious outputs, and human trust in the agent's drafts. Mitigations include input sanitization and provenance, staging writes pending human approval, automated validation, and stronger provenance and UI controls for analysts.",
+  "checkerSummary": "The KYC Document Summarizer processes sensitive customer financial data and has write access to the KYC case management system, placing it in Tier 3. While human confirmation is required for final actions, the agent's ability to draft summaries from untrusted inputs and write to a critical system presents significant risks that need careful mitigation.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1889,
+      "inputTokenDetails": {
+        "noCacheTokens": 1889,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1840,
+      "outputTokenDetails": {
+        "textTokens": 624,
+        "reasoningTokens": 1216
+      },
+      "totalTokens": 3729,
+      "raw": {
+        "input_tokens": 1889,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1840,
+        "output_tokens_details": {
+          "reasoning_tokens": 1216
+        },
+        "total_tokens": 3729
+      }
+    },
+    "latencyMs": 13151,
+    "generationId": "gen_01M5T833NXDJ0MVPBG7PX9BSNR",
+    "provider": "openai",
+    "costUsd": 0.00415225
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2630,
+      "inputTokenDetails": {
+        "noCacheTokens": 2630,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1313,
+      "outputTokenDetails": {
+        "textTokens": 571,
+        "reasoningTokens": 742
+      },
+      "totalTokens": 3943,
+      "raw": {
+        "thoughtsTokenCount": 742,
+        "promptTokenCount": 2630,
+        "candidatesTokenCount": 571,
+        "totalTokenCount": 3943,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2630
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 571
+          }
+        ]
+      }
+    },
+    "latencyMs": 9593,
+    "generationId": "gen_01M5T83GGZR087Q35SYCTRSPCY",
+    "provider": "vertex",
+    "costUsd": 0.0040715
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "When a new onboarding case opens, the agent reads the documents the customer uploaded, such as passports, proof of address and company registration papers, and writes a draft summary note with any gaps it sees.",
+        "whyItMatters": "Untrusted uploaded documents can be crafted to manipulate the agent's objectives or outputs, causing biased, misleading, or harmful summaries that influence downstream case decisions. Although an analyst reviews the draft, poisoned documents could consistently steer summaries and analyst judgment.",
+        "recommendedControl": "Sanitize and validate uploaded document contents before ingestion, apply input provenance and integrity checks, and add adversarial-content detection plus explicit guidance and verification checks the model must follow when summarizing untrusted documents."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"permissions\": [ \"read\", \"write\" ]",
+        "whyItMatters": "The agent has write permission to the KYC case management system, so if tool outputs are manipulated by untrusted inputs or prompt injection the agent could create or modify case data incorrectly. A write-capable tool amplifies the impact of any misbehaviour or injected content.",
+        "recommendedControl": "Restrict the agent to write only to a staging/draft area with explicit human approval required to promote content to the official case record, and add automated validation rules that block suspicious or high-risk changes before a human sees them."
+      },
+      {
+        "category": "ASI09",
+        "severity": "low",
+        "evidenceQuote": "A KYC analyst must review and accept the note before it is saved to the case.",
+        "whyItMatters": "The agent creates persuasive draft summaries that may induce undue trust from analysts, increasing the chance that analysts accept incorrect outputs without sufficient scrutiny. This is a human-agent trust exploitation risk even when final approval is manual.",
+        "recommendedControl": "Require the agent to include sources, confidence scores, and a clear, machine-readable provenance trail with each draft summary, and provide analyst training and UI nudges that highlight model limitations and prompt thorough verification."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The agent handles personal and customer financial data and has write access to the case system, so it is Tier 3. Key risks are adversarial or malformed uploaded documents that can manipulate summaries, the agent's write permission which increases impact of malicious outputs, and human trust in the agent's drafts. Mitigations include input sanitization and provenance, staging writes pending human approval, automated validation, and stronger provenance and UI controls for analysts."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile explicitly states the agent processes 'untrusted_inputs' from 'uploaded_files', which could be crafted to manipulate the agent's summarization task, aligning with ASI01."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The agent has 'write' permissions to the 'KYC case management system', which, despite human confirmation, presents a risk of unauthorized or incorrect data modification if the agent's output is compromised."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The agent generates draft summaries for human review, which can lead to over-reliance and reduced scrutiny by analysts, fitting the description of ASI09."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"permissions\": [ \"read\", \"write\" ]",
+        "whyItMatters": "The agent has write access to the KYC case management system, which could be misused to create or modify case data, even if a human confirms the final note, as the draft itself could contain malicious or misleading information that is then approved.",
+        "recommendedControl": "Implement strict validation and content filtering on the agent's proposed write operations to the KYC case management system, beyond just human review of the summary text."
+      },
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"dataReads\": [ \"personal\", \"customer_financial\" ]",
+        "whyItMatters": "The agent reads highly sensitive 'personal' and 'customer_financial' data, which, if exfiltrated or misused due to a vulnerability, could lead to severe privacy breaches and financial harm.",
+        "recommendedControl": "Implement robust data loss prevention (DLP) measures and strict access controls to prevent the agent from outputting or transmitting raw sensitive data, even in draft form."
+      }
+    ],
+    "proposedTier": 3,
+    "summary": "The KYC Document Summarizer processes sensitive customer financial data and has write access to the KYC case management system, placing it in Tier 3. While human confirmation is required for final actions, the agent's ability to draft summaries from untrusted inputs and write to a critical system presents significant risks that need careful mitigation."
+  },
+  "costUsd": 0.008223749999999998,
+  "seconds": 22.744
+}

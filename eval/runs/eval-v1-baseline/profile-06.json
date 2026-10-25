@@ -1,0 +1,247 @@
+{
+  "profileId": "profile-06",
+  "tiers": {
+    "rule": 1,
+    "reviewer": 1,
+    "checker": 2,
+    "final": 2,
+    "setBy": [
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "\"provider\": \"Anthropic\",",
+      "whyItMatters": "The model provider is a third party, so model behavior, updates, or compromise outside our control could alter agent outputs or leak sensitive prompts. The profile also omits a specific model version which prevents reproducible testing and patch tracking.",
+      "recommendedControl": "Pin and document an approved model version, require a vendor security review and SLA, and add monitoring of model-behavior drift with alerts for unexpected outputs.",
+      "modelSeverity": "medium",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly states the model provider is Anthropic and does not specify a version, supporting the supply chain vulnerability finding.",
+      "contested": false
+    },
+    {
+      "category": "ASI01",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [ \"chat\" ]",
+      "whyItMatters": "Untrusted chat input creates a prompt injection vector that could manipulate the agent's goals or outputs, and the profile does not describe input sanitization or prompt-hardening controls. Even with human confirmation for actions, malicious inputs could cause unsafe or misleading answers to employees.",
+      "recommendedControl": "Implement input validation and a prompt-sanitization layer, add adversarial-testing for common injection techniques, and log untrusted inputs with alerts for anomalous patterns.",
+      "modelSeverity": "medium",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile lists 'chat' as an untrusted input, which directly supports the risk of prompt injection and potential manipulation of agent goals or outputs.",
+      "contested": false
+    },
+    {
+      "category": "ASI10",
+      "severity": "medium",
+      "evidenceQuote": "\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"",
+      "whyItMatters": "The kill switch is manual and untested, so in an incident the team may be unable to reliably stop or contain a malfunctioning or compromised agent. Lack of a tested runbook increases time to remediate and risk of continued harmful behavior.",
+      "recommendedControl": "Develop and test an automated, documented shutdown procedure and runbook, perform regular drills, and implement an automated emergency disable that does not rely solely on a single person.",
+      "modelSeverity": "medium",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile clearly states the kill switch is 'Manual' and has 'No tested runbook', which directly supports the finding of an inadequate kill switch.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI03",
+      "severity": "medium",
+      "evidenceQuote": "\"logging\": { \"enabled\": true, \"destination\": \"Application logs, not yet forwarded to the SIEM\" }",
+      "whyItMatters": "Without forwarding logs to a central SIEM, security teams may miss critical alerts, making it difficult to detect and respond to incidents like unauthorized access or agent misuse in a timely manner.",
+      "recommendedControl": "Configure log forwarding to the central SIEM for real-time monitoring and analysis.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "\"description\": \"Single-tenant internal chatbot that answers employee questions from a curated, access-controlled internal wiki. It has no write access and makes no external tool calls, and the knowledge base holds no personal data. It retrieves only from vetted documents.\"",
+      "whyItMatters": "Despite claims of no personal data, the agent accesses an 'internal wiki' which could contain sensitive company information, and a compromised agent could misuse its 'read' tool to exfiltrate this data through its chat output.",
+      "recommendedControl": "Implement strict output filtering and data loss prevention (DLP) measures to prevent sensitive internal information from being disclosed in agent responses.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This agent is read-only and confined to internal wiki reads, so Tier 1 is appropriate. Main risks are third-party model supply chain exposure, untrusted chat input that could enable prompt injection, and an untested manual kill switch; each should be mitigated before launch.",
+  "checkerSummary": "The agent is a Tier 2 risk because it reads internal documents and its actions are confirmed by a human. Key findings include supply chain risks from the model, prompt injection vulnerabilities, and an untested manual kill switch. Additionally, logging is not integrated with the SIEM, and there's a risk of sensitive internal data exfiltration through tool misuse despite claims of no personal data.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1830,
+      "inputTokenDetails": {
+        "noCacheTokens": 1830,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1288,
+      "outputTokenDetails": {
+        "textTokens": 520,
+        "reasoningTokens": 768
+      },
+      "totalTokens": 3118,
+      "raw": {
+        "input_tokens": 1830,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1288,
+        "output_tokens_details": {
+          "reasoning_tokens": 768
+        },
+        "total_tokens": 3118
+      }
+    },
+    "latencyMs": 9802,
+    "generationId": "gen_01M5T7XKYF9YMDYEJKTMQJ6GYV",
+    "provider": "openai",
+    "costUsd": 0.0030335
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2513,
+      "inputTokenDetails": {
+        "noCacheTokens": 2513,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1315,
+      "outputTokenDetails": {
+        "textTokens": 582,
+        "reasoningTokens": 733
+      },
+      "totalTokens": 3828,
+      "raw": {
+        "thoughtsTokenCount": 733,
+        "promptTokenCount": 2513,
+        "candidatesTokenCount": 582,
+        "totalTokenCount": 3828,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2513
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 582
+          }
+        ]
+      }
+    },
+    "latencyMs": 6917,
+    "generationId": "gen_01M5T7XXH0901MD0RBXMJMNRZ7",
+    "provider": "vertex",
+    "costUsd": 0.0040414
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 1,
+    "findings": [
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"provider\": \"Anthropic\",",
+        "whyItMatters": "The model provider is a third party, so model behavior, updates, or compromise outside our control could alter agent outputs or leak sensitive prompts. The profile also omits a specific model version which prevents reproducible testing and patch tracking.",
+        "recommendedControl": "Pin and document an approved model version, require a vendor security review and SLA, and add monitoring of model-behavior drift with alerts for unexpected outputs."
+      },
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [ \"chat\" ]",
+        "whyItMatters": "Untrusted chat input creates a prompt injection vector that could manipulate the agent's goals or outputs, and the profile does not describe input sanitization or prompt-hardening controls. Even with human confirmation for actions, malicious inputs could cause unsafe or misleading answers to employees.",
+        "recommendedControl": "Implement input validation and a prompt-sanitization layer, add adversarial-testing for common injection techniques, and log untrusted inputs with alerts for anomalous patterns."
+      },
+      {
+        "category": "ASI10",
+        "severity": "medium",
+        "evidenceQuote": "\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"",
+        "whyItMatters": "The kill switch is manual and untested, so in an incident the team may be unable to reliably stop or contain a malfunctioning or compromised agent. Lack of a tested runbook increases time to remediate and risk of continued harmful behavior.",
+        "recommendedControl": "Develop and test an automated, documented shutdown procedure and runbook, perform regular drills, and implement an automated emergency disable that does not rely solely on a single person."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent is read-only and confined to internal wiki reads, so Tier 1 is appropriate. Main risks are third-party model supply chain exposure, untrusted chat input that could enable prompt injection, and an untested manual kill switch; each should be mitigated before launch."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile explicitly states the model provider is Anthropic and does not specify a version, supporting the supply chain vulnerability finding."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The profile lists 'chat' as an untrusted input, which directly supports the risk of prompt injection and potential manipulation of agent goals or outputs."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The profile clearly states the kill switch is 'Manual' and has 'No tested runbook', which directly supports the finding of an inadequate kill switch."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"logging\": { \"enabled\": true, \"destination\": \"Application logs, not yet forwarded to the SIEM\" }",
+        "whyItMatters": "Without forwarding logs to a central SIEM, security teams may miss critical alerts, making it difficult to detect and respond to incidents like unauthorized access or agent misuse in a timely manner.",
+        "recommendedControl": "Configure log forwarding to the central SIEM for real-time monitoring and analysis."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"description\": \"Single-tenant internal chatbot that answers employee questions from a curated, access-controlled internal wiki. It has no write access and makes no external tool calls, and the knowledge base holds no personal data. It retrieves only from vetted documents.\"",
+        "whyItMatters": "Despite claims of no personal data, the agent accesses an 'internal wiki' which could contain sensitive company information, and a compromised agent could misuse its 'read' tool to exfiltrate this data through its chat output.",
+        "recommendedControl": "Implement strict output filtering and data loss prevention (DLP) measures to prevent sensitive internal information from being disclosed in agent responses."
+      }
+    ],
+    "proposedTier": 2,
+    "summary": "The agent is a Tier 2 risk because it reads internal documents and its actions are confirmed by a human. Key findings include supply chain risks from the model, prompt injection vulnerabilities, and an untested manual kill switch. Additionally, logging is not integrated with the SIEM, and there's a risk of sensitive internal data exfiltration through tool misuse despite claims of no personal data."
+  },
+  "costUsd": 0.0070749,
+  "seconds": 16.719
+}

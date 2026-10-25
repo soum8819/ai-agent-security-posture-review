@@ -1,0 +1,361 @@
+{
+  "profileId": "profile-01",
+  "tiers": {
+    "rule": 4,
+    "reviewer": 4,
+    "checker": 4,
+    "final": 4,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 4: moves money with no person confirming (Wire transfer API)",
+      "Tier 4: acts with no person confirming (ERP financial system, Vendor invoices email inbox)",
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (ERP financial system, Vendor invoices email inbox, Wire transfer API)",
+      "Tier 2: reads confidential, customer_financial data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI10",
+      "severity": "critical",
+      "evidenceQuote": "approves and initiates wire transfers of up to $25,000 without human review.",
+      "whyItMatters": "The agent can move money autonomously with no human confirmation, so compromise or malfunction can cause immediate financial loss without any intervening control.",
+      "recommendedControl": "Require dual-person approval for any wire transfer and block autonomous move_money calls by the agent; implement a human-in-the-loop gateway that verifies payment details before executing transfers.",
+      "modelSeverity": "critical",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly states the agent initiates wire transfers without human review, directly supporting the critical severity and the risk of a rogue agent causing financial loss.",
+      "contested": false
+    },
+    {
+      "category": "ASI06",
+      "severity": "high",
+      "evidenceQuote": "It keeps a memory of vendor history to spot anomalies, but that memory store is shared across all vendor accounts with no per-vendor separation.",
+      "whyItMatters": "A shared persistent memory can be poisoned or cause cross-tenant data leakage, letting a malicious or corrupted entry influence decisions for other vendors including approvals or denials.",
+      "recommendedControl": "Partition the memory store per vendor and add integrity checks and access controls, and implement versioned immutability or signed entries for critical vendor history to detect and mitigate poisoning.",
+      "modelSeverity": "high",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile clearly states the memory is shared across all vendor accounts with no separation, which directly supports the risk of memory poisoning or cross-vendor data influence.",
+      "contested": false
+    },
+    {
+      "category": "ASI01",
+      "severity": "high",
+      "evidenceQuote": "\"untrustedInputs\": [ \"email\" ]",
+      "whyItMatters": "The agent ingests untrusted email content as inputs and uses them to make approval and payment decisions, so crafted emails or attachments can manipulate goals, trigger incorrect approvals, or cause unsafe actions.",
+      "recommendedControl": "Treat email content as untrusted: add strict input validation, attachment sandboxing, provenance checks, and require secondary human verification for any invoice that changes payment targets, amounts, or approval decisions.",
+      "modelSeverity": "high",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile lists email as an untrusted input, confirming the risk of manipulation through crafted emails or attachments.",
+      "contested": false
+    },
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+      "whyItMatters": "The agent uses its own scoped token to perform sensitive actions including writes to ERP and money movement; if that token is compromised or overly permissive, attackers can escalate privileges and act without additional authorization, and the kill switch is manual and untested which slows remediation.",
+      "recommendedControl": "Enforce least privilege on the token with narrow action, time, and resource scopes, rotate credentials automatically, add short-lived token issuance tied to per-action approval, and implement a tested, automated emergency revocation playbook for the service account.",
+      "modelSeverity": "high",
+      "id": "F4",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile states the agent uses its own scoped token for actions, and the kill switch is manual and untested, which supports the risk of privilege abuse if the token is compromised.",
+      "contested": false
+    },
+    {
+      "category": "ASI02",
+      "severity": "critical",
+      "evidenceQuote": "{ \"name\": \"Vendor invoices email inbox\", \"permissions\": [ \"read\", \"write\" ] }",
+      "whyItMatters": "The agent has read and write access to the vendor email inbox and ERP, enabling it to modify external artifacts and internal records; in combination with untrusted inputs this allows manipulated tool outputs or forged messages to influence workflows and potentially hide malicious activity.",
+      "recommendedControl": "Restrict write permissions: make the agent read-only for inbox and ERP by default, require explicit human review or elevated scoped workflows for any writes, and implement immutable audit trails for inbox and ERP changes.",
+      "modelSeverity": "medium",
+      "raisedByRule": "R1",
+      "id": "F5",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile grants read and write permissions to both the email inbox and ERP system, supporting the risk of tool misuse and manipulation of records.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI05",
+      "severity": "high",
+      "evidenceQuote": "Reads vendor invoices from an email inbox, including attachments, extracts payment details, matches them against purchase orders in the ERP, and approves and initiates wire transfers of up to $25,000 without human review.",
+      "whyItMatters": "The agent processes attachments from untrusted email, which could contain malicious code or exploit vulnerabilities in the attachment processing, leading to remote code execution or system compromise.",
+      "recommendedControl": "Implement robust sandboxing for all attachments, perform deep content inspection for malware, and restrict the agent's ability to execute any code from attachments.",
+      "modelSeverity": "high"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R1",
+      "severity": "critical",
+      "reason": "Lists Wire transfer API, ERP financial system, Vendor invoices email inbox that can move money or change customer records, and no person confirms its actions.",
+      "field": "tools.permissions, humanConfirmsActions",
+      "category": "ASI02"
+    },
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (email) and lists ERP financial system, Vendor invoices email inbox that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    },
+    {
+      "ruleId": "R5",
+      "severity": "high",
+      "reason": "Keeps persistent memory and reads untrusted input (email).",
+      "field": "memory, untrustedInputs",
+      "category": "ASI06"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This agent is high-risk because it autonomously initiates wire transfers up to $25,000 without human confirmation and has persistent, shared memory plus integration with untrusted email and write permissions to sensitive systems. Approve only after removing autonomous money movement, partitioning and hardening memory, treating email as untrusted input with human checkpoints, tightening credentials, and implementing tested emergency revocation and monitoring.",
+  "checkerSummary": "The agent operates with critical capabilities, including autonomous wire transfers up to $25,000 and write access to financial systems, without human confirmation. This places it in Tier 4. Several high and critical risks exist due to untrusted inputs, shared memory, and the potential for code execution from attachments, compounded by weak logging and an untested kill switch.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [
+    {
+      "finding": {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "logging: { \"enabled\": true, \"destination\": \"Application logs, not yet forwarded to the SIEM\" }",
+        "whyItMatters": "Lack of SIEM forwarding for logs means that security incidents, unauthorized access, or anomalous agent behavior may not be detected or responded to in a timely manner, hindering incident response.",
+        "recommendedControl": "Configure immediate forwarding of all agent logs to the central SIEM for real-time monitoring, alerting, and correlation with other security events."
+      },
+      "reason": "evidence quote not found in the profile"
+    },
+    {
+      "finding": {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "killSwitch: { \"available\": true, \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\" }",
+        "whyItMatters": "A manual kill switch without a tested runbook introduces significant delay and potential for error during an emergency, allowing a compromised or malfunctioning agent to continue causing harm for longer.",
+        "recommendedControl": "Develop and regularly test an automated kill switch mechanism with a clear, documented runbook to ensure rapid and reliable agent shutdown in an emergency."
+      },
+      "reason": "evidence quote not found in the profile"
+    },
+    {
+      "finding": {
+        "category": "ASI04",
+        "severity": "low",
+        "evidenceQuote": "model: { \"provider\": \"Self-hosted\", \"name\": \"Llama (version not specified)\" }",
+        "whyItMatters": "An unspecified version of the Llama model makes it difficult to track known vulnerabilities, apply necessary patches, or ensure consistent behavior, potentially exposing the agent to known exploits.",
+        "recommendedControl": "Specify and document the exact version of the Llama model used, and establish a process for regular security patching and updates."
+      },
+      "reason": "evidence quote not found in the profile"
+    }
+  ],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1922,
+      "inputTokenDetails": {
+        "noCacheTokens": 130,
+        "cacheReadTokens": 1792,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1978,
+      "outputTokenDetails": {
+        "textTokens": 826,
+        "reasoningTokens": 1152
+      },
+      "totalTokens": 3900,
+      "raw": {
+        "input_tokens": 1922,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 1792
+        },
+        "output_tokens": 1978,
+        "output_tokens_details": {
+          "reasoning_tokens": 1152
+        },
+        "total_tokens": 3900
+      }
+    },
+    "latencyMs": 14377,
+    "generationId": "gen_01M5T85D31EAHP1RS9585AXT22",
+    "provider": "openai",
+    "costUsd": 0.0040333
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2934,
+      "inputTokenDetails": {
+        "noCacheTokens": 2934,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1790,
+      "outputTokenDetails": {
+        "textTokens": 966,
+        "reasoningTokens": 824
+      },
+      "totalTokens": 4724,
+      "raw": {
+        "thoughtsTokenCount": 824,
+        "promptTokenCount": 2934,
+        "candidatesTokenCount": 966,
+        "totalTokenCount": 4724,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2934
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 966
+          }
+        ]
+      }
+    },
+    "latencyMs": 8547,
+    "generationId": "gen_01M5T85TYKY8HN3EWP9R0RBBXK",
+    "provider": "vertex",
+    "costUsd": 0.0053552
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 4,
+    "findings": [
+      {
+        "category": "ASI10",
+        "severity": "critical",
+        "evidenceQuote": "approves and initiates wire transfers of up to $25,000 without human review.",
+        "whyItMatters": "The agent can move money autonomously with no human confirmation, so compromise or malfunction can cause immediate financial loss without any intervening control.",
+        "recommendedControl": "Require dual-person approval for any wire transfer and block autonomous move_money calls by the agent; implement a human-in-the-loop gateway that verifies payment details before executing transfers."
+      },
+      {
+        "category": "ASI06",
+        "severity": "high",
+        "evidenceQuote": "It keeps a memory of vendor history to spot anomalies, but that memory store is shared across all vendor accounts with no per-vendor separation.",
+        "whyItMatters": "A shared persistent memory can be poisoned or cause cross-tenant data leakage, letting a malicious or corrupted entry influence decisions for other vendors including approvals or denials.",
+        "recommendedControl": "Partition the memory store per vendor and add integrity checks and access controls, and implement versioned immutability or signed entries for critical vendor history to detect and mitigate poisoning."
+      },
+      {
+        "category": "ASI01",
+        "severity": "high",
+        "evidenceQuote": "\"untrustedInputs\": [ \"email\" ]",
+        "whyItMatters": "The agent ingests untrusted email content as inputs and uses them to make approval and payment decisions, so crafted emails or attachments can manipulate goals, trigger incorrect approvals, or cause unsafe actions.",
+        "recommendedControl": "Treat email content as untrusted: add strict input validation, attachment sandboxing, provenance checks, and require secondary human verification for any invoice that changes payment targets, amounts, or approval decisions."
+      },
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+        "whyItMatters": "The agent uses its own scoped token to perform sensitive actions including writes to ERP and money movement; if that token is compromised or overly permissive, attackers can escalate privileges and act without additional authorization, and the kill switch is manual and untested which slows remediation.",
+        "recommendedControl": "Enforce least privilege on the token with narrow action, time, and resource scopes, rotate credentials automatically, add short-lived token issuance tied to per-action approval, and implement a tested, automated emergency revocation playbook for the service account."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "{ \"name\": \"Vendor invoices email inbox\", \"permissions\": [ \"read\", \"write\" ] }",
+        "whyItMatters": "The agent has read and write access to the vendor email inbox and ERP, enabling it to modify external artifacts and internal records; in combination with untrusted inputs this allows manipulated tool outputs or forged messages to influence workflows and potentially hide malicious activity.",
+        "recommendedControl": "Restrict write permissions: make the agent read-only for inbox and ERP by default, require explicit human review or elevated scoped workflows for any writes, and implement immutable audit trails for inbox and ERP changes."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent is high-risk because it autonomously initiates wire transfers up to $25,000 without human confirmation and has persistent, shared memory plus integration with untrusted email and write permissions to sensitive systems. Approve only after removing autonomous money movement, partitioning and hardening memory, treating email as untrusted input with human checkpoints, tightening credentials, and implementing tested emergency revocation and monitoring."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile explicitly states the agent initiates wire transfers without human review, directly supporting the critical severity and the risk of a rogue agent causing financial loss."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The profile clearly states the memory is shared across all vendor accounts with no separation, which directly supports the risk of memory poisoning or cross-vendor data influence."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The profile lists email as an untrusted input, confirming the risk of manipulation through crafted emails or attachments."
+      },
+      {
+        "findingId": "F4",
+        "verdict": "agree",
+        "reason": "The profile states the agent uses its own scoped token for actions, and the kill switch is manual and untested, which supports the risk of privilege abuse if the token is compromised."
+      },
+      {
+        "findingId": "F5",
+        "verdict": "agree",
+        "reason": "The profile grants read and write permissions to both the email inbox and ERP system, supporting the risk of tool misuse and manipulation of records."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI05",
+        "severity": "high",
+        "evidenceQuote": "Reads vendor invoices from an email inbox, including attachments, extracts payment details, matches them against purchase orders in the ERP, and approves and initiates wire transfers of up to $25,000 without human review.",
+        "whyItMatters": "The agent processes attachments from untrusted email, which could contain malicious code or exploit vulnerabilities in the attachment processing, leading to remote code execution or system compromise.",
+        "recommendedControl": "Implement robust sandboxing for all attachments, perform deep content inspection for malware, and restrict the agent's ability to execute any code from attachments."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "logging: { \"enabled\": true, \"destination\": \"Application logs, not yet forwarded to the SIEM\" }",
+        "whyItMatters": "Lack of SIEM forwarding for logs means that security incidents, unauthorized access, or anomalous agent behavior may not be detected or responded to in a timely manner, hindering incident response.",
+        "recommendedControl": "Configure immediate forwarding of all agent logs to the central SIEM for real-time monitoring, alerting, and correlation with other security events."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "killSwitch: { \"available\": true, \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\" }",
+        "whyItMatters": "A manual kill switch without a tested runbook introduces significant delay and potential for error during an emergency, allowing a compromised or malfunctioning agent to continue causing harm for longer.",
+        "recommendedControl": "Develop and regularly test an automated kill switch mechanism with a clear, documented runbook to ensure rapid and reliable agent shutdown in an emergency."
+      },
+      {
+        "category": "ASI04",
+        "severity": "low",
+        "evidenceQuote": "model: { \"provider\": \"Self-hosted\", \"name\": \"Llama (version not specified)\" }",
+        "whyItMatters": "An unspecified version of the Llama model makes it difficult to track known vulnerabilities, apply necessary patches, or ensure consistent behavior, potentially exposing the agent to known exploits.",
+        "recommendedControl": "Specify and document the exact version of the Llama model used, and establish a process for regular security patching and updates."
+      }
+    ],
+    "proposedTier": 4,
+    "summary": "The agent operates with critical capabilities, including autonomous wire transfers up to $25,000 and write access to financial systems, without human confirmation. This places it in Tier 4. Several high and critical risks exist due to untrusted inputs, shared memory, and the potential for code execution from attachments, compounded by weak logging and an untested kill switch."
+  },
+  "costUsd": 0.009388500000000001,
+  "seconds": 22.924
+}

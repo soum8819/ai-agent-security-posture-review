@@ -1,0 +1,279 @@
+{
+  "profileId": "profile-03",
+  "tiers": {
+    "rule": 1,
+    "reviewer": 1,
+    "checker": 2,
+    "final": 2,
+    "setBy": [
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI01",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [ \"web\" ]",
+      "whyItMatters": "The agent ingests web content which can contain adversarial or maliciously crafted text that changes the agent's objectives or recommendations, causing it to produce misleading or manipulated briefs. There are no controls listed to sanitize, validate, or filter web inputs.",
+      "recommendedControl": "Implement input validation and content-safety filtering for web-sourced data, and add prompt hardening and allowlist/blocklist rules before the model consumes external web content.",
+      "modelSeverity": "medium",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly states 'untrustedInputs': ['web'], which directly supports the risk of goal hijack through malicious web content.",
+      "contested": false
+    },
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "\"name\": \"Web search\",\"permissions\": [\"read\"]",
+      "whyItMatters": "The agent depends on external tooling for web/news search that can return forged or manipulated results, enabling exfiltration or delivering deceptive content the agent will incorporate into briefs. The profile provides no sandboxing or verification of tool outputs.",
+      "recommendedControl": "Add output verification for external search results, use provenance logging for each source, and restrict search to vetted APIs or curated sources with integrity checks.",
+      "modelSeverity": "medium",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent uses external search tools with read permissions, making it vulnerable to manipulated outputs that could lead to misinformation in the briefs.",
+      "contested": false
+    },
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "A shared credential increases the blast radius if it is compromised or misused, enabling unauthorized access to the CRM read data and possible lateral abuse of other services that accept the token. The profile does not describe token scoping, rotation, or per-agent identities.",
+      "recommendedControl": "Replace the shared_token with a scoped, per-agent credential with least privilege and automated rotation, and add IAM monitoring and usage alerts for that credential.",
+      "modelSeverity": "high",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The use of a 'shared_token' for credentials significantly increases the risk of privilege escalation or unauthorized access if compromised, as noted by the first reviewer.",
+      "contested": false
+    },
+    {
+      "category": "ASI09",
+      "severity": "medium",
+      "evidenceQuote": "\"description\": \"Pulls public web and news data plus read-only CRM context about a client and summarizes it into a brief for the relationship manager. It has no write access to any system. The brief is advisory only and a person reads it before using it.\"",
+      "whyItMatters": "The profile positions the output as advisory and reviewed, which can encourage human trust, but with no described guardrails for hallucinations or provenance the relationship manager may over-rely on incorrect or misleading summaries. This can lead to poor decisions or reputational harm.",
+      "recommendedControl": "Attach source citations and confidence scores to every brief, require explicit RM acknowledgement of sources before taking action, and add hallucination-detection checks and human review heuristics.",
+      "modelSeverity": "medium",
+      "id": "F4",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent's advisory role and natural language output can foster undue human trust, making the relationship manager susceptible to acting on potentially incorrect or misleading information.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"logging\": {\"enabled\": true,\"destination\": \"Application logs, not yet forwarded to the SIEM\"}",
+      "whyItMatters": "Without logging to a SIEM, security teams cannot effectively monitor for anomalous agent behavior, detect attacks, or perform forensic analysis, increasing the risk of undetected compromise. A single fault could propagate without timely detection or intervention, leading to cascading failures across the system or downstream users. ",
+      "recommendedControl": "Integrate all agent logs with the central Security Information and Event Management (SIEM) system for real-time monitoring and alerting.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"killSwitch\": {\"available\": true,\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"}",
+      "whyItMatters": "A manual kill switch without a tested runbook introduces significant delay and uncertainty in responding to a rogue agent or system failure, increasing the potential for harm to propagate. An untested kill switch may fail when needed most, allowing a cascading failure to continue unchecked.",
+      "recommendedControl": "Develop and regularly test a comprehensive runbook for the kill switch, including automated triggers where feasible, to ensure rapid and reliable agent shutdown.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This read-only agent is Tier 1 because it only reads public and internal documents and produces advisory briefs. Main risks are ingestion of untrusted web data, use of external search tools without output verification, a shared credential for CRM access, and potential overreliance by humans without provenance or hallucination controls.",
+  "checkerSummary": "The Account Research Agent is a Tier 2 agent because it only reads internal documents and public data, and its output is advisory, requiring human review before use. However, it has several weaknesses, including untrusted inputs, shared credentials, and inadequate logging and kill switch procedures, which could lead to misinformation or system compromise.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1881,
+      "inputTokenDetails": {
+        "noCacheTokens": 89,
+        "cacheReadTokens": 1792,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1768,
+      "outputTokenDetails": {
+        "textTokens": 680,
+        "reasoningTokens": 1088
+      },
+      "totalTokens": 3649,
+      "raw": {
+        "input_tokens": 1881,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 1792
+        },
+        "output_tokens": 1768,
+        "output_tokens_details": {
+          "reasoning_tokens": 1088
+        },
+        "total_tokens": 3649
+      }
+    },
+    "latencyMs": 17239,
+    "generationId": "gen_01M5T8967FRVJVE6S8JNTK511M",
+    "provider": "openai",
+    "costUsd": 0.00360305
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2756,
+      "inputTokenDetails": {
+        "noCacheTokens": 2756,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1423,
+      "outputTokenDetails": {
+        "textTokens": 646,
+        "reasoningTokens": 777
+      },
+      "totalTokens": 4179,
+      "raw": {
+        "thoughtsTokenCount": 777,
+        "promptTokenCount": 2756,
+        "candidatesTokenCount": 646,
+        "totalTokenCount": 4179,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2756
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 646
+          }
+        ]
+      }
+    },
+    "latencyMs": 8182,
+    "generationId": "gen_01M5T89Q23WTCNMA2NTGP7Q2SW",
+    "provider": "vertex",
+    "costUsd": 0.0043843
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 1,
+    "findings": [
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [ \"web\" ]",
+        "whyItMatters": "The agent ingests web content which can contain adversarial or maliciously crafted text that changes the agent's objectives or recommendations, causing it to produce misleading or manipulated briefs. There are no controls listed to sanitize, validate, or filter web inputs.",
+        "recommendedControl": "Implement input validation and content-safety filtering for web-sourced data, and add prompt hardening and allowlist/blocklist rules before the model consumes external web content."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"name\": \"Web search\",\"permissions\": [\"read\"]",
+        "whyItMatters": "The agent depends on external tooling for web/news search that can return forged or manipulated results, enabling exfiltration or delivering deceptive content the agent will incorporate into briefs. The profile provides no sandboxing or verification of tool outputs.",
+        "recommendedControl": "Add output verification for external search results, use provenance logging for each source, and restrict search to vetted APIs or curated sources with integrity checks."
+      },
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "A shared credential increases the blast radius if it is compromised or misused, enabling unauthorized access to the CRM read data and possible lateral abuse of other services that accept the token. The profile does not describe token scoping, rotation, or per-agent identities.",
+        "recommendedControl": "Replace the shared_token with a scoped, per-agent credential with least privilege and automated rotation, and add IAM monitoring and usage alerts for that credential."
+      },
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "\"description\": \"Pulls public web and news data plus read-only CRM context about a client and summarizes it into a brief for the relationship manager. It has no write access to any system. The brief is advisory only and a person reads it before using it.\"",
+        "whyItMatters": "The profile positions the output as advisory and reviewed, which can encourage human trust, but with no described guardrails for hallucinations or provenance the relationship manager may over-rely on incorrect or misleading summaries. This can lead to poor decisions or reputational harm.",
+        "recommendedControl": "Attach source citations and confidence scores to every brief, require explicit RM acknowledgement of sources before taking action, and add hallucination-detection checks and human review heuristics."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This read-only agent is Tier 1 because it only reads public and internal documents and produces advisory briefs. Main risks are ingestion of untrusted web data, use of external search tools without output verification, a shared credential for CRM access, and potential overreliance by humans without provenance or hallucination controls."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile explicitly states 'untrustedInputs': ['web'], which directly supports the risk of goal hijack through malicious web content."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The agent uses external search tools with read permissions, making it vulnerable to manipulated outputs that could lead to misinformation in the briefs."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The use of a 'shared_token' for credentials significantly increases the risk of privilege escalation or unauthorized access if compromised, as noted by the first reviewer."
+      },
+      {
+        "findingId": "F4",
+        "verdict": "agree",
+        "reason": "The agent's advisory role and natural language output can foster undue human trust, making the relationship manager susceptible to acting on potentially incorrect or misleading information."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"logging\": {\"enabled\": true,\"destination\": \"Application logs, not yet forwarded to the SIEM\"}",
+        "whyItMatters": "Without logging to a SIEM, security teams cannot effectively monitor for anomalous agent behavior, detect attacks, or perform forensic analysis, increasing the risk of undetected compromise. A single fault could propagate without timely detection or intervention, leading to cascading failures across the system or downstream users. ",
+        "recommendedControl": "Integrate all agent logs with the central Security Information and Event Management (SIEM) system for real-time monitoring and alerting."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"killSwitch\": {\"available\": true,\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"}",
+        "whyItMatters": "A manual kill switch without a tested runbook introduces significant delay and uncertainty in responding to a rogue agent or system failure, increasing the potential for harm to propagate. An untested kill switch may fail when needed most, allowing a cascading failure to continue unchecked.",
+        "recommendedControl": "Develop and regularly test a comprehensive runbook for the kill switch, including automated triggers where feasible, to ensure rapid and reliable agent shutdown."
+      }
+    ],
+    "proposedTier": 2,
+    "summary": "The Account Research Agent is a Tier 2 agent because it only reads internal documents and public data, and its output is advisory, requiring human review before use. However, it has several weaknesses, including untrusted inputs, shared credentials, and inadequate logging and kill switch procedures, which could lead to misinformation or system compromise."
+  },
+  "costUsd": 0.00798735,
+  "seconds": 25.421
+}
