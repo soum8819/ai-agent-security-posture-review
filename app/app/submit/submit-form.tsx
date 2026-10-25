@@ -93,13 +93,13 @@ function toggle(list: string[], value: string) {
 }
 
 const inputClass =
-  "mt-1 w-full rounded border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900";
+  "mt-2 w-full rounded-md border border-line bg-page px-3 py-2 text-base text-ink placeholder:text-muted sm:text-sm";
 
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
-    <div className="mt-6">
-      <div className="font-medium">{label}</div>
-      {hint && <div className="text-sm text-zinc-500">{hint}</div>}
+    <div className="border-b border-line px-5 py-5 last:border-0">
+      <div className="text-sm font-medium">{label}</div>
+      {hint && <div className="mt-0.5 text-xs text-muted">{hint}</div>}
       {children}
     </div>
   );
@@ -107,9 +107,9 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
 
 function Checkboxes({ options, value, onChange }: { options: readonly string[]; value: string[]; onChange: (v: string[]) => void }) {
   return (
-    <div className="mt-2 flex flex-wrap gap-4">
+    <div className="mt-2 flex flex-wrap gap-2">
       {options.map((o) => (
-        <label key={o} className="flex items-center gap-2">
+        <label key={o} className="flex min-h-10 cursor-pointer items-center gap-2 rounded-md border border-line px-3 text-sm has-[:checked]:border-ink has-[:checked]:bg-subtle">
           <input type="checkbox" checked={value.includes(o)} onChange={() => onChange(toggle(value, o))} />
           {LABELS[o] ?? o}
         </label>
@@ -120,9 +120,9 @@ function Checkboxes({ options, value, onChange }: { options: readonly string[]; 
 
 function Radios({ name, options, value, onChange }: { name: string; options: readonly string[]; value: string; onChange: (v: string) => void }) {
   return (
-    <div className="mt-2 flex flex-wrap gap-4">
+    <div className="mt-2 flex flex-wrap gap-2">
       {options.map((o) => (
-        <label key={o} className="flex items-center gap-2">
+        <label key={o} className="flex min-h-10 cursor-pointer items-center gap-2 rounded-md border border-line px-3 text-sm has-[:checked]:border-ink has-[:checked]:bg-subtle">
           <input type="radio" name={name} checked={value === o} onChange={() => onChange(o)} />
           {LABELS[o] ?? o}
         </label>
@@ -184,13 +184,13 @@ export function SubmitForm({ initialProfile, supersedes }: { initialProfile?: un
 
   return (
     <form
-      className="mt-8"
+      className="mt-8 space-y-6"
       onSubmit={(e) => {
         e.preventDefault();
         validate();
       }}
     >
-      <label className="block text-sm text-zinc-500">
+      <label className="block text-sm font-medium">
         Load a sample profile
         <select
           className={inputClass}
@@ -210,6 +210,7 @@ export function SubmitForm({ initialProfile, supersedes }: { initialProfile?: un
         </select>
       </label>
 
+      <div className="rounded-lg border border-line bg-page">
       <Field label="Profile id" hint="3 to 40 lowercase letters, digits or dashes">
         <input className={inputClass} value={d.id} onChange={(e) => set("id", e.target.value)} />
       </Field>
@@ -229,7 +230,7 @@ export function SubmitForm({ initialProfile, supersedes }: { initialProfile?: un
 
       <Field label="Tools and permissions">
         {d.tools.map((tool, i) => (
-          <div key={i} className="mt-3 rounded border border-zinc-200 p-3 dark:border-zinc-800">
+          <div key={i} className="mt-3 rounded-md border border-line p-3">
             <div className="flex gap-2">
               <input
                 className={inputClass}
@@ -239,7 +240,7 @@ export function SubmitForm({ initialProfile, supersedes }: { initialProfile?: un
               />
               <button
                 type="button"
-                className="mt-1 rounded border border-zinc-300 px-3 text-sm dark:border-zinc-700"
+                className="mt-2 inline-flex min-h-10 items-center rounded-md border border-line px-3 text-sm hover:bg-fill"
                 onClick={() => set("tools", d.tools.filter((_, j) => j !== i))}
               >
                 Remove
@@ -254,7 +255,7 @@ export function SubmitForm({ initialProfile, supersedes }: { initialProfile?: un
         ))}
         <button
           type="button"
-          className="mt-3 rounded border border-zinc-300 px-3 py-1 text-sm dark:border-zinc-700"
+          className="mt-3 inline-flex min-h-10 items-center rounded-md border border-line px-3 text-sm hover:bg-fill"
           onClick={() => set("tools", [...d.tools, { name: "", permissions: [] }])}
         >
           Add a tool
@@ -290,7 +291,7 @@ export function SubmitForm({ initialProfile, supersedes }: { initialProfile?: un
       </Field>
 
       <Field label="Logging">
-        <label className="mt-2 flex items-center gap-2">
+        <label className="mt-2 flex min-h-10 cursor-pointer items-center gap-2 text-sm">
           <input type="checkbox" checked={d.logging.enabled} onChange={(e) => set("logging", { ...d.logging, enabled: e.target.checked })} />
           Its actions are logged
         </label>
@@ -298,7 +299,7 @@ export function SubmitForm({ initialProfile, supersedes }: { initialProfile?: un
       </Field>
 
       <Field label="Kill switch">
-        <label className="mt-2 flex items-center gap-2">
+        <label className="mt-2 flex min-h-10 cursor-pointer items-center gap-2 text-sm">
           <input type="checkbox" checked={d.killSwitch.available} onChange={(e) => set("killSwitch", { ...d.killSwitch, available: e.target.checked })} />
           It can be stopped quickly
         </label>
@@ -309,30 +310,32 @@ export function SubmitForm({ initialProfile, supersedes }: { initialProfile?: un
         <textarea className={inputClass} rows={6} value={d.description} onChange={(e) => set("description", e.target.value)} />
       </Field>
 
-      <div className="mt-8 flex gap-3">
-        <button type="submit" className="rounded border border-zinc-300 px-5 py-2 font-medium dark:border-zinc-700">
+      </div>
+
+      <div className="flex flex-wrap gap-3">
+        <button type="submit" className="inline-flex min-h-11 items-center justify-center rounded-md border border-line bg-page px-4 text-sm font-medium hover:bg-fill sm:min-h-10">
           Validate
         </button>
         <button
           type="button"
           disabled={sent?.state === "sending"}
           onClick={submitForReview}
-          className="rounded bg-zinc-900 px-5 py-2 font-medium text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
+          className="inline-flex min-h-11 items-center justify-center rounded-md bg-ink px-4 text-sm font-medium text-page hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-10"
         >
-          {sent?.state === "sending" ? "Submitting..." : "Submit for review"}
+          {sent?.state === "sending" ? "Submitting…" : "Submit for review"}
         </button>
       </div>
 
       {sent?.state === "sent" && (
-        <p role="status" className="mt-4 rounded border border-green-700 bg-green-50 p-3 text-green-900">
+        <p role="status" className="mt-4 rounded-md border border-l-4 border-dot-ok bg-subtle px-4 py-3 text-sm">
           Submitted. The review is running.{" "}
-          <Link href={`/app/reviews/${sent.reviewId}`} className="underline">
+          <Link href={`/app/reviews/${sent.reviewId}`} className="font-medium text-accent underline-offset-2 hover:underline">
             Open review {sent.reviewId.slice(0, 8)}
           </Link>
         </p>
       )}
       {sent?.state === "error" && (
-        <div role="alert" className="mt-4 rounded border border-red-700 bg-red-50 p-3 text-red-900">
+        <div role="alert" className="mt-4 rounded-md border border-l-4 border-dot-bad bg-subtle px-4 py-3 text-sm">
           <p className="font-medium">{sent.message}</p>
           {sent.issues && (
             <ul className="mt-2 list-disc pl-5">
@@ -345,12 +348,12 @@ export function SubmitForm({ initialProfile, supersedes }: { initialProfile?: un
       )}
 
       {result?.ok && (
-        <p role="status" className="mt-4 rounded border border-green-700 bg-green-50 p-3 text-green-900">
+        <p role="status" className="mt-4 rounded-md border border-l-4 border-dot-ok bg-subtle px-4 py-3 text-sm">
           Valid: this profile matches the schema.
         </p>
       )}
       {result && !result.ok && (
-        <div role="alert" className="mt-4 rounded border border-red-700 bg-red-50 p-3 text-red-900">
+        <div role="alert" className="mt-4 rounded-md border border-l-4 border-dot-bad bg-subtle px-4 py-3 text-sm">
           <p className="font-medium">Not valid yet. Fix these:</p>
           <ul className="mt-2 list-disc pl-5">
             {result.issues.map((issue) => (

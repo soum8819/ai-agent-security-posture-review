@@ -7,6 +7,21 @@ import type { AgentProfile } from "./profile-schema.ts";
 import type { Severity, TierSource } from "./rules.ts";
 import { findUser } from "./users.ts";
 
+// Short status labels for pills and tables, with a tone that sets the dot
+// colour. The word always carries the meaning; the dot only supports it.
+export const STATUS_SHORT: Record<ReviewStatus, { label: string; tone: "ok" | "warn" | "bad" | "info" | "neutral" }> = {
+  queued: { label: "Queued", tone: "neutral" },
+  reviewing: { label: "Reviewing", tone: "info" },
+  awaiting_appsec: { label: "Waiting for AppSec", tone: "warn" },
+  awaiting_model_risk: { label: "Waiting for Model Risk", tone: "warn" },
+  approved: { label: "Approved", tone: "ok" },
+  approved_with_conditions: { label: "Approved with conditions", tone: "ok" },
+  rejected: { label: "Rejected", tone: "bad" },
+  changes_requested: { label: "Changes requested", tone: "warn" },
+  routed_to_committee: { label: "Sent to committee", tone: "info" },
+  failed: { label: "Failed", tone: "bad" },
+};
+
 export const STATUS_TEXT: Record<ReviewStatus, string> = {
   queued: "Queued",
   reviewing: "Reviewing: the rules and two models are working",
@@ -145,14 +160,9 @@ export const SEVERITY_WORDS: Record<Severity, string> = {
   low: "Low",
 };
 
-// Badge colours as fixed hex values, so their contrast can be checked by a
-// test. Each badge also shows the word, so colour is never the only signal.
-export const SEVERITY_COLOURS: Record<Severity, { background: string; text: string }> = {
-  critical: { background: "#991b1b", text: "#ffffff" },
-  high: { background: "#9a3412", text: "#ffffff" },
-  medium: { background: "#fde68a", text: "#451a03" },
-  low: { background: "#e4e4e7", text: "#18181b" },
-};
+// Badge colours live in app/globals.css (--sev-*), in light and dark mode;
+// tests/design.test.ts checks their contrast. Each badge also shows the word,
+// so colour is never the only signal.
 
 function luminance(hex: string) {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);

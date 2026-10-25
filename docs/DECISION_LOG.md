@@ -67,3 +67,56 @@ its own step recording a resume. Runs stay pinned to the deployment that
 started them, so that old step ran. Nothing was recorded twice by the current
 code. Audit events cannot be changed, so both stay.
 
+## 2026-10-25: design direction for the reviewer app
+
+**Direction.** Calm, dense and readable, in the spirit of Vercel's own
+products: Geist type, a neutral grey scale, one accent colour, generous
+spacing on a 4 pixel grid, and light and dark mode that follow the system
+setting. The review detail page puts what an approver needs first (status,
+final tier, contested findings, who decides next) above the details, with the
+decision form beside them on wide screens.
+
+**Why Geist.** It is Vercel's own typeface (Geist Sans and Geist Mono), it was
+already loaded by the project through next/font, so it costs no new package,
+and its mono face suits the things reviewers compare character by character:
+review ids, evidence quotes and field excerpts. Before this pass the page font
+was still set to Arial, so Geist never showed.
+
+**Why a grey scale with one accent.** Security review is about meaning, so
+colour is kept for meaning. Greys do the structural work (backgrounds, fills,
+borders, secondary and primary text, in the roles of Vercel's Geist colour
+system). One blue accent marks links, the main actions and the keyboard focus
+ring. Red, orange, amber and green appear only where they carry meaning:
+severity and status.
+
+**Rule: colour is never the only signal.** Every severity badge shows its
+word (Critical, High, Medium, Low), every status pill shows its words beside
+its dot, and tier chips show "Tier 1" to "Tier 4", with Tier 4 also saying
+Committee. Every text colour pair passes contrast of at least 4.5 to 1 in both
+modes, and the focus ring at least 3 to 1; tests/design.test.ts checks this
+by reading the real stylesheet.
+
+**Guidelines applied (Vercel's Web Interface Guidelines).** A visible focus
+ring on every focusable element through :focus-visible; hit targets of at
+least 40 pixels, 44 on phones; text inputs at 16 pixels on phones so iOS does
+not zoom; zoom never disabled; loading labels kept and ending in an ellipsis;
+loading placeholders shaped like the content; minimal motion that turns off
+when the system asks for reduced motion.
+
+**Two choices made during the pass.**
+- The submit form's buttons first stuck to the bottom of a phone screen. A
+  screenshot showed the bar covering a field, and the guidelines say sticky
+  bars must never cover the focused element, so the buttons sit at the end of
+  the form instead.
+- Some evidence quotes are profile JSON copied with runs of spaces. On screen
+  they are now shown with repeated spaces collapsed and line breaks kept. The
+  stored quote, the evidence check and the evidence pack are unchanged, so
+  every quote still matches the profile exactly.
+
+**Screenshots.** Before and after, at desktop and phone width, are in
+docs/design/before and docs/design/after (taken with Playwright run through
+npx, so the project gained no package). The first review-detail pair uses a
+setup-check review whose final tier was changed for testing, so its rule tier
+(4) is above its final tier (3); the review-tier3 and review-tier4 shots use
+consistent reviews and are the ones to use publicly.
+

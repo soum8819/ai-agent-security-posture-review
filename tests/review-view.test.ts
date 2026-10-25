@@ -6,7 +6,6 @@ import type { AgentProfile } from "../lib/profile-schema.ts";
 import { canViewReview, reviewScope } from "../lib/review-access.ts";
 import {
   RULE_REQUIREMENTS,
-  SEVERITY_COLOURS,
   SEVERITY_WORDS,
   STATUS_TEXT,
   VERDICT_TEXT,
@@ -34,11 +33,8 @@ test("a Submitter sees only their own reviews; everyone else sees all", () => {
   assert.deepEqual(reviewScope(submitter), { kind: "submitter", submitterId: submitter.id });
 });
 
-test("every badge colour pair passes contrast (at least 4.5 to 1) and says the word", () => {
-  for (const [sev, c] of Object.entries(SEVERITY_COLOURS)) {
-    assert.ok(contrastRatio(c.background, c.text) >= 4.5, `${sev}: ${contrastRatio(c.background, c.text).toFixed(2)}`);
-    assert.ok(SEVERITY_WORDS[sev as keyof typeof SEVERITY_WORDS].length > 0);
-  }
+test("every severity says its word; badge contrast is checked in both modes by tests/design.test.ts", () => {
+  for (const sev of ["critical", "high", "medium", "low"] as const) assert.ok(SEVERITY_WORDS[sev].length > 0);
   assert.ok(Math.abs(contrastRatio("#000000", "#ffffff") - 21) < 0.01); // the formula itself
 });
 

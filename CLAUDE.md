@@ -161,3 +161,5 @@ Updated by the project owner after each step.
 - [x] Step 10: done, with step 11a (live check passed: review 080fc26e resumed across deployments and completed)
 - [ ] Step 11: in progress (11b audit page and 11d data handling built; 11c skipped, registry described in the README)
 - [ ] Step 12: built (attack tests, sign-in attempt limit, input limits, key scan; see eval/security-tests.md); the project owner's live check of attack (a) is pending
+- [ ] Design pass (step 10b): design basics, frame, review detail, sign-in, app home, queue and submit done; the overview page comes after step 13, then the audit restyle
+- [ ] Step 13: next (the evaluation)

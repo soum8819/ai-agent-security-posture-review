@@ -1,26 +1,155 @@
 @import "tailwindcss";
 
+/*
+  Design tokens (design pass, see docs/DECISION_LOG.md). A neutral grey scale
+  in the roles of Vercel's Geist system (page, fills, borders, secondary and
+  primary text), one blue accent, and colours that carry meaning (severity,
+  status). Every text colour pair is checked for contrast of at least 4.5 to 1
+  in both modes by tests/design.test.ts, which reads this file.
+*/
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  color-scheme: light;
+  --page: #ffffff;
+  --subtle: #fafafa;
+  --fill: #f2f2f2;
+  --fill-hover: #ebebeb;
+  --line: #e5e5e5;
+  --line-strong: #c9c9c9;
+  --muted: #5e5e5e;
+  --ink: #171717;
+  --accent: #005fcc;
+  --accent-ink: #ffffff;
+  --focus: #0a6cdb;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --sev-critical-bg: #fdecec;
+  --sev-critical-fg: #a8141b;
+  --sev-high-bg: #fdf0e6;
+  --sev-high-fg: #9a3412;
+  --sev-medium-bg: #fdf4d9;
+  --sev-medium-fg: #7a4a00;
+  --sev-low-bg: #f0f0f0;
+  --sev-low-fg: #454545;
+
+  --mark-bg: #fff4bf;
+  --mark-fg: #171717;
+
+  --dot-ok: #1a7f37;
+  --dot-warn: #b25e00;
+  --dot-bad: #c62828;
+  --dot-info: #005fcc;
+  --dot-neutral: #8f8f8f;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    color-scheme: dark;
+    --page: #0a0a0a;
+    --subtle: #111111;
+    --fill: #1a1a1a;
+    --fill-hover: #222222;
+    --line: #2a2a2a;
+    --line-strong: #3d3d3d;
+    --muted: #a1a1a1;
+    --ink: #ededed;
+    --accent: #52a8ff;
+    --accent-ink: #0a0a0a;
+    --focus: #52a8ff;
+
+    --sev-critical-bg: #3a1114;
+    --sev-critical-fg: #ff9592;
+    --sev-high-bg: #3b1f0f;
+    --sev-high-fg: #ffb27a;
+    --sev-medium-bg: #352a0b;
+    --sev-medium-fg: #f2c94c;
+    --sev-low-bg: #222222;
+    --sev-low-fg: #c9c9c9;
+
+    --mark-bg: #3a3000;
+    --mark-fg: #f5e6a6;
+
+    --dot-ok: #3fb950;
+    --dot-warn: #d29922;
+    --dot-bad: #f85149;
+    --dot-info: #52a8ff;
+    --dot-neutral: #8f8f8f;
   }
 }
 
+@theme inline {
+  --color-page: var(--page);
+  --color-subtle: var(--subtle);
+  --color-fill: var(--fill);
+  --color-fill-hover: var(--fill-hover);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-muted: var(--muted);
+  --color-ink: var(--ink);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-focus: var(--focus);
+  --color-sev-critical-bg: var(--sev-critical-bg);
+  --color-sev-critical-fg: var(--sev-critical-fg);
+  --color-sev-high-bg: var(--sev-high-bg);
+  --color-sev-high-fg: var(--sev-high-fg);
+  --color-sev-medium-bg: var(--sev-medium-bg);
+  --color-sev-medium-fg: var(--sev-medium-fg);
+  --color-sev-low-bg: var(--sev-low-bg);
+  --color-sev-low-fg: var(--sev-low-fg);
+  --color-mark-bg: var(--mark-bg);
+  --color-mark-fg: var(--mark-fg);
+  --color-dot-ok: var(--dot-ok);
+  --color-dot-warn: var(--dot-warn);
+  --color-dot-bad: var(--dot-bad);
+  --color-dot-info: var(--dot-info);
+  --color-dot-neutral: var(--dot-neutral);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Keep a focused element clear of the sticky top bar. */
+html {
+  scroll-padding-top: 5rem;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "liga" 1, "calt" 1;
+}
+
+/* Every focusable element shows a visible ring, for keyboard users only. */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Controls react immediately on touch, without double-tap zoom. */
+a,
+button,
+input,
+label,
+select,
+summary,
+textarea {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Numbers that line up in columns: tiers, counts, costs, times. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Minimal motion, and none at all when the system asks for less. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

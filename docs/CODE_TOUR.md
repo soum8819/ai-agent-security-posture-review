@@ -28,7 +28,7 @@ of step 6, to be updated and reused in step 15.
 - `app/globals.css`: site-wide styling, where Tailwind is switched on.
 - `app/favicon.ico`: the small icon shown on the browser tab.
 - `app/page.tsx`: the overview page at `/`, with the title and one sentence about Harborline.
-- `app/app/page.tsx`: the reviewer app home at `/app`, showing who is signed in, what their role may do, and a Reviews link for every role.
+- `app/app/page.tsx`: the reviewer app home at `/app`: who is signed in, what is waiting for them, action cards for what their role can do, and how a review works.
 - `app/app/sign-in/page.tsx`: the sign-in page at `/app/sign-in`, labelled as a stand-in for Harborline's corporate sign-in, with four fictional users and a demo passcode.
 - `app/app/sign-in/actions.ts`: the server code behind signing in and out, which checks the passcode, refuses sign-in after 5 failed attempts in 15 minutes from one network address, and sets or clears the signed session cookie.
 - `app/app/reviews/page.tsx`: the review queue at `/app/reviews`, newest first, with status, final tier and contested count; a table on wide screens and one card per review on a phone. Submitters see only their own reviews.
@@ -43,6 +43,14 @@ of step 6, to be updated and reused in step 15.
 - `app/app/submit/page.tsx`: the page at `/app/submit`, giving the heading and holding the form; only Submitters may open it. Opened from a review with changes requested, it starts from that profile, shows the reviewer's note, and links the new review to the old one.
 - `app/app/submit/submit-form.tsx`: the form itself, which checks a profile against the schema in the browser, shows what to fix, and sends a valid profile for review.
 - `public/*.svg`: the default Next.js images, not used by any page yet.
+
+## Design
+
+- `app/globals.css`: the design tokens: a neutral grey scale, one blue accent, severity and status colours, in light and dark mode, plus the focus ring, Geist as the page font and reduced motion.
+- `components/ui.tsx`: shared building blocks for every screen: page header, card, buttons, severity badge (word plus colour), tier chip, status pill, notices, and empty and loading states.
+- `components/nav-link.tsx`: a top-bar link that marks the current page.
+- `app/app/layout.tsx`: the frame around every reviewer app page: product name, the pages your role can use, who is signed in, Sign out, and a footer naming the fictional customer.
+- `docs/design/`: before and after screenshots at desktop and phone width.
 
 ## Protection
 
@@ -109,6 +117,7 @@ of step 6, to be updated and reused in step 15.
 - `tests/analyze.test.ts`: proves the evidence check drops a made-up finding and the rule floor raises a severity that is too low; calls no model.
 - `scripts/run-reviews.ts`: a developer tool that runs full reviews (both models) over the evaluation profiles and saves raw results and actual cost to `eval/runs`; run with `npm run reviews -- --set tuning` or `--set all`, or `--checker-only --from <run folder>` to test the checker on saved reviewer results.
 - `tests/evidence-pack.test.ts`: proves the evidence pack holds what the committee needs, keeps every quote exactly as stored, and has no JSON-looking text outside quotes.
+- `tests/design.test.ts`: reads the stylesheet and proves every text colour pair passes contrast of 4.5 to 1 in light and dark mode, and that focus and reduced motion are handled.
 - `tests/audit.test.ts`: proves only the Auditor may read the audit log and that no code anywhere updates or deletes audit events.
 - `tests/resume-cause.test.ts`: proves every resume cause is told apart and none claims the run expired.
 - `tests/security.test.ts`: proves hidden and direction-changing characters are refused, stuffed delimiters are removed from both prompts, oversized bodies are cut off, the sign-in limit holds, and network codes never contain the address.

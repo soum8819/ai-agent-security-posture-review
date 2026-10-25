@@ -6,6 +6,16 @@ Live site: https://ai-agent-security-posture-review.vercel.app (reviewer app: ht
 
 Diagram key: green is built, amber dashed is planned, and purple is the customer's own AWS.
 
+## Screens
+
+The review page, as a Model Risk Reviewer sees a tier 3 review waiting for
+their decision (all data synthetic):
+
+![Review page, desktop](docs/design/after/review-tier3-model-risk-desktop.png)
+
+More screenshots, before and after the design pass, at desktop and phone
+width and in dark mode, are in `docs/design/`.
+
 ## Reviewer app sign-in
 
 The reviewer app under `/app` requires sign-in. The overview at `/` stays public.

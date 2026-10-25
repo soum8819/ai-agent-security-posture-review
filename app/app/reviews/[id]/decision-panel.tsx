@@ -16,7 +16,7 @@ const CHOICES: { value: Choice; label: string; hint: string }[] = [
 ];
 
 const field =
-  "mt-1 w-full rounded border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700";
+  "mt-1 w-full rounded-md border border-line bg-page px-3 py-2 text-base text-ink placeholder:text-muted sm:text-sm";
 
 export function DecisionPanel({
   reviewId,
@@ -87,25 +87,25 @@ export function DecisionPanel({
   }
 
   return (
-    <section aria-labelledby="decide" className="mt-10 rounded border-2 border-zinc-900 p-4 dark:border-zinc-100">
-      <h2 id="decide" className="text-xl font-semibold">Your {stageName} decision</h2>
+    <section aria-labelledby="decide" className="scroll-mt-24 rounded-lg border border-ink bg-page p-5">
+      <h2 id="decide" className="font-semibold">Your {stageName} decision</h2>
 
-      <fieldset className="mt-4">
-        <legend className="font-medium">Decision</legend>
+      <fieldset className="mt-4 space-y-2">
+        <legend className="text-sm font-medium">Decision</legend>
         <div className="mt-2 space-y-2">
           {CHOICES.map((c) => (
-            <label key={c.value} className="flex items-start gap-3">
+            <label key={c.value} className="flex cursor-pointer items-start gap-3 rounded-md border border-line p-3 transition-colors duration-150 hover:bg-subtle has-[:checked]:border-ink has-[:checked]:bg-subtle">
               <input
                 type="radio"
                 name="outcome"
                 value={c.value}
                 checked={outcome === c.value}
                 onChange={() => setOutcome(c.value)}
-                className="mt-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
+                className="mt-1 size-4 accent-[var(--ink)]"
               />
               <span>
-                <span className="font-medium">{c.label}</span>
-                <span className="block text-sm text-zinc-600 dark:text-zinc-400">{c.hint}</span>
+                <span className="text-sm font-medium">{c.label}</span>
+                <span className="block text-xs text-muted">{c.hint}</span>
               </span>
             </label>
           ))}
@@ -113,7 +113,7 @@ export function DecisionPanel({
       </fieldset>
 
       {outcome === "approved_with_conditions" && (
-        <label className="mt-4 block font-medium">
+        <label className="mt-4 block text-sm font-medium">
           Conditions (required)
           <textarea className={field} rows={3} value={conditions} onChange={(e) => setConditions(e.target.value)} />
         </label>
@@ -121,23 +121,23 @@ export function DecisionPanel({
 
       {contested.length > 0 && (
         <fieldset className="mt-6">
-          <legend className="font-medium">Contested findings</legend>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          <legend className="text-sm font-medium">Contested findings</legend>
+          <p className="text-xs text-muted">
             Required before approving: accept each one, or dismiss it with a reason.
           </p>
           <div className="mt-3 space-y-4">
             {contested.map((c) => (
-              <div key={c.id} className="rounded border border-zinc-200 p-3 dark:border-zinc-800">
-                <p className="font-medium">{c.id}: {c.label}</p>
+              <div key={c.id} className="rounded-md border border-dot-warn p-3">
+                <p className="text-sm font-medium"><span className="font-mono text-muted">{c.id}</span> {c.label}</p>
                 <div className="mt-2 flex flex-wrap gap-4">
                   {(["accepted", "dismissed"] as const).map((r) => (
-                    <label key={r} className="flex items-center gap-2">
+                    <label key={r} className="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:min-h-9">
                       <input
                         type="radio"
                         name={`resolution-${c.id}`}
                         checked={resolutions[c.id].resolution === r}
                         onChange={() => setResolutions({ ...resolutions, [c.id]: { ...resolutions[c.id], resolution: r } })}
-                        className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
+                        className="size-4 accent-[var(--ink)]"
                       />
                       {r === "accepted" ? "Accept the finding" : "Dismiss it"}
                     </label>
@@ -160,7 +160,7 @@ export function DecisionPanel({
         </fieldset>
       )}
 
-      <label className="mt-6 block font-medium">
+      <label className="mt-5 block text-sm font-medium">
         Note (required)
         <textarea className={field} rows={4} value={note} onChange={(e) => setNote(e.target.value)} />
       </label>
@@ -169,15 +169,15 @@ export function DecisionPanel({
         type="button"
         onClick={send}
         disabled={state.kind === "sending" || state.kind === "done"}
-        className="mt-4 rounded bg-zinc-900 px-5 py-2 font-medium text-white disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:bg-zinc-100 dark:text-zinc-900"
+        className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-ink px-4 text-sm font-medium text-page transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {state.kind === "sending" ? "Recording..." : "Record decision"}
+        {state.kind === "sending" ? "Recording decision…" : "Record decision"}
       </button>
 
       {state.message && (
         <p
           role={state.kind === "error" ? "alert" : "status"}
-          className={`mt-3 rounded border p-3 ${state.kind === "error" ? "border-red-700 bg-red-50 text-red-900" : "border-green-700 bg-green-50 text-green-900"}`}
+          className={`mt-3 rounded-md border border-l-4 bg-subtle px-3 py-2 text-sm ${state.kind === "error" ? "border-dot-bad" : "border-dot-ok"}`}
         >
           {state.message}
         </p>
