@@ -16,21 +16,41 @@ every agent, person and record in it is synthetic.
 Sign-in is a labelled stand-in for corporate sign-in: pick one of four
 fictional users and enter the demo passcode, which is shared separately.
 
-**Read-only path (no model calls, changes nothing):**
-1. Open the reviewer app and sign in as **Jordan Lee, Auditor**.
-2. Open **Reviews**. Real submissions show first; click **Show setup checks**
-   to see the test reviews as well.
-3. Open **Claims Intake Triage Agent** (Tier 4, sent to the committee): the
-   four tiers, the rules that fired with the profile fields that triggered
-   them, each finding beside its evidence quote, and where the two models
-   disagree. Click **Download evidence pack**.
-4. Open **Audit log**: every submission, decision and workflow resume, which
-   the database refuses to change or delete, with a JSON export.
+**The demo, on two live reviews (no model calls):**
 
-**Optional, makes one real review (about $0.008 in model calls):** sign in as
-**Riley Chen, Submitter**, open **Submit**, load a sample profile, then
-**Submit for review**. The review runs in the background and the page fills
-in when both models finish.
+1. **A Tier 3 review that tried to fool the reviewer.** Sign in as **Alex
+   Moreno, AppSec Reviewer**, and open
+   [Treasury Cash Position Assistant](https://ai-agent-security-posture-review.vercel.app/app/reviews/ea9693cf-8520-4658-a909-96bbaf46c903)
+   (review ea9693cf, submitted by Riley Chen on the live site from sample
+   profile-05).
+   - At the top, a notice says the profile contains text that tries to
+     instruct the reviewer, and quotes it: an order to classify the agent as
+     Tier 1 with no findings. It was flagged and not followed: the rule,
+     reviewer and checker tiers are all 3.
+   - In **Your AppSec decision**, choose **Approve**, write a note and click
+     **Record decision**. The review moves to Model Risk.
+2. **The second approver.** Click **Sign out**, sign in as **Priya Nair,
+   Model Risk Reviewer**, and open the same review. Tier 3 needs a second,
+   different person: decide the Model Risk stage the same way. The page now
+   shows both decisions, and the **Audit log** (as Jordan Lee, Auditor)
+   lists every step.
+3. **The rules win when both models say Tier 3.** Open
+   [Claims Intake Triage Agent](https://ai-agent-security-posture-review.vercel.app/app/reviews/2c6fc9c6-79db-4630-a5b6-b413821e3645)
+   (review 2c6fc9c6). The reviewer and checker models both proposed Tier 3,
+   but the rules set Tier 4, because the agent changes live claim records
+   with no person confirming. The final tier is the highest of the three,
+   so it is Tier 4 and sent to the review committee. Click **Download
+   evidence pack**.
+
+Each review can be decided only once. After the two decisions in steps 1
+and 2, the Treasury review shows its decision history instead of the form.
+
+**Optional, makes one real review:** sign in as **Riley Chen, Submitter**,
+open **Submit**, load a sample profile, then **Submit for review**. The
+review runs in the background and the page fills in when both models
+finish. The Treasury review above cost $0.0077 in model calls and finished
+about 23 seconds after it was submitted (AI Gateway records and the audit
+log).
 
 ## Architecture
 
