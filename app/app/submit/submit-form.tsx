@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import {
   agentProfileSchema,
@@ -72,6 +73,12 @@ const EMPTY: Draft = {
 };
 
 type Result = { ok: true } | { ok: false; issues: string[] } | null;
+
+type Sent =
+  | { state: "sending" }
+  | { state: "sent"; reviewId: string }
+  | { state: "error"; message: string; issues?: string[] }
+  | null;
 
 // Turn the form state into the shape the schema expects.
 function toInput(d: Draft) {
@@ -150,6 +157,7 @@ function Radios({ name, options, value, onChange }: { name: string; options: rea
 export function SubmitForm() {
   const [d, setD] = useState<Draft>(EMPTY);
   const [result, setResult] = useState<Result>(null);
+  const [sent, setSent] = useState<Sent>(null);
 
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) => {
     setD((prev) => ({ ...prev, [key]: value }));
@@ -171,6 +179,30 @@ export function SubmitForm() {
             ),
           },
     );
+    return parsed;
+  }
+
+  // Validates first, then sends the profile to the server, which checks it
+  // again, saves the review and starts the models in the background.
+  async function submitForReview() {
+    const parsed = validate();
+    if (!parsed.success) return;
+    setSent({ state: "sending" });
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ profile: parsed.data }),
+      });
+      const body = await res.json().catch(() => ({}));
+      setSent(
+        res.ok
+          ? { state: "sent", reviewId: body.reviewId }
+          : { state: "error", message: body.error ?? `The server refused it (${res.status})`, issues: body.issues },
+      );
+    } catch {
+      setSent({ state: "error", message: "Could not reach the server" });
+    }
   }
 
   return (
@@ -300,9 +332,40 @@ export function SubmitForm() {
         <textarea className={inputClass} rows={6} value={d.description} onChange={(e) => set("description", e.target.value)} />
       </Field>
 
-      <button type="submit" className="mt-8 rounded bg-zinc-900 px-5 py-2 font-medium text-white dark:bg-zinc-100 dark:text-zinc-900">
-        Validate
-      </button>
+      <div className="mt-8 flex gap-3">
+        <button type="submit" className="rounded border border-zinc-300 px-5 py-2 font-medium dark:border-zinc-700">
+          Validate
+        </button>
+        <button
+          type="button"
+          disabled={sent?.state === "sending"}
+          onClick={submitForReview}
+          className="rounded bg-zinc-900 px-5 py-2 font-medium text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
+        >
+          {sent?.state === "sending" ? "Submitting..." : "Submit for review"}
+        </button>
+      </div>
+
+      {sent?.state === "sent" && (
+        <p role="status" className="mt-4 rounded border border-green-700 bg-green-50 p-3 text-green-900">
+          Submitted. The review is running.{" "}
+          <Link href={`/app/reviews/${sent.reviewId}`} className="underline">
+            Open review {sent.reviewId.slice(0, 8)}
+          </Link>
+        </p>
+      )}
+      {sent?.state === "error" && (
+        <div role="alert" className="mt-4 rounded border border-red-700 bg-red-50 p-3 text-red-900">
+          <p className="font-medium">{sent.message}</p>
+          {sent.issues && (
+            <ul className="mt-2 list-disc pl-5">
+              {sent.issues.map((issue) => (
+                <li key={issue}>{issue}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {result?.ok && (
         <p role="status" className="mt-4 rounded border border-green-700 bg-green-50 p-3 text-green-900">

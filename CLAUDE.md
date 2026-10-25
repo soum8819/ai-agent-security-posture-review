@@ -141,4 +141,4 @@ Updated by the project owner after each step.
 - [x] Step 7: done
 - [ ] Step 8: built, my read-through of the results pending
 - [ ] Step 9: built; finish line partly met: 1 of 12 contested, reported as is
-- [ ] Step 10: in progress, merged with step 11a (slice A done; slice B: database and store built, workflow next)
+- [ ] Step 10: in progress, merged with step 11a (slice A done; slice B: database, store, real workflow, submit and bare status page built; deploy and Vercel check next)

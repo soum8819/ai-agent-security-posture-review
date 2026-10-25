@@ -15,8 +15,9 @@ export default function SubmitPage() {
         Submit an agent profile
       </h1>
       <p className="mt-3 text-zinc-600 dark:text-zinc-400">
-        Fill in the form and press Validate to check it against the profile
-        schema. Nothing is saved or sent anywhere yet.
+        Fill in the form, press Validate to check it against the profile schema,
+        then Submit for review. The rules and two AI models review it in the
+        background, and an AppSec Reviewer makes the decision.
       </p>
       <Suspense fallback={<p className="mt-8 text-zinc-500">Loading...</p>}>
         <Guarded />

@@ -31,9 +31,11 @@ of step 6, to be updated and reused in step 15.
 - `app/app/page.tsx`: the reviewer app home at `/app`, showing who is signed in and what their role may do.
 - `app/app/sign-in/page.tsx`: the sign-in page at `/app/sign-in`, labelled as a stand-in for Harborline's corporate sign-in, with four fictional users and a demo passcode.
 - `app/app/sign-in/actions.ts`: the server code behind signing in and out, which checks the passcode and sets or clears the signed session cookie.
+- `app/app/reviews/[id]/page.tsx`: a review's status page, showing its status, the rule, reviewer, checker and final tiers and the contested count; Submitters see only their own reviews, and anything else shows not found. Slice C turns it into the full review screen.
+- `app/app/reviews/[id]/auto-refresh.tsx`: reloads the review page every few seconds while the models are still working.
 - `app/app/not-allowed/page.tsx`: shown when a signed-in user's role may not open a page.
 - `app/app/submit/page.tsx`: the page at `/app/submit`, giving the heading and holding the form; only Submitters may open it.
-- `app/app/submit/submit-form.tsx`: the form itself, which checks a profile against the schema in the browser and shows what to fix, without saving or sending anything.
+- `app/app/submit/submit-form.tsx`: the form itself, which checks a profile against the schema in the browser, shows what to fix, and sends a valid profile for review.
 - `public/*.svg`: the default Next.js images, not used by any page yet.
 
 ## Protection
@@ -67,13 +69,13 @@ of step 6, to be updated and reused in step 15.
 - `lib/permissions.ts`: what each role may do, checked on the server by every page and route.
 - `lib/session.ts`: creates and checks the signed session cookie, and compares the demo passcode safely.
 - `lib/auth.ts`: the sign-in check used inside pages and routes, sending visitors to sign-in or to the not-allowed page.
-- `lib/local-only.ts`: the lock that makes test routes answer "not found" anywhere except on this computer under `npm run dev`.
 
-## Temporary spikes (to be replaced)
+## The review workflow
 
-- `workflows/review.ts`: proves a review can pause until the right people approve, with two different approvers for tier 3 and any rejection ending it.
-- `app/api/review/start/route.ts`: starts one test review, local only, after checking the inputs.
-- `app/api/review/approve/route.ts`: sends one approval or rejection to a waiting review, local only, after checking the inputs.
+- `workflows/review/index.ts`: the durable review: rules and the first model, the second model, save the result, then pause for an AppSec decision; tier 4 ends as routed to committee instead.
+- `workflows/review/steps.ts`: the workflow's steps, each run outside the web request and kept once finished, so a later failure never repeats a paid model call; the two model steps retry at most once.
+- `workflows/review/hooks.ts`: the AppSec pause point, kept apart so the approval route can resume a review without loading model code.
+- `app/api/reviews/route.ts`: receives a submitted profile from a signed-in Submitter, checks it and the daily limit, saves the review, starts the workflow and returns at once with the review id.
 
 ## Evaluation set
 
