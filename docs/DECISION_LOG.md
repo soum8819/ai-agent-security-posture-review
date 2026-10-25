@@ -194,9 +194,8 @@ and the open question above stands as written.
 ## 2026-10-25: the five decisions shown on the overview site
 
 The overview site at `/` shows five decisions. Each one's facts come from
-this log, CLAUDE.md or eval/results.md; the "why" in the project owner's own
-words is still to be written, here and on the site
-(`app/overview/content.ts`).
+this log, CLAUDE.md or eval/results.md; the "why" is in the project owner's
+own words, the same here and on the site (`app/overview/content.ts`).
 
 1. **A model can raise the tier, never lower it.** Rules set a floor for
    severity and tier; the final tier is the highest of the rule, reviewer and
