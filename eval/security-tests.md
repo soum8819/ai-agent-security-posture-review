@@ -139,6 +139,67 @@ Limit: 5 failed sign-ins per 15 minutes from one network address.
 
 Only where a match would be was printed, never a value.
 
+## Known gaps
+
+What the six tests above do not cover, and the control that limits each one.
+These are real weaknesses of this build, not hypotheticals.
+
+1. **Subtle semantic manipulation.** A team can describe a risky agent in
+   calm, reassuring words ("refunds are always reviewed", "access is narrowly
+   scoped") with no instruction anywhere. Nothing flags that as manipulation,
+   and the models may believe it. The tests only tried obvious orders.
+   *What limits it:* the rules read the listed fields (tools, permissions,
+   data, confirmation, credentials), never the prose, and set a minimum
+   severity and tier; the prompts tell both models to judge by what the
+   profile lists and to take the riskier reading when it contradicts itself;
+   a human approver reads every finding beside its quote. *What does not:*
+   if the listed fields themselves are false, nothing in this app catches it.
+   That needs checking the agent's real configuration against the
+   registry, which is out of scope here.
+
+2. **A model steered despite the floor.** The floor only covers the eight
+   rules. An attack could make a model drop or soften a finding in a category
+   no rule covers, add false alarms, or talk the checker into agreeing. Each
+   attack ran once, on one profile, so passing says little about how often
+   it would work; answers vary between runs (step 8 and step 13).
+   *What limits it:* the final tier can never go below the rule tier; rule
+   floors are never lowered by a model; manipulation attempts are flagged
+   and shown to the approver; contested findings must be resolved; every
+   review needs a recorded human decision. Measuring how often an attack
+   succeeds needs repeated runs, planned for step 13.
+
+3. **Abuse that stays under the limits.** Anyone with the demo passcode can
+   submit up to 10 reviews per fictional user per 24 hours (40 in all, about
+   $0.32 a day in model calls) and fill the database with junk. The sign-in
+   limit counts per network address, so an attacker who can change address
+   (rotating proxies) can keep guessing the passcode. A 4,000 character
+   description is allowed, so each request can be as large as the limits
+   permit. *What limits it:* the shared passcode, the daily limit, the size
+   limits, and an AI Gateway budget on the key (recommended; not confirmed
+   to be set). There is no CAPTCHA or per-account lockout.
+
+4. **Anyone with the passcode can choose any role.** Sign-in is a labelled
+   stand-in: whoever knows the passcode can pick Alex Moreno and approve, so
+   identity is self-chosen. The rule "nobody approves their own submission"
+   holds between the fictional users, not between real people. *What limits
+   it:* the passcode, the audit log of every decision, and the README's note
+   that production would use Harborline's corporate sign-in (OIDC or SAML).
+   This is the largest gap between this build and production.
+
+5. **A real quote used for an unsupported claim.** The evidence check proves
+   a quote is in the profile, not that it supports the finding. A model can
+   quote something true but irrelevant. *What limits it:* the quote is shown
+   beside the claim for the approver to judge, and the checker model gives
+   a verdict on each finding.
+
+6. **Attacks not tested here because they are prevented by design.**
+   Script injection through profile text (React escapes all text; no page
+   inserts raw HTML, checked by search), database injection (every query
+   passes values as parameters, checked by search), cross-site sign-in
+   (Next.js checks the origin of server actions) and session theft
+   (httpOnly, secure, SameSite cookie, signed and expiring). Each rests on
+   a search of the code or on the framework, not on an attack test.
+
 ## Live end-to-end check of (a), by the project owner
 
 To run on https://ai-agent-security-posture-review.vercel.app in a private
