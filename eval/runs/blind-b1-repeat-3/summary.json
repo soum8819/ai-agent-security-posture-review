@@ -1,0 +1,11 @@
+{
+  "runName": "blind-b1-repeat-3",
+  "profiles": [
+    "01",
+    "03",
+    "10"
+  ],
+  "costUsd": 0.038292,
+  "blindPromptVersion": "b1",
+  "createdAt": "2026-10-25T21:31:05.797Z"
+}

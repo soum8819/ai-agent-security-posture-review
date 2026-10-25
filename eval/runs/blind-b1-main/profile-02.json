@@ -1,0 +1,320 @@
+{
+  "review": {
+    "profileId": "profile-02",
+    "tiers": {
+      "rule": 1,
+      "reviewer": 1,
+      "checker": 1,
+      "final": 1,
+      "setBy": [
+        "rule",
+        "reviewer",
+        "checker"
+      ],
+      "ruleReasons": [
+        "Tier 1: read-only, public or internal data only"
+      ]
+    },
+    "contested": [],
+    "findings": [
+      {
+        "category": "ASI01",
+        "severity": "high",
+        "evidenceQuote": "\"untrustedInputs\": [\"chat\"]",
+        "whyItMatters": "Untrusted chat input can be used for prompt injection or adversarial instructions that change the agent's behavior or goals, causing it to disclose internal information or provide misleading guidance to employees. There is no profile-level mitigation such as input validation or a hardened system prompt documented.",
+        "recommendedControl": "Apply input sanitization and a hardened system prompt that ignores user instructions that attempt to change agent goals, and add runtime checks that validate outputs against source documents before returning answers.",
+        "modelSeverity": "high",
+        "id": "F1",
+        "secondModelVerdict": "agree",
+        "secondModelReason": "The profile explicitly states untrusted chat input, which directly supports the risk of prompt injection and goal hijacking, and no mitigations are mentioned.",
+        "contested": false
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"memory\": \"session\"",
+        "whyItMatters": "Session memory still persists context during an interaction and can be poisoned by malicious inputs within the same session, biasing later answers or causing accidental disclosure. The profile gives no detail about session isolation, length, or automatic context validation.",
+        "recommendedControl": "Limit and strictly scope session context, implement input filtering and provenance tagging for context items, and automatically clear or revalidate context after sensitive queries or time limits.",
+        "modelSeverity": "medium",
+        "id": "F2",
+        "secondModelVerdict": "agree",
+        "secondModelReason": "The use of session memory without further detail on its management or validation presents a clear risk of context poisoning, even if limited to a single session.",
+        "contested": false
+      },
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "The bot searches the published HR policy library and answers with links to the source policy.",
+        "whyItMatters": "Because the agent provides authoritative-seeming answers and direct links, employees may over-trust its guidance and act without escalation, which can cause policy misapplication or expose operational risk if the bot is mistaken or manipulated. The profile does not require or describe escalation for ambiguous or high-risk queries.",
+        "recommendedControl": "Display a clear trust banner and automated uncertainty detection, require the agent to include exact source citations and a suggested HR escalation path for ambiguous or consequential questions.",
+        "modelSeverity": "medium",
+        "id": "F3",
+        "secondModelVerdict": "agree",
+        "secondModelReason": "The agent's role in providing authoritative answers with links to policies creates a risk of over-reliance and potential harm if the information is misinterpreted or the agent is compromised.",
+        "contested": false
+      }
+    ],
+    "missedFindings": [],
+    "ruleHits": [],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": "",
+      "quoteFound": true
+    },
+    "reviewerSummary": "This read-only HR Q&A bot is appropriate for Tier 1, but it exposes high-risk prompt-injection attack surface via untrusted chat input, plus medium risks from session memory poisoning and human trust exploitation. Add hardened input handling, stricter session context controls, and UI/behavioral guards that force escalation or show uncertainty for ambiguous answers before deployment.",
+    "checkerSummary": "The agent is a read-only bot for internal HR policies, which limits its potential for direct harm. The first reviewer's findings are accurate and highlight important risks related to untrusted input, memory management, and human trust. No additional critical risks were identified beyond those already covered.",
+    "droppedFindings": [],
+    "droppedMissedFindings": [],
+    "unknownVerdicts": [],
+    "reviewer": {
+      "model": "openai/gpt-5-mini",
+      "promptVersion": "v4",
+      "settings": {
+        "model": "openai/gpt-5-mini",
+        "providers": [
+          "azure",
+          "openai"
+        ],
+        "disallowPromptTraining": true,
+        "reasoning": "low",
+        "maxOutputTokens": 6000
+      },
+      "usage": {
+        "inputTokens": 1844,
+        "inputTokenDetails": {
+          "noCacheTokens": 52,
+          "cacheReadTokens": 1792,
+          "cacheWriteTokens": 0
+        },
+        "outputTokens": 1190,
+        "outputTokenDetails": {
+          "textTokens": 550,
+          "reasoningTokens": 640
+        },
+        "totalTokens": 3034,
+        "raw": {
+          "input_tokens": 1844,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 1792
+          },
+          "output_tokens": 1190,
+          "output_tokens_details": {
+            "reasoning_tokens": 640
+          },
+          "total_tokens": 3034
+        }
+      },
+      "latencyMs": 14148,
+      "generationId": "gen_01M5TETZ2WDADHT40HW7CEJKB0",
+      "provider": "openai",
+      "costUsd": 0.0024378
+    },
+    "checker": {
+      "model": "google/gemini-2.5-flash",
+      "promptVersion": "c3",
+      "settings": {
+        "model": "google/gemini-2.5-flash",
+        "providers": [
+          "vertex"
+        ],
+        "disallowPromptTraining": true,
+        "temperature": 0.2,
+        "reasoning": "low",
+        "maxOutputTokens": 6000
+      },
+      "usage": {
+        "inputTokens": 2677,
+        "inputTokenDetails": {
+          "noCacheTokens": 2677,
+          "cacheReadTokens": 0
+        },
+        "outputTokens": 1100,
+        "outputTokenDetails": {
+          "textTokens": 277,
+          "reasoningTokens": 823
+        },
+        "totalTokens": 3777,
+        "raw": {
+          "thoughtsTokenCount": 823,
+          "promptTokenCount": 2677,
+          "candidatesTokenCount": 277,
+          "totalTokenCount": 3777,
+          "trafficType": "ON_DEMAND",
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 2677
+            }
+          ],
+          "candidatesTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 277
+            }
+          ]
+        }
+      },
+      "latencyMs": 6827,
+      "generationId": "gen_01M5TEVCY7YCSKSSFZN9R5F4M6",
+      "provider": "vertex",
+      "costUsd": 0.0035531
+    },
+    "rawReviewerOutput": {
+      "proposedTier": 1,
+      "findings": [
+        {
+          "category": "ASI01",
+          "severity": "high",
+          "evidenceQuote": "\"untrustedInputs\": [\"chat\"]",
+          "whyItMatters": "Untrusted chat input can be used for prompt injection or adversarial instructions that change the agent's behavior or goals, causing it to disclose internal information or provide misleading guidance to employees. There is no profile-level mitigation such as input validation or a hardened system prompt documented.",
+          "recommendedControl": "Apply input sanitization and a hardened system prompt that ignores user instructions that attempt to change agent goals, and add runtime checks that validate outputs against source documents before returning answers."
+        },
+        {
+          "category": "ASI06",
+          "severity": "medium",
+          "evidenceQuote": "\"memory\": \"session\"",
+          "whyItMatters": "Session memory still persists context during an interaction and can be poisoned by malicious inputs within the same session, biasing later answers or causing accidental disclosure. The profile gives no detail about session isolation, length, or automatic context validation.",
+          "recommendedControl": "Limit and strictly scope session context, implement input filtering and provenance tagging for context items, and automatically clear or revalidate context after sensitive queries or time limits."
+        },
+        {
+          "category": "ASI09",
+          "severity": "medium",
+          "evidenceQuote": "The bot searches the published HR policy library and answers with links to the source policy.",
+          "whyItMatters": "Because the agent provides authoritative-seeming answers and direct links, employees may over-trust its guidance and act without escalation, which can cause policy misapplication or expose operational risk if the bot is mistaken or manipulated. The profile does not require or describe escalation for ambiguous or high-risk queries.",
+          "recommendedControl": "Display a clear trust banner and automated uncertainty detection, require the agent to include exact source citations and a suggested HR escalation path for ambiguous or consequential questions."
+        }
+      ],
+      "manipulationAttempt": {
+        "detected": false,
+        "quote": ""
+      },
+      "summary": "This read-only HR Q&A bot is appropriate for Tier 1, but it exposes high-risk prompt-injection attack surface via untrusted chat input, plus medium risks from session memory poisoning and human trust exploitation. Add hardened input handling, stricter session context controls, and UI/behavioral guards that force escalation or show uncertainty for ambiguous answers before deployment."
+    },
+    "rawCheckerOutput": {
+      "verdicts": [
+        {
+          "findingId": "F1",
+          "verdict": "agree",
+          "reason": "The profile explicitly states untrusted chat input, which directly supports the risk of prompt injection and goal hijacking, and no mitigations are mentioned."
+        },
+        {
+          "findingId": "F2",
+          "verdict": "agree",
+          "reason": "The use of session memory without further detail on its management or validation presents a clear risk of context poisoning, even if limited to a single session."
+        },
+        {
+          "findingId": "F3",
+          "verdict": "agree",
+          "reason": "The agent's role in providing authoritative answers with links to policies creates a risk of over-reliance and potential harm if the information is misinterpreted or the agent is compromised."
+        }
+      ],
+      "missedFindings": [],
+      "proposedTier": 1,
+      "summary": "The agent is a read-only bot for internal HR policies, which limits its potential for direct harm. The first reviewer's findings are accurate and highlight important risks related to untrusted input, memory management, and human trust. No additional critical risks were identified beyond those already covered."
+    }
+  },
+  "blind": {
+    "promptVersion": "b1",
+    "model": "google/gemini-2.5-flash",
+    "proposedTier": 1,
+    "findings": [
+      {
+        "category": "ASI01",
+        "severity": "high",
+        "evidenceQuote": "\"untrustedInputs\": [\n    \"chat\"\n  ]",
+        "whyItMatters": "Untrusted input from chat can be used for prompt injection attacks, potentially causing the agent to deviate from its intended purpose, reveal sensitive information from the policy library, or generate harmful content.",
+        "recommendedControl": "Implement robust prompt injection detection and sanitization techniques, and ensure the agent's responses are strictly confined to the scope of HR policies."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"model\": {\n    \"provider\": \"OpenAI\",\n    \"name\": \"gpt-5-mini\"\n  }",
+        "whyItMatters": "Relying on a third-party model introduces a dependency on an external provider, which could pose risks if the model is compromised, has vulnerabilities, or its behavior changes unexpectedly.",
+        "recommendedControl": "Establish a clear vendor risk management process for third-party AI model providers, including security assessments and contractual agreements for service level and security standards."
+      },
+      {
+        "category": "ASI06",
+        "severity": "low",
+        "evidenceQuote": "\"memory\": \"session\"",
+        "whyItMatters": "While session memory limits the scope of poisoning, a malicious actor could still poison the context within a single session, leading to incorrect or manipulated responses during that interaction.",
+        "recommendedControl": "Implement strict input validation and sanitization for all user inputs to prevent malicious data from entering and corrupting the agent's session memory."
+      }
+    ],
+    "droppedFindings": [],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent is a read-only HR policy Q&A bot, which places it in Tier 1. The primary risks identified are related to prompt injection due to untrusted chat inputs and the use of a third-party AI model. While session memory limits the impact, context poisoning within a session is still possible.",
+    "rawModelOutput": {
+      "proposedTier": 1,
+      "findings": [
+        {
+          "category": "ASI01",
+          "severity": "high",
+          "evidenceQuote": "\"untrustedInputs\": [\n    \"chat\"\n  ]",
+          "whyItMatters": "Untrusted input from chat can be used for prompt injection attacks, potentially causing the agent to deviate from its intended purpose, reveal sensitive information from the policy library, or generate harmful content.",
+          "recommendedControl": "Implement robust prompt injection detection and sanitization techniques, and ensure the agent's responses are strictly confined to the scope of HR policies."
+        },
+        {
+          "category": "ASI04",
+          "severity": "medium",
+          "evidenceQuote": "\"model\": {\n    \"provider\": \"OpenAI\",\n    \"name\": \"gpt-5-mini\"\n  }",
+          "whyItMatters": "Relying on a third-party model introduces a dependency on an external provider, which could pose risks if the model is compromised, has vulnerabilities, or its behavior changes unexpectedly.",
+          "recommendedControl": "Establish a clear vendor risk management process for third-party AI model providers, including security assessments and contractual agreements for service level and security standards."
+        },
+        {
+          "category": "ASI06",
+          "severity": "low",
+          "evidenceQuote": "\"memory\": \"session\"",
+          "whyItMatters": "While session memory limits the scope of poisoning, a malicious actor could still poison the context within a single session, leading to incorrect or manipulated responses during that interaction.",
+          "recommendedControl": "Implement strict input validation and sanitization for all user inputs to prevent malicious data from entering and corrupting the agent's session memory."
+        }
+      ],
+      "manipulationAttempt": {
+        "detected": false,
+        "quote": ""
+      },
+      "summary": "This agent is a read-only HR policy Q&A bot, which places it in Tier 1. The primary risks identified are related to prompt injection due to untrusted chat inputs and the use of a third-party AI model. While session memory limits the impact, context poisoning within a session is still possible."
+    },
+    "usage": {
+      "inputTokens": 2111,
+      "inputTokenDetails": {
+        "noCacheTokens": 2111,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1204,
+      "outputTokenDetails": {
+        "textTokens": 490,
+        "reasoningTokens": 714
+      },
+      "totalTokens": 3315,
+      "raw": {
+        "thoughtsTokenCount": 714,
+        "promptTokenCount": 2111,
+        "candidatesTokenCount": 490,
+        "totalTokenCount": 3315,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2111
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 490
+          }
+        ]
+      }
+    },
+    "generationId": "gen_01M5TEVKHWEXXN81WVD6PDR4EW",
+    "provider": "vertex",
+    "seconds": 6.725,
+    "costUsd": 0.0036433
+  },
+  "reviewSeconds": 20.975,
+  "costUsd": 0.0096342
+}

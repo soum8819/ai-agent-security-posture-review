@@ -161,5 +161,7 @@ Updated by the project owner after each step.
 - [x] Step 10: done, with step 11a (live check passed: review 080fc26e resumed across deployments and completed)
 - [ ] Step 11: in progress (11b audit page and 11d data handling built; 11c skipped, registry described in the README)
 - [ ] Step 12: built (attack tests, sign-in attempt limit, input limits, key scan; see eval/security-tests.md); the project owner's live check of attack (a) is pending
-- [ ] Design pass (step 10b): design basics, frame, review detail, sign-in, app home, queue and submit done; the overview page comes after step 13, then the audit restyle
-- [ ] Step 13: next (the evaluation)
+- [ ] Design pass (step 10b): design basics, frame, review detail, sign-in, app home, queue and submit done; polish after step 13 done (setup checks hidden in the queue, graduated tier chips, rule tier reasons on the review page, split header); the overview page is next, then the audit restyle
+- [x] Step 13: done (eval/results.md; frozen at tag eval-v1; two checker fixes, c2 and c3; spend $0.31). Open for the project owner: profile-04 Tier 4 versus Tier 3 (docs/DECISION_LOG.md), left undecided
+- [x] Blind-first checker experiment: done (eval/BLIND_CHECKER.md; spend $0.22). Supports anchoring, no tier difference, no production change
+- [ ] Step 14: next (cost, speed and what the platform shows)

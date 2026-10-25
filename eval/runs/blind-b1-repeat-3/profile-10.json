@@ -1,0 +1,458 @@
+{
+  "review": {
+    "profileId": "profile-10",
+    "tiers": {
+      "rule": 2,
+      "reviewer": 4,
+      "checker": 4,
+      "final": 4,
+      "setBy": [
+        "reviewer",
+        "checker"
+      ],
+      "ruleReasons": [
+        "Tier 2: can act beyond reading (Customer support CRM, Refund issuance API)",
+        "Tier 2: reads confidential data"
+      ]
+    },
+    "contested": [],
+    "findings": [
+      {
+        "category": "ASI02",
+        "severity": "critical",
+        "evidenceQuote": "\"issues refunds of up to $50 automatically.\"",
+        "whyItMatters": "The profile explicitly allows the agent to issue refunds without human approval for amounts up to $50, which means the agent can move funds autonomously and be abused to exfiltrate money or perform many small fraudulent refunds at scale. There is no compensating control in the profile that prevents automated refund workflows from executing. ",
+        "recommendedControl": "Require an explicit human approval step for all refunds, or remove move_money permission from the agent and surface refund requests to a separate, auditable service that enforces multi-party approval for any monetary action.",
+        "modelSeverity": "critical",
+        "id": "F1",
+        "secondModelVerdict": "agree",
+        "secondModelReason": "The profile explicitly states the agent can issue refunds up to $50 automatically, which contradicts the \"humanConfirmsActions\": true setting for these specific actions.",
+        "contested": false
+      },
+      {
+        "category": "ASI01",
+        "severity": "high",
+        "evidenceQuote": "\"untrustedInputs\": [ \"chat\" ]",
+        "whyItMatters": "Untrusted chat input is a direct vector for prompt injection and goal manipulation, which could cause the agent to change task selection or escalate actions such as issuing refunds or modifying CRM records. The profile gives no mitigations for prompt-injection hardened parsing, sanitization, or policy enforcement. ",
+        "recommendedControl": "Implement explicit input validation and a prompt-injection defense pipeline, plus a hardened instruction-following policy enforcement layer that rejects or flags any untrusted chat content that requests agent policy changes or financial actions.",
+        "modelSeverity": "high",
+        "id": "F2",
+        "secondModelVerdict": "agree",
+        "secondModelReason": "The agent accepts untrusted chat input, which is a direct vector for prompt injection to manipulate its goals and actions, especially given its powerful tools.",
+        "contested": false
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+        "whyItMatters": "The agent holds its own scoped token, which if stolen or misused by the agent or an attacker could be used to perform privileged CRM reads/writes and refunds; the profile has no mention of token rotation, least privilege scope details, or auditing tied to a human approver. ",
+        "recommendedControl": "Enforce least-privilege scopes with short-lived tokens bound to a per-request approval flow, implement automatic rotation and revocation, and ensure all token usages are logged with correlated human-approval identifiers.",
+        "modelSeverity": "medium",
+        "id": "F3",
+        "secondModelVerdict": "agree",
+        "secondModelReason": "While using its own scoped token is good practice, the lack of detail on scope, rotation, and auditing for a token granting write and money-moving permissions is a valid concern.",
+        "contested": false
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "Conversation history is kept for each customer session.",
+        "whyItMatters": "Retaining conversation history per session creates a context that can be poisoned by adversarial inputs, which the agent may later use when deciding to read data, update CRM records, or trigger refunds, causing incorrect or harmful behavior. The profile does not describe validation, sanitization, or periodic review of stored session context. ",
+        "recommendedControl": "Limit retained context to strictly necessary fields, apply automated content sanitization and provenance tagging, and expire or require re-validation of session memory before any financial or write actions.",
+        "modelSeverity": "medium",
+        "id": "F4",
+        "secondModelVerdict": "agree",
+        "secondModelReason": "Retaining conversation history without specified sanitization or validation creates a clear risk of memory and context poisoning, influencing future agent decisions.",
+        "contested": false
+      },
+      {
+        "category": "ASI04",
+        "severity": "low",
+        "evidenceQuote": "\"name\": \"Claude Sonnet (version not specified)\"",
+        "whyItMatters": "The model is a third-party provider model with an unspecified version, which increases supply-chain risk because vulnerabilities or behavior changes in the model could affect decision logic or safety without traceable versioning. The profile includes no model version pinning or update policy. ",
+        "recommendedControl": "Pin to a specific, reviewed model version, require change-control for model upgrades, and include model provenance and security review in the deployment pipeline.",
+        "modelSeverity": "low",
+        "id": "F5",
+        "secondModelVerdict": "agree",
+        "secondModelReason": "Using an unspecified version of a third-party model introduces supply chain risk, as behavior changes or vulnerabilities could be introduced without explicit control or awareness.",
+        "contested": false
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"permissions\": [\"read\", \"write\"]",
+        "whyItMatters": "The agent has write permissions to the Customer Support CRM, which, combined with untrusted input and the potential for goal hijack, could lead to unauthorized data modification or deletion, impacting customer records and business operations. This allows an attacker to manipulate customer data or create fraudulent entries.",
+        "recommendedControl": "Implement strict input validation and content filtering for all CRM write operations, and ensure all write actions are logged with sufficient detail for auditing and rollback.",
+        "modelSeverity": "high"
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"",
+        "whyItMatters": "A manual kill switch without a tested runbook means that in a critical incident, the response time to disable a rogue agent could be significantly delayed, allowing more harm to occur. This lack of preparedness increases the risk of cascading failures if the agent malfunctions or is compromised. ",
+        "recommendedControl": "Develop and regularly test a clear, automated, or semi-automated runbook for the kill switch to ensure rapid response and minimize potential damage during an incident.",
+        "modelSeverity": "medium"
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+        "whyItMatters": "Logging to application logs but not forwarding to a SIEM means that security teams lack centralized visibility and real-time alerting for suspicious agent activities, making detection of attacks or malfunctions difficult and slow. This significantly hinders incident response and forensic analysis.",
+        "recommendedControl": "Configure immediate forwarding of all agent logs to the central SIEM for real-time monitoring, alerting, and correlation with other security events.",
+        "modelSeverity": "medium"
+      }
+    ],
+    "ruleHits": [
+      {
+        "ruleId": "R3",
+        "severity": "high",
+        "reason": "Reads untrusted input (chat) and lists Customer support CRM that can write or run code.",
+        "field": "untrustedInputs, tools.permissions",
+        "category": "ASI01"
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": "",
+      "quoteFound": true
+    },
+    "reviewerSummary": "The agent can move money autonomously for refunds up to $50, creating a high-risk avenue for monetary loss and fraud, so propose Tier 4. Additional issues include untrusted chat input enabling prompt-injection, storage of session history that can be poisoned, scoped credential risks, and an unspecified third-party model version. Remediation should focus on removing or gating direct move_money permissions, enforcing human approval and least-privilege credential controls, input sanitization, memory controls, and model version pinning.",
+    "checkerSummary": "The agent can automatically issue refunds up to $50, which is a critical risk that places it in Tier 4, despite the general \"humanConfirmsActions\": true setting. It also has write access to the CRM and handles confidential data, further elevating its risk profile. The manual kill switch without a tested runbook and the lack of SIEM integration for logs are significant operational weaknesses.",
+    "droppedFindings": [],
+    "droppedMissedFindings": [],
+    "unknownVerdicts": [],
+    "reviewer": {
+      "model": "openai/gpt-5-mini",
+      "promptVersion": "v4",
+      "settings": {
+        "model": "openai/gpt-5-mini",
+        "providers": [
+          "azure",
+          "openai"
+        ],
+        "disallowPromptTraining": true,
+        "reasoning": "low",
+        "maxOutputTokens": 6000
+      },
+      "usage": {
+        "inputTokens": 1894,
+        "inputTokenDetails": {
+          "noCacheTokens": 102,
+          "cacheReadTokens": 1792,
+          "cacheWriteTokens": 0
+        },
+        "outputTokens": 1667,
+        "outputTokenDetails": {
+          "textTokens": 835,
+          "reasoningTokens": 832
+        },
+        "totalTokens": 3561,
+        "raw": {
+          "input_tokens": 1894,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 1792
+          },
+          "output_tokens": 1667,
+          "output_tokens_details": {
+            "reasoning_tokens": 832
+          },
+          "total_tokens": 3561
+        }
+      },
+      "latencyMs": 11439,
+      "generationId": "gen_01M5TFHK0DE21A429SRWX1W4XF",
+      "provider": "openai",
+      "costUsd": 0.0034043
+    },
+    "checker": {
+      "model": "google/gemini-2.5-flash",
+      "promptVersion": "c3",
+      "settings": {
+        "model": "google/gemini-2.5-flash",
+        "providers": [
+          "vertex"
+        ],
+        "disallowPromptTraining": true,
+        "temperature": 0.2,
+        "reasoning": "low",
+        "maxOutputTokens": 6000
+      },
+      "usage": {
+        "inputTokens": 3096,
+        "inputTokenDetails": {
+          "noCacheTokens": 3096,
+          "cacheReadTokens": 0
+        },
+        "outputTokens": 1770,
+        "outputTokenDetails": {
+          "textTokens": 855,
+          "reasoningTokens": 915
+        },
+        "totalTokens": 4866,
+        "raw": {
+          "thoughtsTokenCount": 915,
+          "promptTokenCount": 3096,
+          "candidatesTokenCount": 855,
+          "totalTokenCount": 4866,
+          "trafficType": "ON_DEMAND",
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 3096
+            }
+          ],
+          "candidatesTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 855
+            }
+          ]
+        }
+      },
+      "latencyMs": 8946,
+      "generationId": "gen_01M5TFHY5F820YM11ZNN14E268",
+      "provider": "vertex",
+      "costUsd": 0.0053538
+    },
+    "rawReviewerOutput": {
+      "proposedTier": 4,
+      "findings": [
+        {
+          "category": "ASI02",
+          "severity": "critical",
+          "evidenceQuote": "\"issues refunds of up to $50 automatically.\"",
+          "whyItMatters": "The profile explicitly allows the agent to issue refunds without human approval for amounts up to $50, which means the agent can move funds autonomously and be abused to exfiltrate money or perform many small fraudulent refunds at scale. There is no compensating control in the profile that prevents automated refund workflows from executing. ",
+          "recommendedControl": "Require an explicit human approval step for all refunds, or remove move_money permission from the agent and surface refund requests to a separate, auditable service that enforces multi-party approval for any monetary action."
+        },
+        {
+          "category": "ASI01",
+          "severity": "high",
+          "evidenceQuote": "\"untrustedInputs\": [ \"chat\" ]",
+          "whyItMatters": "Untrusted chat input is a direct vector for prompt injection and goal manipulation, which could cause the agent to change task selection or escalate actions such as issuing refunds or modifying CRM records. The profile gives no mitigations for prompt-injection hardened parsing, sanitization, or policy enforcement. ",
+          "recommendedControl": "Implement explicit input validation and a prompt-injection defense pipeline, plus a hardened instruction-following policy enforcement layer that rejects or flags any untrusted chat content that requests agent policy changes or financial actions."
+        },
+        {
+          "category": "ASI03",
+          "severity": "medium",
+          "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+          "whyItMatters": "The agent holds its own scoped token, which if stolen or misused by the agent or an attacker could be used to perform privileged CRM reads/writes and refunds; the profile has no mention of token rotation, least privilege scope details, or auditing tied to a human approver. ",
+          "recommendedControl": "Enforce least-privilege scopes with short-lived tokens bound to a per-request approval flow, implement automatic rotation and revocation, and ensure all token usages are logged with correlated human-approval identifiers."
+        },
+        {
+          "category": "ASI06",
+          "severity": "medium",
+          "evidenceQuote": "Conversation history is kept for each customer session.",
+          "whyItMatters": "Retaining conversation history per session creates a context that can be poisoned by adversarial inputs, which the agent may later use when deciding to read data, update CRM records, or trigger refunds, causing incorrect or harmful behavior. The profile does not describe validation, sanitization, or periodic review of stored session context. ",
+          "recommendedControl": "Limit retained context to strictly necessary fields, apply automated content sanitization and provenance tagging, and expire or require re-validation of session memory before any financial or write actions."
+        },
+        {
+          "category": "ASI04",
+          "severity": "low",
+          "evidenceQuote": "\"name\": \"Claude Sonnet (version not specified)\"",
+          "whyItMatters": "The model is a third-party provider model with an unspecified version, which increases supply-chain risk because vulnerabilities or behavior changes in the model could affect decision logic or safety without traceable versioning. The profile includes no model version pinning or update policy. ",
+          "recommendedControl": "Pin to a specific, reviewed model version, require change-control for model upgrades, and include model provenance and security review in the deployment pipeline."
+        }
+      ],
+      "manipulationAttempt": {
+        "detected": false,
+        "quote": ""
+      },
+      "summary": "The agent can move money autonomously for refunds up to $50, creating a high-risk avenue for monetary loss and fraud, so propose Tier 4. Additional issues include untrusted chat input enabling prompt-injection, storage of session history that can be poisoned, scoped credential risks, and an unspecified third-party model version. Remediation should focus on removing or gating direct move_money permissions, enforcing human approval and least-privilege credential controls, input sanitization, memory controls, and model version pinning."
+    },
+    "rawCheckerOutput": {
+      "verdicts": [
+        {
+          "findingId": "F1",
+          "verdict": "agree",
+          "reason": "The profile explicitly states the agent can issue refunds up to $50 automatically, which contradicts the \"humanConfirmsActions\": true setting for these specific actions."
+        },
+        {
+          "findingId": "F2",
+          "verdict": "agree",
+          "reason": "The agent accepts untrusted chat input, which is a direct vector for prompt injection to manipulate its goals and actions, especially given its powerful tools."
+        },
+        {
+          "findingId": "F3",
+          "verdict": "agree",
+          "reason": "While using its own scoped token is good practice, the lack of detail on scope, rotation, and auditing for a token granting write and money-moving permissions is a valid concern."
+        },
+        {
+          "findingId": "F4",
+          "verdict": "agree",
+          "reason": "Retaining conversation history without specified sanitization or validation creates a clear risk of memory and context poisoning, influencing future agent decisions."
+        },
+        {
+          "findingId": "F5",
+          "verdict": "agree",
+          "reason": "Using an unspecified version of a third-party model introduces supply chain risk, as behavior changes or vulnerabilities could be introduced without explicit control or awareness."
+        }
+      ],
+      "missedFindings": [
+        {
+          "category": "ASI03",
+          "severity": "high",
+          "evidenceQuote": "\"permissions\": [\"read\", \"write\"]",
+          "whyItMatters": "The agent has write permissions to the Customer Support CRM, which, combined with untrusted input and the potential for goal hijack, could lead to unauthorized data modification or deletion, impacting customer records and business operations. This allows an attacker to manipulate customer data or create fraudulent entries.",
+          "recommendedControl": "Implement strict input validation and content filtering for all CRM write operations, and ensure all write actions are logged with sufficient detail for auditing and rollback."
+        },
+        {
+          "category": "ASI08",
+          "severity": "medium",
+          "evidenceQuote": "\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"",
+          "whyItMatters": "A manual kill switch without a tested runbook means that in a critical incident, the response time to disable a rogue agent could be significantly delayed, allowing more harm to occur. This lack of preparedness increases the risk of cascading failures if the agent malfunctions or is compromised. ",
+          "recommendedControl": "Develop and regularly test a clear, automated, or semi-automated runbook for the kill switch to ensure rapid response and minimize potential damage during an incident."
+        },
+        {
+          "category": "ASI08",
+          "severity": "medium",
+          "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+          "whyItMatters": "Logging to application logs but not forwarding to a SIEM means that security teams lack centralized visibility and real-time alerting for suspicious agent activities, making detection of attacks or malfunctions difficult and slow. This significantly hinders incident response and forensic analysis.",
+          "recommendedControl": "Configure immediate forwarding of all agent logs to the central SIEM for real-time monitoring, alerting, and correlation with other security events."
+        }
+      ],
+      "proposedTier": 4,
+      "summary": "The agent can automatically issue refunds up to $50, which is a critical risk that places it in Tier 4, despite the general \"humanConfirmsActions\": true setting. It also has write access to the CRM and handles confidential data, further elevating its risk profile. The manual kill switch without a tested runbook and the lack of SIEM integration for logs are significant operational weaknesses."
+    }
+  },
+  "blind": {
+    "promptVersion": "b1",
+    "model": "google/gemini-2.5-flash",
+    "proposedTier": 4,
+    "findings": [
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"memory\": \"session\"",
+        "whyItMatters": "Storing conversation history in session memory makes the agent vulnerable to context poisoning, where malicious input from earlier in the session could influence future decisions or tool use.",
+        "recommendedControl": "Implement mechanisms to detect and filter malicious content from session memory, or consider using a more ephemeral memory strategy if full session recall is not strictly necessary for security-critical decisions."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"logging\": { \"enabled\": true, \"destination\": \"Application logs, not yet forwarded to the SIEM\" }",
+        "whyItMatters": "Logs not being forwarded to the SIEM means that security incidents, anomalous behavior, or potential attacks may not be detected or responded to in a timely manner by security operations.",
+        "recommendedControl": "Ensure all agent logs are immediately forwarded to the central SIEM for real-time monitoring, alerting, and incident response capabilities."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"killSwitch\": { \"available\": true, \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\" }",
+        "whyItMatters": "The lack of a tested runbook for the kill switch introduces uncertainty and potential delays in disabling the agent during an emergency, increasing the window for harm.",
+        "recommendedControl": "Develop and regularly test a comprehensive runbook for the kill switch procedure to ensure rapid and effective agent shutdown in critical situations."
+      }
+    ],
+    "droppedFindings": [
+      {
+        "finding": {
+          "category": "ASI01",
+          "severity": "critical",
+          "evidenceQuote": "\"humanConfirmsActions\": true, ... \"issues refunds of up to $50 automatically. Refunds above $50 need human approval.\"",
+          "whyItMatters": "The profile contradicts itself regarding human confirmation for actions. If refunds up to $50 are issued automatically, it means the agent can move money without human oversight, which is a critical risk.",
+          "recommendedControl": "Clarify and ensure consistency in the agent's configuration regarding human confirmation for all actions, especially those involving financial transactions. If automatic refunds are intended, this must be explicitly stated as 'humanConfirmsActions': false for those specific actions, and appropriate controls for automatic transactions must be in place."
+        },
+        "reason": "evidence quote not found in the profile"
+      },
+      {
+        "finding": {
+          "category": "ASI02",
+          "severity": "high",
+          "evidenceQuote": "\"untrustedInputs\": [\"chat\"], ... \"tools\": [ { \"name\": \"Customer support CRM\", \"permissions\": [ \"read\", \"write\" ] } ]",
+          "whyItMatters": "The agent processes untrusted chat input and has write access to the Customer support CRM. This creates a significant risk of prompt injection leading to unauthorized data modification or abuse of the CRM system.",
+          "recommendedControl": "Implement robust input validation and sanitization for all chat inputs, and strictly limit the agent's write permissions to the CRM to only necessary fields and actions, with clear guardrails."
+        },
+        "reason": "evidence quote not found in the profile"
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The agent poses a critical risk due to its ability to automatically issue refunds up to $50, contradicting its stated human confirmation setting. It also has write access to a CRM while processing untrusted chat input, creating a high risk of tool misuse. Furthermore, weaknesses in logging and the kill switch reduce the ability to detect and respond to incidents effectively.",
+    "rawModelOutput": {
+      "proposedTier": 4,
+      "findings": [
+        {
+          "category": "ASI01",
+          "severity": "critical",
+          "evidenceQuote": "\"humanConfirmsActions\": true, ... \"issues refunds of up to $50 automatically. Refunds above $50 need human approval.\"",
+          "whyItMatters": "The profile contradicts itself regarding human confirmation for actions. If refunds up to $50 are issued automatically, it means the agent can move money without human oversight, which is a critical risk.",
+          "recommendedControl": "Clarify and ensure consistency in the agent's configuration regarding human confirmation for all actions, especially those involving financial transactions. If automatic refunds are intended, this must be explicitly stated as 'humanConfirmsActions': false for those specific actions, and appropriate controls for automatic transactions must be in place."
+        },
+        {
+          "category": "ASI02",
+          "severity": "high",
+          "evidenceQuote": "\"untrustedInputs\": [\"chat\"], ... \"tools\": [ { \"name\": \"Customer support CRM\", \"permissions\": [ \"read\", \"write\" ] } ]",
+          "whyItMatters": "The agent processes untrusted chat input and has write access to the Customer support CRM. This creates a significant risk of prompt injection leading to unauthorized data modification or abuse of the CRM system.",
+          "recommendedControl": "Implement robust input validation and sanitization for all chat inputs, and strictly limit the agent's write permissions to the CRM to only necessary fields and actions, with clear guardrails."
+        },
+        {
+          "category": "ASI06",
+          "severity": "medium",
+          "evidenceQuote": "\"memory\": \"session\"",
+          "whyItMatters": "Storing conversation history in session memory makes the agent vulnerable to context poisoning, where malicious input from earlier in the session could influence future decisions or tool use.",
+          "recommendedControl": "Implement mechanisms to detect and filter malicious content from session memory, or consider using a more ephemeral memory strategy if full session recall is not strictly necessary for security-critical decisions."
+        },
+        {
+          "category": "ASI08",
+          "severity": "medium",
+          "evidenceQuote": "\"logging\": { \"enabled\": true, \"destination\": \"Application logs, not yet forwarded to the SIEM\" }",
+          "whyItMatters": "Logs not being forwarded to the SIEM means that security incidents, anomalous behavior, or potential attacks may not be detected or responded to in a timely manner by security operations.",
+          "recommendedControl": "Ensure all agent logs are immediately forwarded to the central SIEM for real-time monitoring, alerting, and incident response capabilities."
+        },
+        {
+          "category": "ASI08",
+          "severity": "medium",
+          "evidenceQuote": "\"killSwitch\": { \"available\": true, \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\" }",
+          "whyItMatters": "The lack of a tested runbook for the kill switch introduces uncertainty and potential delays in disabling the agent during an emergency, increasing the window for harm.",
+          "recommendedControl": "Develop and regularly test a comprehensive runbook for the kill switch procedure to ensure rapid and effective agent shutdown in critical situations."
+        }
+      ],
+      "manipulationAttempt": {
+        "detected": false,
+        "quote": ""
+      },
+      "summary": "The agent poses a critical risk due to its ability to automatically issue refunds up to $50, contradicting its stated human confirmation setting. It also has write access to a CRM while processing untrusted chat input, creating a high risk of tool misuse. Furthermore, weaknesses in logging and the kill switch reduce the ability to detect and respond to incidents effectively."
+    },
+    "usage": {
+      "inputTokens": 2207,
+      "inputTokenDetails": {
+        "noCacheTokens": 2207,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1668,
+      "outputTokenDetails": {
+        "textTokens": 834,
+        "reasoningTokens": 834
+      },
+      "totalTokens": 3875,
+      "raw": {
+        "thoughtsTokenCount": 834,
+        "promptTokenCount": 2207,
+        "candidatesTokenCount": 834,
+        "totalTokenCount": 3875,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2207
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 834
+          }
+        ]
+      }
+    },
+    "generationId": "gen_01M5TFJ6TP20DA6MTZBTTCWDP2",
+    "provider": "vertex",
+    "seconds": 8.061,
+    "costUsd": 0.0048321
+  },
+  "reviewSeconds": 20.385,
+  "costUsd": 0.0135902
+}

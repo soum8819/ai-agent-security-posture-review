@@ -1,0 +1,378 @@
+{
+  "review": {
+    "profileId": "profile-06",
+    "tiers": {
+      "rule": 1,
+      "reviewer": 1,
+      "checker": 1,
+      "final": 1,
+      "setBy": [
+        "rule",
+        "reviewer",
+        "checker"
+      ],
+      "ruleReasons": [
+        "Tier 1: read-only, public or internal data only"
+      ]
+    },
+    "contested": [],
+    "findings": [
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"memory\": \"session\"",
+        "whyItMatters": "The agent accepts untrusted chat inputs while retaining session memory, so malicious or misleading inputs within a session can poison context and bias subsequent answers to employees. Over time repeated or crafted inputs could degrade accuracy or cause disclosure of internal information.",
+        "recommendedControl": "Validate and sanitize user inputs, enforce strict input handling and session expiration, and implement provenance tagging and filtering for any content elevated into contextual state.",
+        "modelSeverity": "medium",
+        "id": "F1",
+        "secondModelVerdict": "agree",
+        "secondModelReason": "The profile clearly states the agent uses session memory and accepts untrusted chat inputs, which supports the risk of context poisoning.",
+        "contested": false
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"provider\": \"Anthropic\"",
+        "whyItMatters": "The agent relies on a third party hosted model, which creates a supply chain dependency: model compromise, tampered updates, or unexpected behavior from the provider could affect confidentiality and integrity of responses. There is no version specified, increasing uncertainty about update and patch management.",
+        "recommendedControl": "Record and pin model versioning, perform supply chain risk assessment, require signed model responses or provider attestations, and monitor model outputs for anomalous behavior.",
+        "modelSeverity": "medium",
+        "id": "F2",
+        "secondModelVerdict": "agree",
+        "secondModelReason": "The profile indicates a third-party model provider and explicitly states the version is not specified, directly supporting the supply chain vulnerability finding.",
+        "contested": false
+      },
+      {
+        "category": "ASI09",
+        "severity": "low",
+        "evidenceQuote": "\"humanConfirmsActions\": true",
+        "whyItMatters": "The agent is positioned to answer employee questions and may be perceived as authoritative; employees could overtrust or act on incorrect answers leading to operational mistakes. Relying on human confirmation for actions does not mitigate users acting on agent responses without additional verification.",
+        "recommendedControl": "Display provenance and confidence for answers, include explicit disclaimers for critical guidance, and require secondary verification for any operational changes based on agent output.",
+        "modelSeverity": "low",
+        "id": "F3",
+        "secondModelVerdict": "agree",
+        "secondModelReason": "The agent's purpose to answer employee questions, combined with its read-only nature, makes human-agent trust exploitation a valid concern, even with human confirmation for actions.",
+        "contested": false
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"logging\": {\"enabled\": true,\"destination\": \"Application logs, not yet forwarded to the SIEM\"}",
+        "whyItMatters": "Without centralized SIEM logging, detecting and responding to security incidents, such as repeated attempts at prompt injection or data exfiltration, will be significantly delayed or impossible. This lack of visibility can allow a single fault to propagate undetected.",
+        "recommendedControl": "Ensure all application logs are immediately forwarded to the central SIEM for real-time monitoring and correlation with other security events.",
+        "modelSeverity": "medium"
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"killSwitch\": {\"available\": true,\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"}",
+        "whyItMatters": "A manual kill switch without a tested runbook introduces significant delay and potential for error during a critical incident, increasing the risk of cascading failures or prolonged harm. An untested process is an unreliable process.",
+        "recommendedControl": "Develop and regularly test a comprehensive runbook for the kill switch procedure to ensure rapid and effective agent shutdown in an emergency.",
+        "modelSeverity": "medium"
+      }
+    ],
+    "ruleHits": [],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": "",
+      "quoteFound": true
+    },
+    "reviewerSummary": "This is a read-only internal KB assistant, so overall risk tier is 1. Key risks are session-context poisoning from untrusted chat inputs, reliance on a third-party model without pinned versioning, and potential user overtrust; mitigate with input controls, model supply-chain controls, provenance and user disclaimers.",
+    "checkerSummary": "The agent is a read-only internal knowledge base assistant, which places it in Tier 1. The first reviewer's findings are accurate, and I've added two additional findings related to logging and the kill switch, which are critical for incident response and system resilience.",
+    "droppedFindings": [],
+    "droppedMissedFindings": [],
+    "unknownVerdicts": [],
+    "reviewer": {
+      "model": "openai/gpt-5-mini",
+      "promptVersion": "v4",
+      "settings": {
+        "model": "openai/gpt-5-mini",
+        "providers": [
+          "azure",
+          "openai"
+        ],
+        "disallowPromptTraining": true,
+        "reasoning": "low",
+        "maxOutputTokens": 6000
+      },
+      "usage": {
+        "inputTokens": 1830,
+        "inputTokenDetails": {
+          "noCacheTokens": 166,
+          "cacheReadTokens": 1664,
+          "cacheWriteTokens": 0
+        },
+        "outputTokens": 1528,
+        "outputTokenDetails": {
+          "textTokens": 504,
+          "reasoningTokens": 1024
+        },
+        "totalTokens": 3358,
+        "raw": {
+          "input_tokens": 1830,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 1664
+          },
+          "output_tokens": 1528,
+          "output_tokens_details": {
+            "reasoning_tokens": 1024
+          },
+          "total_tokens": 3358
+        }
+      },
+      "latencyMs": 10376,
+      "generationId": "gen_01M5TF001SK9RFGEBYEEBK4XC1",
+      "provider": "openai",
+      "costUsd": 0.0031391
+    },
+    "checker": {
+      "model": "google/gemini-2.5-flash",
+      "promptVersion": "c3",
+      "settings": {
+        "model": "google/gemini-2.5-flash",
+        "providers": [
+          "vertex"
+        ],
+        "disallowPromptTraining": true,
+        "temperature": 0.2,
+        "reasoning": "low",
+        "maxOutputTokens": 6000
+      },
+      "usage": {
+        "inputTokens": 2633,
+        "inputTokenDetails": {
+          "noCacheTokens": 2633,
+          "cacheReadTokens": 0
+        },
+        "outputTokens": 1257,
+        "outputTokenDetails": {
+          "textTokens": 554,
+          "reasoningTokens": 703
+        },
+        "totalTokens": 3890,
+        "raw": {
+          "thoughtsTokenCount": 703,
+          "promptTokenCount": 2633,
+          "candidatesTokenCount": 554,
+          "totalTokenCount": 3890,
+          "trafficType": "ON_DEMAND",
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 2633
+            }
+          ],
+          "candidatesTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 554
+            }
+          ]
+        }
+      },
+      "latencyMs": 6761,
+      "generationId": "gen_01M5TF0A6H1NTNYR09YT6CTME5",
+      "provider": "vertex",
+      "costUsd": 0.0039324
+    },
+    "rawReviewerOutput": {
+      "proposedTier": 1,
+      "findings": [
+        {
+          "category": "ASI06",
+          "severity": "medium",
+          "evidenceQuote": "\"memory\": \"session\"",
+          "whyItMatters": "The agent accepts untrusted chat inputs while retaining session memory, so malicious or misleading inputs within a session can poison context and bias subsequent answers to employees. Over time repeated or crafted inputs could degrade accuracy or cause disclosure of internal information.",
+          "recommendedControl": "Validate and sanitize user inputs, enforce strict input handling and session expiration, and implement provenance tagging and filtering for any content elevated into contextual state."
+        },
+        {
+          "category": "ASI04",
+          "severity": "medium",
+          "evidenceQuote": "\"provider\": \"Anthropic\"",
+          "whyItMatters": "The agent relies on a third party hosted model, which creates a supply chain dependency: model compromise, tampered updates, or unexpected behavior from the provider could affect confidentiality and integrity of responses. There is no version specified, increasing uncertainty about update and patch management.",
+          "recommendedControl": "Record and pin model versioning, perform supply chain risk assessment, require signed model responses or provider attestations, and monitor model outputs for anomalous behavior."
+        },
+        {
+          "category": "ASI09",
+          "severity": "low",
+          "evidenceQuote": "\"humanConfirmsActions\": true",
+          "whyItMatters": "The agent is positioned to answer employee questions and may be perceived as authoritative; employees could overtrust or act on incorrect answers leading to operational mistakes. Relying on human confirmation for actions does not mitigate users acting on agent responses without additional verification.",
+          "recommendedControl": "Display provenance and confidence for answers, include explicit disclaimers for critical guidance, and require secondary verification for any operational changes based on agent output."
+        }
+      ],
+      "manipulationAttempt": {
+        "detected": false,
+        "quote": ""
+      },
+      "summary": "This is a read-only internal KB assistant, so overall risk tier is 1. Key risks are session-context poisoning from untrusted chat inputs, reliance on a third-party model without pinned versioning, and potential user overtrust; mitigate with input controls, model supply-chain controls, provenance and user disclaimers."
+    },
+    "rawCheckerOutput": {
+      "verdicts": [
+        {
+          "findingId": "F1",
+          "verdict": "agree",
+          "reason": "The profile clearly states the agent uses session memory and accepts untrusted chat inputs, which supports the risk of context poisoning."
+        },
+        {
+          "findingId": "F2",
+          "verdict": "agree",
+          "reason": "The profile indicates a third-party model provider and explicitly states the version is not specified, directly supporting the supply chain vulnerability finding."
+        },
+        {
+          "findingId": "F3",
+          "verdict": "agree",
+          "reason": "The agent's purpose to answer employee questions, combined with its read-only nature, makes human-agent trust exploitation a valid concern, even with human confirmation for actions."
+        }
+      ],
+      "missedFindings": [
+        {
+          "category": "ASI08",
+          "severity": "medium",
+          "evidenceQuote": "\"logging\": {\"enabled\": true,\"destination\": \"Application logs, not yet forwarded to the SIEM\"}",
+          "whyItMatters": "Without centralized SIEM logging, detecting and responding to security incidents, such as repeated attempts at prompt injection or data exfiltration, will be significantly delayed or impossible. This lack of visibility can allow a single fault to propagate undetected.",
+          "recommendedControl": "Ensure all application logs are immediately forwarded to the central SIEM for real-time monitoring and correlation with other security events."
+        },
+        {
+          "category": "ASI08",
+          "severity": "medium",
+          "evidenceQuote": "\"killSwitch\": {\"available\": true,\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"}",
+          "whyItMatters": "A manual kill switch without a tested runbook introduces significant delay and potential for error during a critical incident, increasing the risk of cascading failures or prolonged harm. An untested process is an unreliable process.",
+          "recommendedControl": "Develop and regularly test a comprehensive runbook for the kill switch procedure to ensure rapid and effective agent shutdown in an emergency."
+        }
+      ],
+      "proposedTier": 1,
+      "summary": "The agent is a read-only internal knowledge base assistant, which places it in Tier 1. The first reviewer's findings are accurate, and I've added two additional findings related to logging and the kill switch, which are critical for incident response and system resilience."
+    }
+  },
+  "blind": {
+    "promptVersion": "b1",
+    "model": "google/gemini-2.5-flash",
+    "proposedTier": 1,
+    "findings": [],
+    "droppedFindings": [
+      {
+        "finding": {
+          "category": "ASI01",
+          "severity": "medium",
+          "evidenceQuote": "untrustedInputs: [\"chat\"]",
+          "whyItMatters": "Untrusted user input can be used to manipulate the agent's behavior, potentially leading it to misuse its read tool or reveal information it shouldn't.",
+          "recommendedControl": "Implement robust input validation and prompt injection defenses to sanitize user queries before they reach the LLM."
+        },
+        "reason": "evidence quote not found in the profile"
+      },
+      {
+        "finding": {
+          "category": "ASI04",
+          "severity": "low",
+          "evidenceQuote": "name: \"Claude Sonnet (version not specified)\"",
+          "whyItMatters": "Not specifying the exact model version can lead to unexpected behavior or introduce vulnerabilities if the model provider updates the model without prior testing by the bank.",
+          "recommendedControl": "Specify and pin the exact model version used to ensure consistent behavior and allow for controlled updates."
+        },
+        "reason": "evidence quote not found in the profile"
+      },
+      {
+        "finding": {
+          "category": "ASI08",
+          "severity": "medium",
+          "evidenceQuote": "destination: \"Application logs, not yet forwarded to the SIEM\"",
+          "whyItMatters": "Logs not being forwarded to the SIEM means that security incidents or anomalous agent behavior may not be detected or responded to in a timely manner.",
+          "recommendedControl": "Ensure all application logs are immediately forwarded to the central SIEM for comprehensive security monitoring and alerting."
+        },
+        "reason": "evidence quote not found in the profile"
+      },
+      {
+        "finding": {
+          "category": "ASI08",
+          "severity": "high",
+          "evidenceQuote": "description: \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"",
+          "whyItMatters": "An untested, manual kill switch is unreliable and could significantly delay the ability to stop a misbehaving or compromised agent, increasing potential harm.",
+          "recommendedControl": "Develop and regularly test an automated or well-documented runbook for the kill switch to ensure rapid and effective agent deactivation."
+        },
+        "reason": "evidence quote not found in the profile"
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent is a read-only internal knowledge base assistant, appropriately classified as Tier 1. Key risks include the potential for prompt injection due to untrusted chat inputs, and operational weaknesses in logging and the kill switch. Addressing these issues will improve the agent's security posture and reliability.",
+    "rawModelOutput": {
+      "proposedTier": 1,
+      "findings": [
+        {
+          "category": "ASI01",
+          "severity": "medium",
+          "evidenceQuote": "untrustedInputs: [\"chat\"]",
+          "whyItMatters": "Untrusted user input can be used to manipulate the agent's behavior, potentially leading it to misuse its read tool or reveal information it shouldn't.",
+          "recommendedControl": "Implement robust input validation and prompt injection defenses to sanitize user queries before they reach the LLM."
+        },
+        {
+          "category": "ASI04",
+          "severity": "low",
+          "evidenceQuote": "name: \"Claude Sonnet (version not specified)\"",
+          "whyItMatters": "Not specifying the exact model version can lead to unexpected behavior or introduce vulnerabilities if the model provider updates the model without prior testing by the bank.",
+          "recommendedControl": "Specify and pin the exact model version used to ensure consistent behavior and allow for controlled updates."
+        },
+        {
+          "category": "ASI08",
+          "severity": "medium",
+          "evidenceQuote": "destination: \"Application logs, not yet forwarded to the SIEM\"",
+          "whyItMatters": "Logs not being forwarded to the SIEM means that security incidents or anomalous agent behavior may not be detected or responded to in a timely manner.",
+          "recommendedControl": "Ensure all application logs are immediately forwarded to the central SIEM for comprehensive security monitoring and alerting."
+        },
+        {
+          "category": "ASI08",
+          "severity": "high",
+          "evidenceQuote": "description: \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"",
+          "whyItMatters": "An untested, manual kill switch is unreliable and could significantly delay the ability to stop a misbehaving or compromised agent, increasing potential harm.",
+          "recommendedControl": "Develop and regularly test an automated or well-documented runbook for the kill switch to ensure rapid and effective agent deactivation."
+        }
+      ],
+      "manipulationAttempt": {
+        "detected": false,
+        "quote": ""
+      },
+      "summary": "This agent is a read-only internal knowledge base assistant, appropriately classified as Tier 1. Key risks include the potential for prompt injection due to untrusted chat inputs, and operational weaknesses in logging and the kill switch. Addressing these issues will improve the agent's security posture and reliability."
+    },
+    "usage": {
+      "inputTokens": 2099,
+      "inputTokenDetails": {
+        "noCacheTokens": 2099,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1316,
+      "outputTokenDetails": {
+        "textTokens": 552,
+        "reasoningTokens": 764
+      },
+      "totalTokens": 3415,
+      "raw": {
+        "thoughtsTokenCount": 764,
+        "promptTokenCount": 2099,
+        "candidatesTokenCount": 552,
+        "totalTokenCount": 3415,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2099
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 552
+          }
+        ]
+      }
+    },
+    "generationId": "gen_01M5TF0GSXDZTHBX7FD1JNJ8XM",
+    "provider": "vertex",
+    "seconds": 7.341,
+    "costUsd": 0.0039197
+  },
+  "reviewSeconds": 17.137,
+  "costUsd": 0.0109912
+}

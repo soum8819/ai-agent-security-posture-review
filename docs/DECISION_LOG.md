@@ -163,3 +163,30 @@ possible), while R1 to R8 raise findings. The page never showed the tier
 rules' reasons, so a Tier 3 review said only "No rule fired". "Rules that
 fired" now starts with "Why the rules set Tier N" and its reasons. The data
 was not inconsistent; the page was missing a part.
+
+## 2026-10-25: blind-first checker experiment
+
+**Plan committed before any run** (eval/BLIND_CHECKER.md, commit 491f298),
+with the measures and how to read them fixed in advance.
+
+**Same model, same settings, separate prompt.** The blind arm calls the
+production checker model with its production settings, and a prompt (b1)
+that exists only in the experiment script. It reuses the shared prompt
+pieces and the two checker-only sentences from c2 and c3 word for word, so
+the arms differ in what they see. No production prompt or pipeline file was
+changed.
+
+**One extra view added after seeing the main run.** 27 to 31% of the blind
+checker's evidence quotes failed the exact-match check, which empties its
+finding list on four profiles. The prompt was not changed to fix this (that
+would tune the experiment). Instead the report adds one view that also counts
+the dropped findings. It is labelled as added after the main run, and the
+planned figures are reported unchanged beside it.
+
+**Outcome: no production change.** The result supports the anchoring worry,
+so the checker's "agree" verdicts are not to be presented as independent
+confirmation. It does not show a blind-first checker would be better: tiers
+were unchanged and its extra disagreements are mostly run-to-run noise.
+
+**Profile-04 left as it is.** No decision on its tier; the key is unchanged
+and the open question above stands as written.

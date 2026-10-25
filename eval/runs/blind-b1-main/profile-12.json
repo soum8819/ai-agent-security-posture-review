@@ -1,0 +1,386 @@
+{
+  "review": {
+    "profileId": "profile-12",
+    "tiers": {
+      "rule": 2,
+      "reviewer": 2,
+      "checker": 2,
+      "final": 2,
+      "setBy": [
+        "rule",
+        "reviewer",
+        "checker"
+      ],
+      "ruleReasons": [
+        "Tier 2: can act beyond reading (Team chat notification)",
+        "Tier 2: reads confidential data"
+      ]
+    },
+    "contested": [],
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"shared_token\"",
+        "whyItMatters": "A shared credential increases the blast radius if it is leaked or reused, enabling privilege escalation or lateral movement across sub-agents and tooling. Shared tokens make it difficult to revoke or audit individual agent access.",
+        "recommendedControl": "Replace the shared_token with per-agent scoped credentials or short-lived tokens bound to each agent identity, and add rotation and audit logging for all credentials.",
+        "modelSeverity": "high",
+        "id": "F1",
+        "secondModelVerdict": "agree",
+        "secondModelReason": "The use of a shared token for multiple agents and tools is a clear security risk, and the category and severity are appropriate.",
+        "contested": false
+      },
+      {
+        "category": "ASI06",
+        "severity": "high",
+        "evidenceQuote": "An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations.",
+        "whyItMatters": "Persistent, shared memory across multiple specialist agents creates a single poisoning vector where malicious or corrupted context can influence all agents' reasoning and recommendations. Poisoned memory could bias strategy outputs or leak confidential information to downstream agents or outputs.",
+        "recommendedControl": "Segment memory stores per-agent role and enforce integrity checks and access controls, implement input validation and provenance tagging for memory writes, and provide a review/approval step before memory-derived recommendations are used.",
+        "modelSeverity": "high",
+        "id": "F2",
+        "secondModelVerdict": "agree",
+        "secondModelReason": "Persistent shared memory across multiple sub-agents presents a significant risk for context poisoning, and the finding accurately reflects this.",
+        "contested": false
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"permissions\": [\"send_messages\"]",
+        "whyItMatters": "The agent can send messages to team chat which could be misused to exfiltrate sensitive confidential data or to broadcast malicious instructions if the agent is manipulated. There is no evidence of output sanitization, destination filtering, or rate limits on messaging.",
+        "recommendedControl": "Enforce output filtering and destination allowlists for chat posts, redact confidential fields before sending, and require human confirmation for any messages that include sensitive content.",
+        "modelSeverity": "medium",
+        "id": "F3",
+        "secondModelVerdict": "agree",
+        "secondModelReason": "The ability to send messages to team chat without explicit controls is a valid concern for data exfiltration or malicious instruction, even with human confirmation for actions.",
+        "contested": false
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "Manual: the on-call engineer disables the agent's service account. No tested runbook.",
+        "whyItMatters": "The kill switch is manual and untested, increasing the chance that an incident will not be stopped quickly, allowing faults or compromise to propagate across the orchestrator and sub-agents. Lack of a tested runbook undermines operational readiness during incidents.",
+        "recommendedControl": "Implement an automated emergency disable mechanism with documented, tested runbooks and regular drills, and ensure the kill action is logged and monitored in the SIEM.",
+        "modelSeverity": "medium",
+        "id": "F4",
+        "secondModelVerdict": "agree",
+        "secondModelReason": "A manual kill switch without a tested runbook is a significant operational weakness that could delay incident response, and the finding is accurate.",
+        "contested": false
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "Application logs, not yet forwarded to the SIEM",
+        "whyItMatters": "Logs not being forwarded to a SIEM hinder real-time monitoring, threat detection, and incident response, making it harder to identify and react to security incidents or agent misuse.",
+        "recommendedControl": "Configure all application logs to be immediately forwarded to the central SIEM for comprehensive security monitoring and analysis.",
+        "modelSeverity": "medium",
+        "raisedByRule": "R4"
+      },
+      {
+        "category": "ASI04",
+        "severity": "low",
+        "evidenceQuote": "Claude Sonnet (version not specified)",
+        "whyItMatters": "An unspecified model version makes it difficult to track known vulnerabilities, ensure consistent behavior, or reproduce issues, posing a supply chain risk if the underlying model changes unexpectedly.",
+        "recommendedControl": "Specify and pin the exact version of the Claude Sonnet model used to ensure consistency and enable proper vulnerability tracking.",
+        "modelSeverity": "low"
+      }
+    ],
+    "ruleHits": [
+      {
+        "ruleId": "R4",
+        "severity": "high",
+        "reason": "Uses a shared token instead of its own scoped credentials.",
+        "field": "credentials",
+        "category": "ASI03"
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": "",
+      "quoteFound": true
+    },
+    "reviewerSummary": "This orchestrator uses persistent shared memory and a shared credential, creating elevated risk of context poisoning and credential abuse. The agent can post to team chat and has an untested manual kill switch, so enforce per-agent credentials, segmented memory controls with integrity checks, chat output restrictions, and a tested automated kill procedure before approval.",
+    "checkerSummary": "The agent is correctly identified as having several high-risk areas, particularly around shared credentials and memory poisoning. My review confirms the first reviewer's findings and adds concerns regarding logging and model versioning. The agent's ability to send chat messages, combined with reading confidential data, warrants careful control, but human confirmation for actions keeps it from Tier 4.",
+    "droppedFindings": [],
+    "droppedMissedFindings": [],
+    "unknownVerdicts": [],
+    "reviewer": {
+      "model": "openai/gpt-5-mini",
+      "promptVersion": "v4",
+      "settings": {
+        "model": "openai/gpt-5-mini",
+        "providers": [
+          "azure",
+          "openai"
+        ],
+        "disallowPromptTraining": true,
+        "reasoning": "low",
+        "maxOutputTokens": 6000
+      },
+      "usage": {
+        "inputTokens": 1895,
+        "inputTokenDetails": {
+          "noCacheTokens": 1895,
+          "cacheReadTokens": 0,
+          "cacheWriteTokens": 0
+        },
+        "outputTokens": 1652,
+        "outputTokenDetails": {
+          "textTokens": 692,
+          "reasoningTokens": 960
+        },
+        "totalTokens": 3547,
+        "raw": {
+          "input_tokens": 1895,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 0
+          },
+          "output_tokens": 1652,
+          "output_tokens_details": {
+            "reasoning_tokens": 960
+          },
+          "total_tokens": 3547
+        }
+      },
+      "latencyMs": 13772,
+      "generationId": "gen_01M5TF8AVMX5K1WC8VXNCE90KW",
+      "provider": "openai",
+      "costUsd": 0.00377775
+    },
+    "checker": {
+      "model": "google/gemini-2.5-flash",
+      "promptVersion": "c3",
+      "settings": {
+        "model": "google/gemini-2.5-flash",
+        "providers": [
+          "vertex"
+        ],
+        "disallowPromptTraining": true,
+        "temperature": 0.2,
+        "reasoning": "low",
+        "maxOutputTokens": 6000
+      },
+      "usage": {
+        "inputTokens": 2892,
+        "inputTokenDetails": {
+          "noCacheTokens": 2892,
+          "cacheReadTokens": 0
+        },
+        "outputTokens": 1417,
+        "outputTokenDetails": {
+          "textTokens": 561,
+          "reasoningTokens": 856
+        },
+        "totalTokens": 4309,
+        "raw": {
+          "thoughtsTokenCount": 856,
+          "promptTokenCount": 2892,
+          "candidatesTokenCount": 561,
+          "totalTokenCount": 4309,
+          "trafficType": "ON_DEMAND",
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 2892
+            }
+          ],
+          "candidatesTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 561
+            }
+          ]
+        }
+      },
+      "latencyMs": 7953,
+      "generationId": "gen_01M5TF8RAAPNZ9HH6XZBKXT066",
+      "provider": "vertex",
+      "costUsd": 0.0044101
+    },
+    "rawReviewerOutput": {
+      "proposedTier": 2,
+      "findings": [
+        {
+          "category": "ASI03",
+          "severity": "high",
+          "evidenceQuote": "\"shared_token\"",
+          "whyItMatters": "A shared credential increases the blast radius if it is leaked or reused, enabling privilege escalation or lateral movement across sub-agents and tooling. Shared tokens make it difficult to revoke or audit individual agent access.",
+          "recommendedControl": "Replace the shared_token with per-agent scoped credentials or short-lived tokens bound to each agent identity, and add rotation and audit logging for all credentials."
+        },
+        {
+          "category": "ASI06",
+          "severity": "high",
+          "evidenceQuote": "An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations.",
+          "whyItMatters": "Persistent, shared memory across multiple specialist agents creates a single poisoning vector where malicious or corrupted context can influence all agents' reasoning and recommendations. Poisoned memory could bias strategy outputs or leak confidential information to downstream agents or outputs.",
+          "recommendedControl": "Segment memory stores per-agent role and enforce integrity checks and access controls, implement input validation and provenance tagging for memory writes, and provide a review/approval step before memory-derived recommendations are used."
+        },
+        {
+          "category": "ASI02",
+          "severity": "medium",
+          "evidenceQuote": "\"permissions\": [\"send_messages\"]",
+          "whyItMatters": "The agent can send messages to team chat which could be misused to exfiltrate sensitive confidential data or to broadcast malicious instructions if the agent is manipulated. There is no evidence of output sanitization, destination filtering, or rate limits on messaging.",
+          "recommendedControl": "Enforce output filtering and destination allowlists for chat posts, redact confidential fields before sending, and require human confirmation for any messages that include sensitive content."
+        },
+        {
+          "category": "ASI08",
+          "severity": "medium",
+          "evidenceQuote": "Manual: the on-call engineer disables the agent's service account. No tested runbook.",
+          "whyItMatters": "The kill switch is manual and untested, increasing the chance that an incident will not be stopped quickly, allowing faults or compromise to propagate across the orchestrator and sub-agents. Lack of a tested runbook undermines operational readiness during incidents.",
+          "recommendedControl": "Implement an automated emergency disable mechanism with documented, tested runbooks and regular drills, and ensure the kill action is logged and monitored in the SIEM."
+        }
+      ],
+      "manipulationAttempt": {
+        "detected": false,
+        "quote": ""
+      },
+      "summary": "This orchestrator uses persistent shared memory and a shared credential, creating elevated risk of context poisoning and credential abuse. The agent can post to team chat and has an untested manual kill switch, so enforce per-agent credentials, segmented memory controls with integrity checks, chat output restrictions, and a tested automated kill procedure before approval."
+    },
+    "rawCheckerOutput": {
+      "verdicts": [
+        {
+          "findingId": "F1",
+          "verdict": "agree",
+          "reason": "The use of a shared token for multiple agents and tools is a clear security risk, and the category and severity are appropriate."
+        },
+        {
+          "findingId": "F2",
+          "verdict": "agree",
+          "reason": "Persistent shared memory across multiple sub-agents presents a significant risk for context poisoning, and the finding accurately reflects this."
+        },
+        {
+          "findingId": "F3",
+          "verdict": "agree",
+          "reason": "The ability to send messages to team chat without explicit controls is a valid concern for data exfiltration or malicious instruction, even with human confirmation for actions."
+        },
+        {
+          "findingId": "F4",
+          "verdict": "agree",
+          "reason": "A manual kill switch without a tested runbook is a significant operational weakness that could delay incident response, and the finding is accurate."
+        }
+      ],
+      "missedFindings": [
+        {
+          "category": "ASI03",
+          "severity": "medium",
+          "evidenceQuote": "Application logs, not yet forwarded to the SIEM",
+          "whyItMatters": "Logs not being forwarded to a SIEM hinder real-time monitoring, threat detection, and incident response, making it harder to identify and react to security incidents or agent misuse.",
+          "recommendedControl": "Configure all application logs to be immediately forwarded to the central SIEM for comprehensive security monitoring and analysis."
+        },
+        {
+          "category": "ASI04",
+          "severity": "low",
+          "evidenceQuote": "Claude Sonnet (version not specified)",
+          "whyItMatters": "An unspecified model version makes it difficult to track known vulnerabilities, ensure consistent behavior, or reproduce issues, posing a supply chain risk if the underlying model changes unexpectedly.",
+          "recommendedControl": "Specify and pin the exact version of the Claude Sonnet model used to ensure consistency and enable proper vulnerability tracking."
+        }
+      ],
+      "proposedTier": 2,
+      "summary": "The agent is correctly identified as having several high-risk areas, particularly around shared credentials and memory poisoning. My review confirms the first reviewer's findings and adds concerns regarding logging and model versioning. The agent's ability to send chat messages, combined with reading confidential data, warrants careful control, but human confirmation for actions keeps it from Tier 4."
+    }
+  },
+  "blind": {
+    "promptVersion": "b1",
+    "model": "google/gemini-2.5-flash",
+    "proposedTier": 2,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "shared_token",
+        "whyItMatters": "Using a shared token means that if this agent's credentials are compromised, other systems or agents using the same token could also be affected. This broadens the blast radius of a potential breach and makes granular access control difficult.",
+        "recommendedControl": "Provision a unique, scoped token for this agent with only the minimum necessary permissions."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "Application logs, not yet forwarded to the SIEM",
+        "whyItMatters": "Without logs being forwarded to a Security Information and Event Management (SIEM) system, detecting and responding to security incidents involving the agent will be significantly delayed. This hinders proactive threat detection and forensic analysis.",
+        "recommendedControl": "Ensure all agent logs are immediately forwarded to the central SIEM for real-time monitoring and analysis."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "Manual: the on-call engineer disables the agent's service account. No tested runbook.",
+        "whyItMatters": "The lack of a tested runbook for the kill switch introduces uncertainty and potential delays in disabling the agent during an emergency. This could allow a compromised or misbehaving agent to continue causing harm for longer than necessary.",
+        "recommendedControl": "Develop and regularly test a clear runbook for activating the kill switch to ensure rapid and effective response during incidents."
+      }
+    ],
+    "droppedFindings": [],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The agent is proposed for Tier 2 due to its ability to send messages and handle confidential data, with human confirmation for actions. Key risks include the use of a shared token, which broadens the impact of a credential compromise, and inadequate logging and kill switch procedures that could hamper incident response. Addressing these issues will improve the agent's security posture.",
+    "rawModelOutput": {
+      "proposedTier": 2,
+      "findings": [
+        {
+          "category": "ASI03",
+          "severity": "high",
+          "evidenceQuote": "shared_token",
+          "whyItMatters": "Using a shared token means that if this agent's credentials are compromised, other systems or agents using the same token could also be affected. This broadens the blast radius of a potential breach and makes granular access control difficult.",
+          "recommendedControl": "Provision a unique, scoped token for this agent with only the minimum necessary permissions."
+        },
+        {
+          "category": "ASI08",
+          "severity": "medium",
+          "evidenceQuote": "Application logs, not yet forwarded to the SIEM",
+          "whyItMatters": "Without logs being forwarded to a Security Information and Event Management (SIEM) system, detecting and responding to security incidents involving the agent will be significantly delayed. This hinders proactive threat detection and forensic analysis.",
+          "recommendedControl": "Ensure all agent logs are immediately forwarded to the central SIEM for real-time monitoring and analysis."
+        },
+        {
+          "category": "ASI08",
+          "severity": "medium",
+          "evidenceQuote": "Manual: the on-call engineer disables the agent's service account. No tested runbook.",
+          "whyItMatters": "The lack of a tested runbook for the kill switch introduces uncertainty and potential delays in disabling the agent during an emergency. This could allow a compromised or misbehaving agent to continue causing harm for longer than necessary.",
+          "recommendedControl": "Develop and regularly test a clear runbook for activating the kill switch to ensure rapid and effective response during incidents."
+        }
+      ],
+      "manipulationAttempt": {
+        "detected": false,
+        "quote": ""
+      },
+      "summary": "The agent is proposed for Tier 2 due to its ability to send messages and handle confidential data, with human confirmation for actions. Key risks include the use of a shared token, which broadens the impact of a credential compromise, and inadequate logging and kill switch procedures that could hamper incident response. Addressing these issues will improve the agent's security posture."
+    },
+    "usage": {
+      "inputTokens": 2193,
+      "inputTokenDetails": {
+        "noCacheTokens": 2193,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1247,
+      "outputTokenDetails": {
+        "textTokens": 484,
+        "reasoningTokens": 763
+      },
+      "totalTokens": 3440,
+      "raw": {
+        "thoughtsTokenCount": 763,
+        "promptTokenCount": 2193,
+        "candidatesTokenCount": 484,
+        "totalTokenCount": 3440,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2193
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 484
+          }
+        ]
+      }
+    },
+    "generationId": "gen_01M5TF903BNN11PV4HT4VHQNY9",
+    "provider": "vertex",
+    "seconds": 7.193,
+    "costUsd": 0.0037754
+  },
+  "reviewSeconds": 21.725,
+  "costUsd": 0.01196325
+}

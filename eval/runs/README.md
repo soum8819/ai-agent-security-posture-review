@@ -100,3 +100,17 @@ checker c1, rules unchanged). See eval/EVAL_PLAN.md and eval/results.md.
 | eval-c3-heldout | 04, 06, 08, 11 | v4 / c3 | $0.0323 | Held-out profiles rerun once after both fixes, for information only and reported separately in eval/results.md. Not used to choose or tune anything. |
 
 Step 13 total: $0.3056 for 39 full reviews.
+
+## After step 13: blind-first checker experiment
+
+Runs made with `scripts/experiment-blind-checker.ts run`. Each profile file
+holds the full production review (reviewer v4, checker c3) and the blind
+checker's answer (prompt b1, in the script only), with Gateway costs. Plan
+and results: eval/BLIND_CHECKER.md.
+
+| Run folder | Profiles | Prompts | Cost | Why |
+|---|---|---|---|---|
+| blind-b1-main | all 12 | v4 / c3 / b1 | $0.1462 | The experiment's main run. |
+| blind-b1-repeat-2, blind-b1-repeat-3 | 01, 03, 10 | v4 / c3 / b1 | $0.0381, $0.0383 | Repeats, to size run-to-run variation. |
+
+Experiment total: $0.2226.

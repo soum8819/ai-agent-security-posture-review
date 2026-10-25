@@ -241,6 +241,51 @@ ${t.rows.join("\n")}
 `;
 }
 
+// Added after the main run, and labelled as such in the report: the blind
+// checker's quotes often failed the exact-match evidence check, so this view
+// also counts the findings that check dropped. It changes no run and no
+// prompt; it only reads the saved raw answers.
+function quoteChecks(run: string, ids: string[]) {
+  let cRaw = 0, cDrop = 0, bRaw = 0, bDrop = 0;
+  for (const n of ids) {
+    const s = load(run, n);
+    if (!s) continue;
+    cRaw += s.review.missedFindings.length + s.review.droppedMissedFindings.length;
+    cDrop += s.review.droppedMissedFindings.length;
+    bRaw += s.blind.findings.length + s.blind.droppedFindings.length;
+    bDrop += s.blind.droppedFindings.length;
+  }
+  return { cRaw, cDrop, bRaw, bDrop };
+}
+
+function extraView(title: string, run: string, ids: string[]) {
+  const q = quoteChecks(run, ids);
+  let n = 0, cS = 0, cU = 0, bS = 0, bU = 0, cDis = 0, bDis = 0, cCon = 0, bCon = 0, revFindings = 0;
+  for (const id of ids) {
+    const s = load(run, id);
+    if (!s) continue;
+    const { r, R, C } = views(s);
+    const B = new Set<string>([...s.blind.findings, ...s.blind.droppedFindings.map((d) => d.finding)].map((f) => f.category));
+    n++;
+    cS += shared(C, R); cU += union(C, R); bS += shared(B, R); bU += union(B, R);
+    revFindings += r.findings.length;
+    cDis += r.findings.filter((f) => f.secondModelVerdict === "disagree").length;
+    bDis += r.findings.filter((f) => !B.has(f.category)).length;
+    cCon += r.contested.length;
+    bCon += r.findings.filter((f) => high(f.severity) && !B.has(f.category)).length;
+  }
+  const pct = (a: number, b: number) => (b ? `${a} of ${b} (${Math.round((100 * a) / b)}%)` : "none");
+  return `#### ${title} (${n} profiles)
+
+| Measure | Current design | Blind-first, counting findings whose quote failed the check |
+|---|---|---|
+| Checker findings whose evidence quote failed the exact-match check | ${pct(q.cDrop, q.cRaw)} of its missed findings | ${pct(q.bDrop, q.bRaw)} of its findings |
+| Overlap with the reviewer's categories | ${pct(cS, cU)} | ${pct(bS, bU)} |
+| Disagreements with the ${revFindings} reviewer findings | ${cDis} | ${bDis} |
+| Contested | ${cCon} | ${bCon} |
+`;
+}
+
 function repeats(runs: string[]) {
   const ids = ["01", "03", "10"].filter((n) => runs.slice(1).some((r) => load(r, n)));
   const out = ["| Profile | Run | Current checker tier | Blind tier | Current overlap with reviewer | Blind overlap with reviewer | Blind categories shared with blind run 1 |", "|---|---|---|---|---|---|---|"];
@@ -272,6 +317,16 @@ const body = `<!-- RESULTS START (written by scripts/experiment-blind-checker.ts
 
 ${section("Tuning set", runName, tuning)}
 ${section("Held-out set", runName, heldOut)}
+### Extra view, added after the main run (not in the plan)
+
+The blind checker's evidence quotes often failed the exact-match check (it
+wrote field excerpts in a loose form, for example without the quote marks
+around field names), so the planned figures above count only its findings
+that passed. This view also counts the dropped ones, to separate "the blind
+checker saw the risk" from "the blind checker quoted it exactly".
+
+${extraView("Tuning set", runName, tuning)}
+${extraView("Held-out set", runName, heldOut)}
 ### Repeat runs (tuning profiles 01, 03, 10)
 
 ${rest.length ? repeats(allRuns) : "Not run yet.\n"}

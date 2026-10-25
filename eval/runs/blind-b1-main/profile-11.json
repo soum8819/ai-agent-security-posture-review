@@ -1,0 +1,323 @@
+{
+  "review": {
+    "profileId": "profile-11",
+    "tiers": {
+      "rule": 3,
+      "reviewer": 3,
+      "checker": 3,
+      "final": 3,
+      "setBy": [
+        "rule",
+        "reviewer",
+        "checker"
+      ],
+      "ruleReasons": [
+        "Tier 3: reads customer financial data",
+        "Tier 2: can act beyond reading (KYC case management system)",
+        "Tier 2: reads personal, customer_financial data"
+      ]
+    },
+    "contested": [],
+    "findings": [
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [ \"uploaded_files\" ]",
+        "whyItMatters": "The agent directly ingests user-uploaded documents which can contain crafted content that manipulates parsing, triggers unsafe tool use, or causes data exfiltration through generated outputs. A successful injection could cause the agent to disclose sensitive customer_financial or personal data in its draft summary or subsequent interactions.",
+        "recommendedControl": "Implement input sanitization and content scanning before the model sees uploaded files, use a strict parsing pipeline that strips or canonicalizes embedded text and metadata, and include explicit model-level guardrails that reject or flag inputs containing instructions or executable artefacts.",
+        "modelSeverity": "medium",
+        "id": "F1",
+        "secondModelVerdict": "agree",
+        "secondModelReason": "The profile clearly states the agent processes untrusted uploaded files, which is a direct pathway for prompt injection and potential tool misuse, even with human confirmation.",
+        "contested": false
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"model\": { \"provider\": \"OpenAI\", \"name\": \"gpt-5-mini\" }",
+        "whyItMatters": "The model is a third-party hosted provider, so model behaviour or confidentiality depends on an external service which could be compromised or change, leading to altered outputs, data exposure, or supply-chain tampering of reasoning and summaries.",
+        "recommendedControl": "Apply enterprise-grade contractual and technical protections: use a vetted enterprise model endpoint with dedicated tenancy or on-prem alternatives, enforce minimum-stability and change-notice SLAs, and route sensitive prompts through a redaction or tokenization layer before sending to the provider.",
+        "modelSeverity": "medium",
+        "id": "F2",
+        "secondModelVerdict": "agree",
+        "secondModelReason": "The profile explicitly names OpenAI as the model provider, indicating reliance on a third-party service which introduces supply chain risks.",
+        "contested": false
+      },
+      {
+        "category": "ASI01",
+        "severity": "high",
+        "evidenceQuote": "\"When a new onboarding case opens, the agent reads the documents the customer uploaded, such as passports, proof of address and company registration papers, and writes a draft summary note with any gaps it sees.\"",
+        "whyItMatters": "Because the agent derives objectives and outputs directly from uploaded documents, an attacker could include crafted content that alters the agent's task interpretation or pushes unsafe summarization behavior, causing biased or misleading drafts that influence analyst decisions.",
+        "recommendedControl": "Add explicit instruction templates and refusal behaviours that are injected after ingestion and cannot be overridden by document content, perform adversarial-input testing, and surface provenance and confidence metadata with every draft so analysts can quickly identify suspicious summaries.",
+        "modelSeverity": "medium",
+        "raisedByRule": "R3",
+        "id": "F3",
+        "secondModelVerdict": "agree",
+        "secondModelReason": "The agent's core function is to summarize untrusted documents, making it vulnerable to goal hijack if malicious content in the documents manipulates its summarization objectives.",
+        "contested": false
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"tools\": [ { \"name\": \"KYC document store\", \"permissions\": [ \"read\" ] }, { \"name\": \"KYC case management system\", \"permissions\": [ \"read\", \"write\" ] } ]",
+        "whyItMatters": "The agent has write permissions to the KYC case management system, which, if exploited, could allow an attacker to create or modify case data, even if human confirmation is required for the final save. An attacker could craft input to generate a misleading draft that an analyst might inadvertently approve, leading to data integrity issues.",
+        "recommendedControl": "Implement strict validation and sanitization of all data written to the KYC case management system, and ensure the human review process includes explicit checks for agent-generated content anomalies.",
+        "modelSeverity": "medium"
+      }
+    ],
+    "ruleHits": [
+      {
+        "ruleId": "R3",
+        "severity": "high",
+        "reason": "Reads untrusted input (uploaded_files) and lists KYC case management system that can write or run code.",
+        "field": "untrustedInputs, tools.permissions",
+        "category": "ASI01"
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": "",
+      "quoteFound": true
+    },
+    "reviewerSummary": "Tier 3 is appropriate because the agent reads personal and customer financial data. Key risks: ingestion of untrusted uploaded files enabling prompt or content injection, reliance on a third-party model provider, and the possibility that document content could alter agent objectives or outputs. Mitigations should include input sanitization, stronger provider controls, and immutable post-ingestion guardrails plus provenance metadata for analyst review.",
+    "checkerSummary": "The agent processes sensitive customer financial and personal data, which places it in Tier 3. While it has write permissions, human confirmation for actions prevents it from being Tier 4. The primary risks identified are related to untrusted inputs, third-party model dependency, and potential misuse of write permissions, despite human oversight.",
+    "droppedFindings": [],
+    "droppedMissedFindings": [],
+    "unknownVerdicts": [],
+    "reviewer": {
+      "model": "openai/gpt-5-mini",
+      "promptVersion": "v4",
+      "settings": {
+        "model": "openai/gpt-5-mini",
+        "providers": [
+          "azure",
+          "openai"
+        ],
+        "disallowPromptTraining": true,
+        "reasoning": "low",
+        "maxOutputTokens": 6000
+      },
+      "usage": {
+        "inputTokens": 1889,
+        "inputTokenDetails": {
+          "noCacheTokens": 97,
+          "cacheReadTokens": 1792,
+          "cacheWriteTokens": 0
+        },
+        "outputTokens": 1367,
+        "outputTokenDetails": {
+          "textTokens": 663,
+          "reasoningTokens": 704
+        },
+        "totalTokens": 3256,
+        "raw": {
+          "input_tokens": 1889,
+          "input_tokens_details": {
+            "cache_write_tokens": 0,
+            "cached_tokens": 1792
+          },
+          "output_tokens": 1367,
+          "output_tokens_details": {
+            "reasoning_tokens": 704
+          },
+          "total_tokens": 3256
+        }
+      },
+      "latencyMs": 10991,
+      "generationId": "gen_01M5TF75QN2GMEFH35CNFB52GK",
+      "provider": "openai",
+      "costUsd": 0.00280305
+    },
+    "checker": {
+      "model": "google/gemini-2.5-flash",
+      "promptVersion": "c3",
+      "settings": {
+        "model": "google/gemini-2.5-flash",
+        "providers": [
+          "vertex"
+        ],
+        "disallowPromptTraining": true,
+        "temperature": 0.2,
+        "reasoning": "low",
+        "maxOutputTokens": 6000
+      },
+      "usage": {
+        "inputTokens": 2806,
+        "inputTokenDetails": {
+          "noCacheTokens": 2806,
+          "cacheReadTokens": 0
+        },
+        "outputTokens": 1298,
+        "outputTokenDetails": {
+          "textTokens": 471,
+          "reasoningTokens": 827
+        },
+        "totalTokens": 4104,
+        "raw": {
+          "thoughtsTokenCount": 827,
+          "promptTokenCount": 2806,
+          "candidatesTokenCount": 471,
+          "totalTokenCount": 4104,
+          "trafficType": "ON_DEMAND",
+          "promptTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 2806
+            }
+          ],
+          "candidatesTokensDetails": [
+            {
+              "modality": "TEXT",
+              "tokenCount": 471
+            }
+          ]
+        }
+      },
+      "latencyMs": 6696,
+      "generationId": "gen_01M5TF7GGBY0ZYZ8DTYDRAA012",
+      "provider": "vertex",
+      "costUsd": 0.0040868
+    },
+    "rawReviewerOutput": {
+      "proposedTier": 3,
+      "findings": [
+        {
+          "category": "ASI02",
+          "severity": "medium",
+          "evidenceQuote": "\"untrustedInputs\": [ \"uploaded_files\" ]",
+          "whyItMatters": "The agent directly ingests user-uploaded documents which can contain crafted content that manipulates parsing, triggers unsafe tool use, or causes data exfiltration through generated outputs. A successful injection could cause the agent to disclose sensitive customer_financial or personal data in its draft summary or subsequent interactions.",
+          "recommendedControl": "Implement input sanitization and content scanning before the model sees uploaded files, use a strict parsing pipeline that strips or canonicalizes embedded text and metadata, and include explicit model-level guardrails that reject or flag inputs containing instructions or executable artefacts."
+        },
+        {
+          "category": "ASI04",
+          "severity": "medium",
+          "evidenceQuote": "\"model\": { \"provider\": \"OpenAI\", \"name\": \"gpt-5-mini\" }",
+          "whyItMatters": "The model is a third-party hosted provider, so model behaviour or confidentiality depends on an external service which could be compromised or change, leading to altered outputs, data exposure, or supply-chain tampering of reasoning and summaries.",
+          "recommendedControl": "Apply enterprise-grade contractual and technical protections: use a vetted enterprise model endpoint with dedicated tenancy or on-prem alternatives, enforce minimum-stability and change-notice SLAs, and route sensitive prompts through a redaction or tokenization layer before sending to the provider."
+        },
+        {
+          "category": "ASI01",
+          "severity": "medium",
+          "evidenceQuote": "\"When a new onboarding case opens, the agent reads the documents the customer uploaded, such as passports, proof of address and company registration papers, and writes a draft summary note with any gaps it sees.\"",
+          "whyItMatters": "Because the agent derives objectives and outputs directly from uploaded documents, an attacker could include crafted content that alters the agent's task interpretation or pushes unsafe summarization behavior, causing biased or misleading drafts that influence analyst decisions.",
+          "recommendedControl": "Add explicit instruction templates and refusal behaviours that are injected after ingestion and cannot be overridden by document content, perform adversarial-input testing, and surface provenance and confidence metadata with every draft so analysts can quickly identify suspicious summaries."
+        }
+      ],
+      "manipulationAttempt": {
+        "detected": false,
+        "quote": ""
+      },
+      "summary": "Tier 3 is appropriate because the agent reads personal and customer financial data. Key risks: ingestion of untrusted uploaded files enabling prompt or content injection, reliance on a third-party model provider, and the possibility that document content could alter agent objectives or outputs. Mitigations should include input sanitization, stronger provider controls, and immutable post-ingestion guardrails plus provenance metadata for analyst review."
+    },
+    "rawCheckerOutput": {
+      "verdicts": [
+        {
+          "findingId": "F1",
+          "verdict": "agree",
+          "reason": "The profile clearly states the agent processes untrusted uploaded files, which is a direct pathway for prompt injection and potential tool misuse, even with human confirmation."
+        },
+        {
+          "findingId": "F2",
+          "verdict": "agree",
+          "reason": "The profile explicitly names OpenAI as the model provider, indicating reliance on a third-party service which introduces supply chain risks."
+        },
+        {
+          "findingId": "F3",
+          "verdict": "agree",
+          "reason": "The agent's core function is to summarize untrusted documents, making it vulnerable to goal hijack if malicious content in the documents manipulates its summarization objectives."
+        }
+      ],
+      "missedFindings": [
+        {
+          "category": "ASI03",
+          "severity": "medium",
+          "evidenceQuote": "\"tools\": [ { \"name\": \"KYC document store\", \"permissions\": [ \"read\" ] }, { \"name\": \"KYC case management system\", \"permissions\": [ \"read\", \"write\" ] } ]",
+          "whyItMatters": "The agent has write permissions to the KYC case management system, which, if exploited, could allow an attacker to create or modify case data, even if human confirmation is required for the final save. An attacker could craft input to generate a misleading draft that an analyst might inadvertently approve, leading to data integrity issues.",
+          "recommendedControl": "Implement strict validation and sanitization of all data written to the KYC case management system, and ensure the human review process includes explicit checks for agent-generated content anomalies."
+        }
+      ],
+      "proposedTier": 3,
+      "summary": "The agent processes sensitive customer financial and personal data, which places it in Tier 3. While it has write permissions, human confirmation for actions prevents it from being Tier 4. The primary risks identified are related to untrusted inputs, third-party model dependency, and potential misuse of write permissions, despite human oversight."
+    }
+  },
+  "blind": {
+    "promptVersion": "b1",
+    "model": "google/gemini-2.5-flash",
+    "proposedTier": 3,
+    "findings": [],
+    "droppedFindings": [
+      {
+        "finding": {
+          "category": "ASI02",
+          "severity": "high",
+          "evidenceQuote": "\"untrustedInputs\": [\"uploaded_files\"],\"tools\": [{\"name\": \"KYC document store\",\"permissions\": [\"read\"]},{\"name\": \"KYC case management system\",\"permissions\": [\"read\",\"write\"]}]",
+          "whyItMatters": "The agent processes untrusted uploaded files and has write access to the KYC case management system. Malicious content in these files could be processed and, even with human review, could lead to an analyst inadvertently approving a summary that contains harmful or misleading information.",
+          "recommendedControl": "Implement robust content filtering and sanitization for all uploaded files before they are processed by the agent, and provide clear warnings to analysts about potential AI-generated content risks."
+        },
+        "reason": "evidence quote not found in the profile"
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The agent is proposed at Tier 3 primarily because it handles customer financial data. A significant risk identified is the agent's ability to process untrusted uploaded files and write to the KYC case management system, which could lead to tool misuse despite human confirmation. Robust input validation and enhanced analyst awareness are recommended.",
+    "rawModelOutput": {
+      "proposedTier": 3,
+      "findings": [
+        {
+          "category": "ASI02",
+          "severity": "high",
+          "evidenceQuote": "\"untrustedInputs\": [\"uploaded_files\"],\"tools\": [{\"name\": \"KYC document store\",\"permissions\": [\"read\"]},{\"name\": \"KYC case management system\",\"permissions\": [\"read\",\"write\"]}]",
+          "whyItMatters": "The agent processes untrusted uploaded files and has write access to the KYC case management system. Malicious content in these files could be processed and, even with human review, could lead to an analyst inadvertently approving a summary that contains harmful or misleading information.",
+          "recommendedControl": "Implement robust content filtering and sanitization for all uploaded files before they are processed by the agent, and provide clear warnings to analysts about potential AI-generated content risks."
+        }
+      ],
+      "manipulationAttempt": {
+        "detected": false,
+        "quote": ""
+      },
+      "summary": "The agent is proposed at Tier 3 primarily because it handles customer financial data. A significant risk identified is the agent's ability to process untrusted uploaded files and write to the KYC case management system, which could lead to tool misuse despite human confirmation. Robust input validation and enhanced analyst awareness are recommended."
+    },
+    "usage": {
+      "inputTokens": 2204,
+      "inputTokenDetails": {
+        "noCacheTokens": 2204,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1142,
+      "outputTokenDetails": {
+        "textTokens": 293,
+        "reasoningTokens": 849
+      },
+      "totalTokens": 3346,
+      "raw": {
+        "thoughtsTokenCount": 849,
+        "promptTokenCount": 2204,
+        "candidatesTokenCount": 293,
+        "totalTokenCount": 3346,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2204
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 293
+          }
+        ]
+      }
+    },
+    "generationId": "gen_01M5TF7Q1PMTMPT2PARK3J0XWG",
+    "provider": "vertex",
+    "seconds": 7.34,
+    "costUsd": 0.0035162
+  },
+  "reviewSeconds": 17.687,
+  "costUsd": 0.01040605
+}

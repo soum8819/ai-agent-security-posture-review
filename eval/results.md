@@ -145,7 +145,7 @@ anchor on them. Its value showed up elsewhere, in the risks it added (17
 missed findings across the tuning baseline) and in its own tier. But it is
 not yet an independent second opinion on each finding. The blind-first
 checker idea in CLAUDE.md (checker reviews alone, then compares) is the test
-for this, and it was not run in step 13.
+for this. It was run after step 13; see [BLIND_CHECKER.md](BLIND_CHECKER.md).
 
 ## Failure analysis (tuning set only)
 
