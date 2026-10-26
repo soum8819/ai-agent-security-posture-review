@@ -159,7 +159,7 @@ the checker's instructions, measured on 3 runs before and 3 after):
 
 | | Tuning set (8) | Held-out set (4) |
 |---|---|---|
-| Final tier inside the key's range | 7 of 8 | 3 of 4 (one rerun, information only) |
+| Final tier inside the key's range | 7 of 8 | 3 of 4 (one rerun after the fixes, held-out results already seen) |
 
 - Profile 07 (payments, a person confirms each payment): the checker called
   it Tier 4. After fix A it was in range in 3 of 3 runs (0 of 3 before).
@@ -214,9 +214,9 @@ with a verified quote. Every route test passed: signed out, wrong role, wrong
 stage, another site, decision replay, decision reuse across reviews and the
 public workflow webhook. One real fault was found and fixed (a checker marker
 reaching the reviewer's prompt), and four wrong test expectations were
-corrected, with both results kept. A key scan of every version of every file
-in step 12 found no secrets, and every commit since is scanned before it is
-made. The project owner's live check of attack (a) is pending.
+corrected, with both results kept. A scan of every saved version of every
+file, run during security testing, found no passwords or keys; each change
+since is scanned before it is saved. The project owner's live check of attack (a) is pending.
 Six known gaps are written up honestly, the largest being that anyone with
 the passcode can choose any role.
 
@@ -281,10 +281,10 @@ from the platform (step 14).
   them (see the blind-first experiment above).
 - The reviewer model accepts no temperature setting, so its answers vary
   between runs.
-- On Hobby, Workflow keeps a finished run's payloads for 1 day after the run
-  finishes (a run still waiting on a hook keeps all its data). The review
-  and decision records live in our own database, so they do not depend on
-  it.
+- A paused or running workflow keeps all its data with no time limit.
+  Vercel's retention clock (1 day on Hobby, 7 on Pro, 30 on Enterprise)
+  starts only after a run finishes. Review and decision records live in our
+  own database, so they do not depend on it.
 - Locally, `npm run build` deletes paused workflow runs kept in
   `.next/workflow-data`.
 - Rule R2 fires for any run-code tool, because the profile has no sandbox
@@ -292,6 +292,14 @@ from the platform (step 14).
 - Zero data retention is not switched on (Hobby plan).
 - The evidence check proves a quote is in the profile, not that it supports
   the finding; the approver judges that.
+
+## Built with AI help
+
+The code and tests were written by Claude Code (Anthropic) under my
+direction. The planning documents and the one-page summary were drafted with
+Claude. Every commit made with Claude Code carries a Co-Authored-By line. The
+'why' lines in the decision log and on the site, and FEEDBACK.md, are my own
+words.
 
 More: [docs/DECISION_LOG.md](docs/DECISION_LOG.md) (decisions and why),
 [docs/CODE_TOUR.md](docs/CODE_TOUR.md) (one line per file),

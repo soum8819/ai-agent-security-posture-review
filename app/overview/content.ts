@@ -66,7 +66,7 @@ export const AFTER = {
   tuning: "7 of 8",
   tuningNote: "profile 03 counted from its one baseline run; it failed 5 of 6 runs",
   heldOut: "3 of 4",
-  heldOutNote: "one rerun, information only",
+  heldOutNote: "one rerun after the fixes, held-out results already seen",
   fixes: [
     "Profile 07 (payments, a person confirms each payment): the checker called it Tier 4. After fix A, in range in 3 of 3 runs, from 0 of 3.",
     "Profile 02 (read-only HR bot): the checker counted “no person confirms” as a risk though it takes no actions. After fix B, 3 of 3 runs in range, from 2 of 3.",
@@ -90,7 +90,7 @@ export const CHECKER = {
     { measure: "Reviewer findings not supported", tuning: ["0 of 30", "17 of 30"], heldOut: ["1 of 16", "8 of 16"] },
     { measure: "Final tier in the key's range", tuning: ["7 of 8", "7 of 8"], heldOut: ["3 of 4", "3 of 4"] },
   ],
-  note: "The blind checker's extra disagreements were mostly risks it did not list that run, not reasoned objections; it also differed from its own earlier runs. No production change.",
+  note: "The blind checker's extra disagreements were mostly risks it did not list that run, not reasoned objections; it also differed from its own earlier runs. No production change. These runs came after the fixes, so the held-out results had already been seen.",
 };
 
 // eval/security-tests.md
@@ -98,7 +98,7 @@ export const SECURITY = [
   "Four prompt-injection attacks, including orders in the owner name and fake end-of-data markers: every tier held at 4 and each attempt was flagged with a verified quote.",
   "Every route test passed: signed out, wrong role, wrong stage, another site, decision replay and reuse, and the public workflow webhook.",
   "One real fault found and fixed, and four wrong test expectations corrected, with both results kept.",
-  "A key scan of every version of every file in step 12 found no secrets; every commit since is scanned first.",
+  "A scan of every saved version of every file, run during security testing, found no passwords or keys; each change since is scanned before it is saved.",
 ];
 
 export const SPLIT = {
@@ -126,7 +126,7 @@ export const BUILT_ON_VERCEL = [
 
 export const LIMITS = [
   "Sign-in is a stand-in: anyone with the demo passcode can choose any role.",
-  "On Hobby, Workflow keeps a finished run's payloads for 1 day after it finishes. Review and decision records live in our own database, so they do not depend on it.",
+  "A paused or running workflow keeps all its data with no time limit. Vercel's retention clock (1 day on Hobby, 7 on Pro, 30 on Enterprise) starts only after a run finishes. Review and decision records live in our own database, so they do not depend on it.",
   "Zero data retention is not switched on (it needs Pro or Enterprise).",
   "The evidence check proves a quote is in the profile, not that it supports the finding. The approver judges that.",
 ];

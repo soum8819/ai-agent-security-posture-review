@@ -96,7 +96,12 @@ export function TierChip({ tier, size = "md" }: { tier: number | null; size?: ke
       <span>
         Tier <span className="tabular font-mono">{tier}</span>
       </span>
-      {tier >= 4 && <span className={cx("font-normal opacity-80", size === "xl" && "text-base")}>Committee</span>}
+      {tier >= 4 && (
+        <>
+          {" "}
+          <span className={cx("font-normal opacity-80", size === "xl" && "text-base")}>Committee</span>
+        </>
+      )}
     </span>
   );
 }
