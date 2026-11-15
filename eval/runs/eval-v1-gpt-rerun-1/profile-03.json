@@ -1,0 +1,300 @@
+{
+  "profileId": "profile-03",
+  "tiers": {
+    "rule": 1,
+    "reviewer": 1,
+    "checker": 1,
+    "final": 1,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "shared_token",
+      "whyItMatters": "A shared credential increases the blast radius if it is leaked or misused, and it prevents per-agent least-privilege auditing and revocation. An attacker or compromised process with that token could access all data the agent can read.",
+      "recommendedControl": "Replace the shared_token with a per-agent, least-privilege credential and rotate it regularly; record use in audit logs and restrict scope to only the specific read APIs the agent needs.",
+      "modelSeverity": "high",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly states the use of a 'shared_token', which is a common security weakness for agent credentials.",
+      "contested": false
+    },
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [\"web\"]",
+      "whyItMatters": "The agent consumes web content and uses web/news search tools, exposing it to malicious or manipulated external content that could cause data exfiltration or incorrect summaries if tool outputs are trusted without validation.",
+      "recommendedControl": "Add input validation and provenance checks for web-sourced content, sanitize or flag snippets from untrusted sources, and apply output filtering or human review for any high-risk conclusions.",
+      "modelSeverity": "medium",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile clearly lists 'web' as an untrusted input and uses web search tools, confirming exposure to external content risks.",
+      "contested": false
+    },
+    {
+      "category": "ASI09",
+      "severity": "medium",
+      "evidenceQuote": "\"humanConfirmsActions\": false",
+      "whyItMatters": "The profile indicates the agent operates without requiring human confirmation, while it produces advisory briefs that relationship managers will rely on; this can enable undue human trust in potentially incorrect or biased summaries.",
+      "recommendedControl": "Enforce an explicit human-in-the-loop confirmation step for all final briefs before they are marked as ready, and include provenance and confidence metadata in each brief to support human review.",
+      "modelSeverity": "medium",
+      "id": "F3",
+      "secondModelVerdict": "disagree",
+      "secondModelReason": "While 'humanConfirmsActions' is false, the description explicitly states 'The brief is advisory only and a person reads it before using it', which mitigates the risk of undue human trust in the agent's output.",
+      "contested": false
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "Manual: the on-call engineer disables the agent's service account. No tested runbook.",
+      "whyItMatters": "The kill switch is manual and untested, which may delay mitigation if the agent misbehaves or is exploited, allowing problems to persist or propagate to users before containment.",
+      "recommendedControl": "Implement an automated and tested emergency disable mechanism with a documented runbook and regular drills, and ensure rapid monitoring alerts route to the on-call responder team.",
+      "modelSeverity": "medium",
+      "id": "F4",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile describes the kill switch as 'Manual' and having 'No tested runbook', indicating a potential delay in incident response.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"memory\": \"none\"",
+      "whyItMatters": "The agent's lack of memory means it cannot retain context across interactions, which could lead to inefficient or repetitive processing, or require re-fetching information, increasing API calls and potential for data exposure over time.",
+      "recommendedControl": "Implement a secure, ephemeral memory solution for short-term context retention, ensuring sensitive data is not persistently stored and is purged after use.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"logging\": {\"enabled\": true,\"destination\": \"Application logs, not yet forwarded to the SIEM\"}",
+      "whyItMatters": "Logs not being forwarded to a SIEM means security teams lack centralized visibility into agent activity, making it harder to detect and respond to security incidents or anomalous behavior in a timely manner.",
+      "recommendedControl": "Configure logging to forward all agent activity to the central SIEM for real-time monitoring, alerting, and forensic analysis.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI04",
+      "severity": "low",
+      "evidenceQuote": "\"model\": {\"provider\": \"Anthropic\",\"name\": \"Claude Sonnet (version not specified)\"}",
+      "whyItMatters": "An unspecified model version introduces a supply chain risk, as updates or changes to the model by the provider could introduce unexpected behavior or vulnerabilities without the agent owner's explicit awareness or testing.",
+      "recommendedControl": "Specify and pin the exact model version used to ensure consistent behavior and allow for controlled updates and testing.",
+      "modelSeverity": "low"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "The agent is read-only and should be Tier 1. Key risks are a shared credential, use of untrusted web inputs without provenance controls, operation without enforced human confirmation, and an untested manual kill switch. Mitigations: per-agent credentials, input provenance and validation, enforced human-in-the-loop review, and an automated tested kill mechanism.",
+  "checkerSummary": "The agent is read-only, accessing public and internal data to generate advisory briefs that are reviewed by a person. While the first reviewer correctly identified risks with shared credentials, untrusted web inputs, and an untested kill switch, they misjudged the human confirmation aspect. I've added findings regarding the lack of memory, insufficient logging, and an unspecified model version.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1881,
+      "inputTokenDetails": {
+        "noCacheTokens": 1881,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1646,
+      "outputTokenDetails": {
+        "textTokens": 622,
+        "reasoningTokens": 1024
+      },
+      "totalTokens": 3527,
+      "raw": {
+        "input_tokens": 1881,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_12h_tokens": 0,
+            "ttl_30m_tokens": 0
+          },
+          "cached_tokens": 0
+        },
+        "output_tokens": 1646,
+        "output_tokens_details": {
+          "reasoning_tokens": 1024
+        },
+        "total_tokens": 3527
+      }
+    },
+    "latencyMs": 19816,
+    "generationId": "gen_01M7ERDS4EJY256JHH05562F2M",
+    "provider": "openai",
+    "costUsd": 0.00376225
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2689,
+      "inputTokenDetails": {
+        "noCacheTokens": 2689,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1607,
+      "outputTokenDetails": {
+        "textTokens": 736,
+        "reasoningTokens": 871
+      },
+      "totalTokens": 4296,
+      "raw": {
+        "thoughtsTokenCount": 871,
+        "promptTokenCount": 2689,
+        "candidatesTokenCount": 736,
+        "totalTokenCount": 4296,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2689
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 736
+          }
+        ]
+      }
+    },
+    "latencyMs": 7812,
+    "generationId": "gen_01M7ERECG22BRBGB3NWXN35RXX",
+    "provider": "vertex",
+    "costUsd": 0.0048242
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 1,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "shared_token",
+        "whyItMatters": "A shared credential increases the blast radius if it is leaked or misused, and it prevents per-agent least-privilege auditing and revocation. An attacker or compromised process with that token could access all data the agent can read.",
+        "recommendedControl": "Replace the shared_token with a per-agent, least-privilege credential and rotate it regularly; record use in audit logs and restrict scope to only the specific read APIs the agent needs."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [\"web\"]",
+        "whyItMatters": "The agent consumes web content and uses web/news search tools, exposing it to malicious or manipulated external content that could cause data exfiltration or incorrect summaries if tool outputs are trusted without validation.",
+        "recommendedControl": "Add input validation and provenance checks for web-sourced content, sanitize or flag snippets from untrusted sources, and apply output filtering or human review for any high-risk conclusions."
+      },
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "\"humanConfirmsActions\": false",
+        "whyItMatters": "The profile indicates the agent operates without requiring human confirmation, while it produces advisory briefs that relationship managers will rely on; this can enable undue human trust in potentially incorrect or biased summaries.",
+        "recommendedControl": "Enforce an explicit human-in-the-loop confirmation step for all final briefs before they are marked as ready, and include provenance and confidence metadata in each brief to support human review."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "Manual: the on-call engineer disables the agent's service account. No tested runbook.",
+        "whyItMatters": "The kill switch is manual and untested, which may delay mitigation if the agent misbehaves or is exploited, allowing problems to persist or propagate to users before containment.",
+        "recommendedControl": "Implement an automated and tested emergency disable mechanism with a documented runbook and regular drills, and ensure rapid monitoring alerts route to the on-call responder team."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The agent is read-only and should be Tier 1. Key risks are a shared credential, use of untrusted web inputs without provenance controls, operation without enforced human confirmation, and an untested manual kill switch. Mitigations: per-agent credentials, input provenance and validation, enforced human-in-the-loop review, and an automated tested kill mechanism."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile explicitly states the use of a 'shared_token', which is a common security weakness for agent credentials."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The profile clearly lists 'web' as an untrusted input and uses web search tools, confirming exposure to external content risks."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "disagree",
+        "reason": "While 'humanConfirmsActions' is false, the description explicitly states 'The brief is advisory only and a person reads it before using it', which mitigates the risk of undue human trust in the agent's output."
+      },
+      {
+        "findingId": "F4",
+        "verdict": "agree",
+        "reason": "The profile describes the kill switch as 'Manual' and having 'No tested runbook', indicating a potential delay in incident response."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"memory\": \"none\"",
+        "whyItMatters": "The agent's lack of memory means it cannot retain context across interactions, which could lead to inefficient or repetitive processing, or require re-fetching information, increasing API calls and potential for data exposure over time.",
+        "recommendedControl": "Implement a secure, ephemeral memory solution for short-term context retention, ensuring sensitive data is not persistently stored and is purged after use."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"logging\": {\"enabled\": true,\"destination\": \"Application logs, not yet forwarded to the SIEM\"}",
+        "whyItMatters": "Logs not being forwarded to a SIEM means security teams lack centralized visibility into agent activity, making it harder to detect and respond to security incidents or anomalous behavior in a timely manner.",
+        "recommendedControl": "Configure logging to forward all agent activity to the central SIEM for real-time monitoring, alerting, and forensic analysis."
+      },
+      {
+        "category": "ASI04",
+        "severity": "low",
+        "evidenceQuote": "\"model\": {\"provider\": \"Anthropic\",\"name\": \"Claude Sonnet (version not specified)\"}",
+        "whyItMatters": "An unspecified model version introduces a supply chain risk, as updates or changes to the model by the provider could introduce unexpected behavior or vulnerabilities without the agent owner's explicit awareness or testing.",
+        "recommendedControl": "Specify and pin the exact model version used to ensure consistent behavior and allow for controlled updates and testing."
+      }
+    ],
+    "proposedTier": 1,
+    "summary": "The agent is read-only, accessing public and internal data to generate advisory briefs that are reviewed by a person. While the first reviewer correctly identified risks with shared credentials, untrusted web inputs, and an untested kill switch, they misjudged the human confirmation aspect. I've added findings regarding the lack of memory, insufficient logging, and an unspecified model version."
+  },
+  "costUsd": 0.008586449999999999,
+  "seconds": 27.629
+}

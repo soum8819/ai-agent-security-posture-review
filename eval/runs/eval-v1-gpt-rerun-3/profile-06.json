@@ -1,0 +1,275 @@
+{
+  "profileId": "profile-06",
+  "tiers": {
+    "rule": 1,
+    "reviewer": 1,
+    "checker": 1,
+    "final": 1,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [ \"chat\" ]",
+      "whyItMatters": "Chat inputs are listed as untrusted while the agent keeps session memory, an attacker could inject malicious or misleading content into chat that is retained in session memory and later influences answers or search queries.",
+      "recommendedControl": "Disable session memory or implement strict input sanitization and validation for chat, and add automated provenance checks and expiry for any retained context.",
+      "modelSeverity": "medium",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly states untrusted chat inputs and session memory, which creates a clear risk of context poisoning.",
+      "contested": false
+    },
+    {
+      "category": "ASI03",
+      "severity": "medium",
+      "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+      "whyItMatters": "The agent holds its own scoped token which, if leaked or misused, could be abused to access internal resources; the profile also notes the kill switch is manual and has no tested runbook which weakens incident response.",
+      "recommendedControl": "Store credentials in a secrets vault with short-lived tokens and automated rotation, enforce least privilege scopes, and implement a tested automated disable/rotation runbook for incident response.",
+      "modelSeverity": "medium",
+      "id": "F2",
+      "secondModelVerdict": "disagree",
+      "secondModelReason": "The use of an 'own_scoped_token' is a good security practice for least privilege, and the finding incorrectly links it to Identity and Privilege Abuse without evidence of misuse potential beyond general credential security.",
+      "contested": false
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "\"provider\": \"Anthropic\",",
+      "whyItMatters": "The model is provided by an external third party, meaning model behavior or updates outside your control could introduce malicious or incorrect outputs and create supply chain risk.",
+      "recommendedControl": "Require vendor attestations and monitoring, pin model versions, perform regular output validation against curated internal datasets, and consider an on-prem or vetted-model fallback for sensitive queries.",
+      "modelSeverity": "medium",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "Using a third-party model without specifying a version or having clear controls introduces supply chain risk, as model behavior can change unexpectedly.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"logging\": { \"enabled\": true, \"destination\": \"Application logs, not yet forwarded to the SIEM\" }",
+      "whyItMatters": "Without forwarding logs to a SIEM, security teams may miss critical alerts or struggle to correlate events, hindering incident detection and response for potential cascading failures.",
+      "recommendedControl": "Integrate application logs with the central SIEM for real-time monitoring, alerting, and forensic analysis.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"killSwitch\": { \"available\": true, \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\" }",
+      "whyItMatters": "A manual kill switch without a tested runbook introduces delays and potential errors during a critical incident, increasing the risk of harm from a rogue agent or cascading failure.",
+      "recommendedControl": "Develop and regularly test an automated or semi-automated runbook for the kill switch to ensure rapid and reliable agent deactivation.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI04",
+      "severity": "low",
+      "evidenceQuote": "\"model\": { \"provider\": \"Anthropic\", \"name\": \"Claude Sonnet (version not specified)\" }",
+      "whyItMatters": "Not specifying the exact model version means updates could introduce breaking changes or vulnerabilities without the team's awareness, impacting reliability and security.",
+      "recommendedControl": "Pin the model to a specific version to ensure consistent behavior and allow for controlled updates.",
+      "modelSeverity": "low"
+    }
+  ],
+  "ruleHits": [],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This agent is a read-only internal wiki assistant, so propose Tier 1. Main risks are session memory poisoning from untrusted chat inputs, use and protection of its scoped credential with an untested manual kill switch, and reliance on a third-party model provider. Mitigations: remove or harden retained memory, enforce vaulted short-lived credentials with an automated runbook, and add model vendor controls and output validation.",
+  "checkerSummary": "The agent is a read-only internal knowledge base assistant, which places it in Tier 1. While the first reviewer correctly identified risks with memory poisoning and third-party model usage, they miscategorized the 'own_scoped_token' as a weakness. I've added findings regarding the lack of SIEM integration, the untested kill switch, and the unspecified model version, which are important for operational security and incident response.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1830,
+      "inputTokenDetails": {
+        "noCacheTokens": 166,
+        "cacheReadTokens": 1664,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1603,
+      "outputTokenDetails": {
+        "textTokens": 515,
+        "reasoningTokens": 1088
+      },
+      "totalTokens": 3433,
+      "raw": {
+        "input_tokens": 1830,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_12h_tokens": 0,
+            "ttl_30m_tokens": 0
+          },
+          "cached_tokens": 1664
+        },
+        "output_tokens": 1603,
+        "output_tokens_details": {
+          "reasoning_tokens": 1088
+        },
+        "total_tokens": 3433
+      }
+    },
+    "latencyMs": 20452,
+    "generationId": "gen_01M7EX7P1D2E1NZPVZ3ER4675V",
+    "provider": "openai",
+    "costUsd": 0.0032891
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2465,
+      "inputTokenDetails": {
+        "noCacheTokens": 808,
+        "cacheReadTokens": 1657
+      },
+      "outputTokens": 1602,
+      "outputTokenDetails": {
+        "textTokens": 685,
+        "reasoningTokens": 917
+      },
+      "totalTokens": 4067,
+      "raw": {
+        "cachedContentTokenCount": 1657,
+        "thoughtsTokenCount": 917,
+        "promptTokenCount": 2465,
+        "candidatesTokenCount": 685,
+        "totalTokenCount": 4067,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2465
+          }
+        ],
+        "cacheTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 1657
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 685
+          }
+        ]
+      }
+    },
+    "latencyMs": 6855,
+    "generationId": "gen_01M7EX8A0A353DYXHFM5Y00DM5",
+    "provider": "vertex",
+    "costUsd": 0.00429711
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 1,
+    "findings": [
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [ \"chat\" ]",
+        "whyItMatters": "Chat inputs are listed as untrusted while the agent keeps session memory, an attacker could inject malicious or misleading content into chat that is retained in session memory and later influences answers or search queries.",
+        "recommendedControl": "Disable session memory or implement strict input sanitization and validation for chat, and add automated provenance checks and expiry for any retained context."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+        "whyItMatters": "The agent holds its own scoped token which, if leaked or misused, could be abused to access internal resources; the profile also notes the kill switch is manual and has no tested runbook which weakens incident response.",
+        "recommendedControl": "Store credentials in a secrets vault with short-lived tokens and automated rotation, enforce least privilege scopes, and implement a tested automated disable/rotation runbook for incident response."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"provider\": \"Anthropic\",",
+        "whyItMatters": "The model is provided by an external third party, meaning model behavior or updates outside your control could introduce malicious or incorrect outputs and create supply chain risk.",
+        "recommendedControl": "Require vendor attestations and monitoring, pin model versions, perform regular output validation against curated internal datasets, and consider an on-prem or vetted-model fallback for sensitive queries."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent is a read-only internal wiki assistant, so propose Tier 1. Main risks are session memory poisoning from untrusted chat inputs, use and protection of its scoped credential with an untested manual kill switch, and reliance on a third-party model provider. Mitigations: remove or harden retained memory, enforce vaulted short-lived credentials with an automated runbook, and add model vendor controls and output validation."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile explicitly states untrusted chat inputs and session memory, which creates a clear risk of context poisoning."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "disagree",
+        "reason": "The use of an 'own_scoped_token' is a good security practice for least privilege, and the finding incorrectly links it to Identity and Privilege Abuse without evidence of misuse potential beyond general credential security."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "Using a third-party model without specifying a version or having clear controls introduces supply chain risk, as model behavior can change unexpectedly."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"logging\": { \"enabled\": true, \"destination\": \"Application logs, not yet forwarded to the SIEM\" }",
+        "whyItMatters": "Without forwarding logs to a SIEM, security teams may miss critical alerts or struggle to correlate events, hindering incident detection and response for potential cascading failures.",
+        "recommendedControl": "Integrate application logs with the central SIEM for real-time monitoring, alerting, and forensic analysis."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"killSwitch\": { \"available\": true, \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\" }",
+        "whyItMatters": "A manual kill switch without a tested runbook introduces delays and potential errors during a critical incident, increasing the risk of harm from a rogue agent or cascading failure.",
+        "recommendedControl": "Develop and regularly test an automated or semi-automated runbook for the kill switch to ensure rapid and reliable agent deactivation."
+      },
+      {
+        "category": "ASI04",
+        "severity": "low",
+        "evidenceQuote": "\"model\": { \"provider\": \"Anthropic\", \"name\": \"Claude Sonnet (version not specified)\" }",
+        "whyItMatters": "Not specifying the exact model version means updates could introduce breaking changes or vulnerabilities without the team's awareness, impacting reliability and security.",
+        "recommendedControl": "Pin the model to a specific version to ensure consistent behavior and allow for controlled updates."
+      }
+    ],
+    "proposedTier": 1,
+    "summary": "The agent is a read-only internal knowledge base assistant, which places it in Tier 1. While the first reviewer correctly identified risks with memory poisoning and third-party model usage, they miscategorized the 'own_scoped_token' as a weakness. I've added findings regarding the lack of SIEM integration, the untested kill switch, and the unspecified model version, which are important for operational security and incident response."
+  },
+  "costUsd": 0.0075862099999999995,
+  "seconds": 27.307
+}

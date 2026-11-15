@@ -1,0 +1,236 @@
+{
+  "profileId": "profile-02",
+  "tiers": {
+    "rule": 1,
+    "reviewer": 1,
+    "checker": 2,
+    "final": 2,
+    "setBy": [
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI01",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [\"chat\"]",
+      "whyItMatters": "User chat is an untrusted input channel and can carry prompt injections or malicious instructions that manipulate the agent's objectives or its use of tools, causing it to retrieve or present information in ways the designers did not intend.",
+      "recommendedControl": "Apply strict input handling: canonicalize and sanitize user input, use a hardened system prompt that enforces allowed behaviors, and implement prompt injection detection and rejection before passing user text to the model.",
+      "modelSeverity": "medium",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile clearly states \"untrustedInputs\": [\"chat\"], which is a direct pathway for prompt injection to manipulate the agent's goals or tool use.",
+      "contested": false
+    },
+    {
+      "category": "ASI06",
+      "severity": "low",
+      "evidenceQuote": "\"memory\": \"session\"",
+      "whyItMatters": "Session memory means user-provided content is retained for the duration of a conversation and can be manipulated by an attacker to bias later responses or leak information within that session.",
+      "recommendedControl": "Limit retained context to minimal metadata, aggressively truncate or redact user-provided content, and provide an explicit session reset or confirmation for any action that uses prior session content.",
+      "modelSeverity": "low",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The use of \"session\" memory allows an attacker to influence subsequent responses within the same conversation, which aligns with memory poisoning risks.",
+      "contested": false
+    },
+    {
+      "category": "ASI09",
+      "severity": "medium",
+      "evidenceQuote": "The bot searches the published HR policy library and answers with links to the source policy.",
+      "whyItMatters": "The bot provides policy guidance directly to employees and may be perceived as authoritative, which could lead employees to act on incorrect or incomplete answers without consulting HR, causing compliance or personnel risks.",
+      "recommendedControl": "Add explicit, visible disclaimers in every answer about the bot's advisory role, require easy escalation to a human HR reviewer for policy interpretations, and log user queries flagged as high-risk for human review.",
+      "modelSeverity": "medium",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The bot's function of providing policy answers without human confirmation creates a risk of employees over-relying on potentially incorrect information, fitting the human-agent trust exploitation category.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI02",
+      "severity": "high",
+      "evidenceQuote": "\"humanConfirmsActions\": false",
+      "whyItMatters": "The bot operates without human oversight for its actions, meaning any misuse of its 'HR policy library search' tool, whether intentional or due to prompt injection, could directly lead to unintended information disclosure or policy misinterpretation without a human catching it.",
+      "recommendedControl": "Implement a human-in-the-loop review for any sensitive or critical policy answers before they are delivered to the employee, or for any answers that deviate significantly from expected patterns.",
+      "modelSeverity": "high"
+    }
+  ],
+  "ruleHits": [],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This agent reads internal HR policies and answers employee chat queries, placing it in Tier 1. Primary risks are prompt injection via the untrusted chat input, session-context poisoning, and overreliance by employees on automated guidance. Mitigations should include input sanitization, tightened session context handling, clear disclaimers and an easy escalation path to HR.",
+  "checkerSummary": "The HR Policy Q&A Bot is designed to answer employee questions using an internal policy library. While it has good logging and a kill switch, its autonomous operation and untrusted input channels pose risks of prompt injection and tool misuse. The proposed tier reflects its read-only nature but also the lack of human confirmation for its actions.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1844,
+      "inputTokenDetails": {
+        "noCacheTokens": 1844,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1400,
+      "outputTokenDetails": {
+        "textTokens": 504,
+        "reasoningTokens": 896
+      },
+      "totalTokens": 3244,
+      "raw": {
+        "input_tokens": 1844,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_12h_tokens": 0,
+            "ttl_30m_tokens": 0
+          },
+          "cached_tokens": 0
+        },
+        "output_tokens": 1400,
+        "output_tokens_details": {
+          "reasoning_tokens": 896
+        },
+        "total_tokens": 3244
+      }
+    },
+    "latencyMs": 17079,
+    "generationId": "gen_01M7EWJMAFY2TN64S5ZEFBMT6D",
+    "provider": "openai",
+    "costUsd": 0.003261
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2503,
+      "inputTokenDetails": {
+        "noCacheTokens": 2503,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1190,
+      "outputTokenDetails": {
+        "textTokens": 430,
+        "reasoningTokens": 760
+      },
+      "totalTokens": 3693,
+      "raw": {
+        "thoughtsTokenCount": 760,
+        "promptTokenCount": 2503,
+        "candidatesTokenCount": 430,
+        "totalTokenCount": 3693,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2503
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 430
+          }
+        ]
+      }
+    },
+    "latencyMs": 5779,
+    "generationId": "gen_01M7EWK4Z7KZXAP7WRJ32EFWXC",
+    "provider": "vertex",
+    "costUsd": 0.0037259
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 1,
+    "findings": [
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [\"chat\"]",
+        "whyItMatters": "User chat is an untrusted input channel and can carry prompt injections or malicious instructions that manipulate the agent's objectives or its use of tools, causing it to retrieve or present information in ways the designers did not intend.",
+        "recommendedControl": "Apply strict input handling: canonicalize and sanitize user input, use a hardened system prompt that enforces allowed behaviors, and implement prompt injection detection and rejection before passing user text to the model."
+      },
+      {
+        "category": "ASI06",
+        "severity": "low",
+        "evidenceQuote": "\"memory\": \"session\"",
+        "whyItMatters": "Session memory means user-provided content is retained for the duration of a conversation and can be manipulated by an attacker to bias later responses or leak information within that session.",
+        "recommendedControl": "Limit retained context to minimal metadata, aggressively truncate or redact user-provided content, and provide an explicit session reset or confirmation for any action that uses prior session content."
+      },
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "The bot searches the published HR policy library and answers with links to the source policy.",
+        "whyItMatters": "The bot provides policy guidance directly to employees and may be perceived as authoritative, which could lead employees to act on incorrect or incomplete answers without consulting HR, causing compliance or personnel risks.",
+        "recommendedControl": "Add explicit, visible disclaimers in every answer about the bot's advisory role, require easy escalation to a human HR reviewer for policy interpretations, and log user queries flagged as high-risk for human review."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent reads internal HR policies and answers employee chat queries, placing it in Tier 1. Primary risks are prompt injection via the untrusted chat input, session-context poisoning, and overreliance by employees on automated guidance. Mitigations should include input sanitization, tightened session context handling, clear disclaimers and an easy escalation path to HR."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile clearly states \"untrustedInputs\": [\"chat\"], which is a direct pathway for prompt injection to manipulate the agent's goals or tool use."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The use of \"session\" memory allows an attacker to influence subsequent responses within the same conversation, which aligns with memory poisoning risks."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The bot's function of providing policy answers without human confirmation creates a risk of employees over-relying on potentially incorrect information, fitting the human-agent trust exploitation category."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "\"humanConfirmsActions\": false",
+        "whyItMatters": "The bot operates without human oversight for its actions, meaning any misuse of its 'HR policy library search' tool, whether intentional or due to prompt injection, could directly lead to unintended information disclosure or policy misinterpretation without a human catching it.",
+        "recommendedControl": "Implement a human-in-the-loop review for any sensitive or critical policy answers before they are delivered to the employee, or for any answers that deviate significantly from expected patterns."
+      }
+    ],
+    "proposedTier": 2,
+    "summary": "The HR Policy Q&A Bot is designed to answer employee questions using an internal policy library. While it has good logging and a kill switch, its autonomous operation and untrusted input channels pose risks of prompt injection and tool misuse. The proposed tier reflects its read-only nature but also the lack of human confirmation for its actions."
+  },
+  "costUsd": 0.0069869,
+  "seconds": 22.858
+}

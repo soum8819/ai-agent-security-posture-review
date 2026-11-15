@@ -1,0 +1,277 @@
+{
+  "profileId": "profile-09",
+  "tiers": {
+    "rule": 4,
+    "reviewer": 4,
+    "checker": 4,
+    "final": 4,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 4: acts with no person confirming (Contract repository)",
+      "Tier 2: can act beyond reading (Contract repository)",
+      "Tier 2: reads confidential data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI02",
+      "severity": "critical",
+      "evidenceQuote": "\"permissions\": [ \"read\", \"write\" ]",
+      "whyItMatters": "The agent has write permissions to the contract repository but the profile provides no human confirmation, so it can autonomously modify or corrupt signed vendor contracts, creating immediate risk to legal and financial obligations.",
+      "recommendedControl": "Remove write permissions from the agent or require an authenticated human approval step for any write or edit operations, and enforce least-privilege repository access.",
+      "modelSeverity": "critical",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly grants write permissions to the 'Contract repository' tool, directly contradicting the description's claim of being read-only, making the risk of unauthorized modification critical.",
+      "contested": false
+    },
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "A shared token creates a single credential that can be reused or exfiltrated to escalate privileges across systems and agents, making it easier for an attacker to impersonate the assistant or pivot to other resources.",
+      "recommendedControl": "Replace the shared token with per-agent, short-lived scoped credentials and enforce rotation and audit logging for token use.",
+      "modelSeverity": "high",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The use of a shared token for credentials is a known security weakness that increases the risk of privilege escalation if compromised.",
+      "contested": false
+    },
+    {
+      "category": "ASI10",
+      "severity": "critical",
+      "evidenceQuote": "\"humanConfirmsActions\": false",
+      "whyItMatters": "The agent is configured to act without human confirmation while having write permission to sensitive contract data, so it can autonomously perform harmful or unauthorized changes that will be applied without oversight.",
+      "recommendedControl": "Require explicit, authenticated human confirmation for any action that writes, modifies, or deletes contract data; block autonomous write capability until that workflow is enforced.",
+      "modelSeverity": "critical",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent has write permissions and no human confirmation for actions, which means it can autonomously make harmful changes to sensitive contract data without oversight.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI01",
+      "severity": "high",
+      "evidenceQuote": "\"untrustedInputs\": [ \"uploaded_files\", \"chat\" ]",
+      "whyItMatters": "The agent processes untrusted inputs from both uploaded files and chat, making it vulnerable to prompt injection attacks that could manipulate its objectives or tool usage.",
+      "recommendedControl": "Implement robust input validation and sanitization for all untrusted inputs, and use a separate, hardened prompt for tool execution.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"logging\": { \"enabled\": true, \"destination\": \"Application logs, not yet forwarded to the SIEM\" }",
+      "whyItMatters": "Logs not being forwarded to a SIEM means that security incidents, agent misuse, or data exfiltration attempts may not be detected or analyzed in a timely manner.",
+      "recommendedControl": "Ensure all application logs are immediately forwarded to the central SIEM for real-time monitoring, alerting, and forensic analysis.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (uploaded_files, chat) and lists Contract repository that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    },
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    },
+    {
+      "ruleId": "R6",
+      "severity": "high",
+      "reason": "Its text claims it is read-only, but it lists Contract repository that can change things.",
+      "field": "description, tools.permissions",
+      "category": "ASI03"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "The profile allows an assistant reading confidential contracts to write to the contract repository while operating without human confirmation and using a shared credential. These conditions permit autonomous, high-impact changes and credential-based escalation. Mitigations: remove or scope write permissions, require human confirmation for writes, and replace the shared token with per-agent scoped credentials.",
+  "checkerSummary": "This agent is classified as Tier 4 because it has unconfirmed write access to the 'Contract repository' and processes sensitive, confidential data. The profile contains a critical contradiction regarding its read-only nature versus its actual write permissions, which, combined with untrusted inputs and shared credentials, presents significant risks.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1868,
+      "inputTokenDetails": {
+        "noCacheTokens": 76,
+        "cacheReadTokens": 1792,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1427,
+      "outputTokenDetails": {
+        "textTokens": 403,
+        "reasoningTokens": 1024
+      },
+      "totalTokens": 3295,
+      "raw": {
+        "input_tokens": 1868,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_12h_tokens": 0,
+            "ttl_30m_tokens": 0
+          },
+          "cached_tokens": 1792
+        },
+        "output_tokens": 1427,
+        "output_tokens_details": {
+          "reasoning_tokens": 1024
+        },
+        "total_tokens": 3295
+      }
+    },
+    "latencyMs": 17070,
+    "generationId": "gen_01M7EXBVTKC7T2A30N2Y3T4VTB",
+    "provider": "openai",
+    "costUsd": 0.0029178
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2497,
+      "inputTokenDetails": {
+        "noCacheTokens": 2497,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1320,
+      "outputTokenDetails": {
+        "textTokens": 521,
+        "reasoningTokens": 799
+      },
+      "totalTokens": 3817,
+      "raw": {
+        "thoughtsTokenCount": 799,
+        "promptTokenCount": 2497,
+        "candidatesTokenCount": 521,
+        "totalTokenCount": 3817,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2497
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 521
+          }
+        ]
+      }
+    },
+    "latencyMs": 6983,
+    "generationId": "gen_01M7EXCCDBPC22DYE4BBMQ0ER6",
+    "provider": "vertex",
+    "costUsd": 0.0040491
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 4,
+    "findings": [
+      {
+        "category": "ASI02",
+        "severity": "critical",
+        "evidenceQuote": "\"permissions\": [ \"read\", \"write\" ]",
+        "whyItMatters": "The agent has write permissions to the contract repository but the profile provides no human confirmation, so it can autonomously modify or corrupt signed vendor contracts, creating immediate risk to legal and financial obligations.",
+        "recommendedControl": "Remove write permissions from the agent or require an authenticated human approval step for any write or edit operations, and enforce least-privilege repository access."
+      },
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "A shared token creates a single credential that can be reused or exfiltrated to escalate privileges across systems and agents, making it easier for an attacker to impersonate the assistant or pivot to other resources.",
+        "recommendedControl": "Replace the shared token with per-agent, short-lived scoped credentials and enforce rotation and audit logging for token use."
+      },
+      {
+        "category": "ASI10",
+        "severity": "critical",
+        "evidenceQuote": "\"humanConfirmsActions\": false",
+        "whyItMatters": "The agent is configured to act without human confirmation while having write permission to sensitive contract data, so it can autonomously perform harmful or unauthorized changes that will be applied without oversight.",
+        "recommendedControl": "Require explicit, authenticated human confirmation for any action that writes, modifies, or deletes contract data; block autonomous write capability until that workflow is enforced."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The profile allows an assistant reading confidential contracts to write to the contract repository while operating without human confirmation and using a shared credential. These conditions permit autonomous, high-impact changes and credential-based escalation. Mitigations: remove or scope write permissions, require human confirmation for writes, and replace the shared token with per-agent scoped credentials."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile explicitly grants write permissions to the 'Contract repository' tool, directly contradicting the description's claim of being read-only, making the risk of unauthorized modification critical."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The use of a shared token for credentials is a known security weakness that increases the risk of privilege escalation if compromised."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The agent has write permissions and no human confirmation for actions, which means it can autonomously make harmful changes to sensitive contract data without oversight."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI01",
+        "severity": "high",
+        "evidenceQuote": "\"untrustedInputs\": [ \"uploaded_files\", \"chat\" ]",
+        "whyItMatters": "The agent processes untrusted inputs from both uploaded files and chat, making it vulnerable to prompt injection attacks that could manipulate its objectives or tool usage.",
+        "recommendedControl": "Implement robust input validation and sanitization for all untrusted inputs, and use a separate, hardened prompt for tool execution."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"logging\": { \"enabled\": true, \"destination\": \"Application logs, not yet forwarded to the SIEM\" }",
+        "whyItMatters": "Logs not being forwarded to a SIEM means that security incidents, agent misuse, or data exfiltration attempts may not be detected or analyzed in a timely manner.",
+        "recommendedControl": "Ensure all application logs are immediately forwarded to the central SIEM for real-time monitoring, alerting, and forensic analysis."
+      }
+    ],
+    "proposedTier": 4,
+    "summary": "This agent is classified as Tier 4 because it has unconfirmed write access to the 'Contract repository' and processes sensitive, confidential data. The profile contains a critical contradiction regarding its read-only nature versus its actual write permissions, which, combined with untrusted inputs and shared credentials, presents significant risks."
+  },
+  "costUsd": 0.0069669,
+  "seconds": 24.053
+}

@@ -1,0 +1,231 @@
+{
+  "profileId": "profile-11",
+  "tiers": {
+    "rule": 3,
+    "reviewer": 3,
+    "checker": 3,
+    "final": 3,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (KYC case management system)",
+      "Tier 2: reads personal, customer_financial data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI02",
+      "severity": "high",
+      "evidenceQuote": "\"untrustedInputs\": [\"uploaded_files\"]",
+      "whyItMatters": "Uploaded files are untrusted and can contain crafted content that causes the agent to extract or reveal sensitive data when producing summaries, and the agent has a writable case system which could be used to persist exfiltrated data or manipulated outputs. An attacker could weaponize uploaded documents to cause the agent to disclose or embed sensitive content in the draft notes.",
+      "recommendedControl": "Run uploaded files through a safe, isolated extraction pipeline and content sanitizer before feeding them to the model, perform automated sensitive-data redaction and pattern detection, and restrict free-text writes to the case system until a human approves a sanitized summary.",
+      "modelSeverity": "high",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile clearly states the agent processes untrusted uploaded files, which is a direct vector for tool misuse and potential data exfiltration via the write access to the case management system.",
+      "contested": false
+    },
+    {
+      "category": "ASI03",
+      "severity": "medium",
+      "evidenceQuote": "\"dataReads\": [ \"personal\", \"customer_financial\" ]",
+      "whyItMatters": "The agent reads highly sensitive personal and customer financial data; combined with its ability to write draft notes to the case management system, a compromised or manipulated agent could expose or mis-handle sensitive customer information. Scoped tokens reduce risk, but the profile does not show additional controls like field-level access limits or automated redaction.",
+      "recommendedControl": "Enforce least privilege and field-level access controls, require the agent token to be split so read access to raw documents is separated from any write permission, and apply automated redaction of PII and financial identifiers before any summaries are generated or stored.",
+      "modelSeverity": "medium",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent reads highly sensitive personal and customer financial data and has write access to the case management system, creating a risk of privilege abuse if compromised, even with scoped tokens.",
+      "contested": false
+    },
+    {
+      "category": "ASI09",
+      "severity": "medium",
+      "evidenceQuote": "A KYC analyst must review and accept the note before it is saved to the case.",
+      "whyItMatters": "The design relies on human review but also creates a risk that analysts will overtrust the agent and accept incorrect, incomplete, or manipulated summaries, leading to missed gaps in KYC or incorrect case decisions. Overreliance can convert model errors into business and regulatory failures.",
+      "recommendedControl": "Present provenance, extracted source snippets and confidence scores alongside each suggested gap, require a short mandatory checklist or justification from the analyst before accepting the draft, and log reviewer actions for audit.",
+      "modelSeverity": "medium",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly states a human must review and accept the note, which introduces the risk of human over-reliance on the agent's output, potentially leading to missed issues.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (uploaded_files) and lists KYC case management system that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This agent reads sensitive personal and financial onboarding documents and writes draft notes to the case system, creating risks of tool misuse and sensitive-data exposure from untrusted uploads, and human overreliance on agent outputs. Recommended mitigations include isolated file extraction and sanitization, stronger least-privilege controls and redaction, and UI/provenance controls plus mandatory reviewer checks before acceptance.",
+  "checkerSummary": "The agent processes highly sensitive customer financial data and personal information, and writes draft notes to a case management system, placing it in Tier 3. The first reviewer's findings are accurate and highlight critical risks related to untrusted inputs, sensitive data handling, and human trust. No significant risks were missed in the initial review.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1889,
+      "inputTokenDetails": {
+        "noCacheTokens": 97,
+        "cacheReadTokens": 1792,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1742,
+      "outputTokenDetails": {
+        "textTokens": 654,
+        "reasoningTokens": 1088
+      },
+      "totalTokens": 3631,
+      "raw": {
+        "input_tokens": 1889,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_12h_tokens": 0,
+            "ttl_30m_tokens": 0
+          },
+          "cached_tokens": 1792
+        },
+        "output_tokens": 1742,
+        "output_tokens_details": {
+          "reasoning_tokens": 1088
+        },
+        "total_tokens": 3631
+      }
+    },
+    "latencyMs": 21651,
+    "generationId": "gen_01M7EWYQN1G0QB3M6M2SR2EG3P",
+    "provider": "openai",
+    "costUsd": 0.00355305
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2656,
+      "inputTokenDetails": {
+        "noCacheTokens": 2656,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1087,
+      "outputTokenDetails": {
+        "textTokens": 298,
+        "reasoningTokens": 789
+      },
+      "totalTokens": 3743,
+      "raw": {
+        "thoughtsTokenCount": 789,
+        "promptTokenCount": 2656,
+        "candidatesTokenCount": 298,
+        "totalTokenCount": 3743,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2656
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 298
+          }
+        ]
+      }
+    },
+    "latencyMs": 8530,
+    "generationId": "gen_01M7EWZCRQXM4XC5SHCP38HAS3",
+    "provider": "vertex",
+    "costUsd": 0.0035143
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "\"untrustedInputs\": [\"uploaded_files\"]",
+        "whyItMatters": "Uploaded files are untrusted and can contain crafted content that causes the agent to extract or reveal sensitive data when producing summaries, and the agent has a writable case system which could be used to persist exfiltrated data or manipulated outputs. An attacker could weaponize uploaded documents to cause the agent to disclose or embed sensitive content in the draft notes.",
+        "recommendedControl": "Run uploaded files through a safe, isolated extraction pipeline and content sanitizer before feeding them to the model, perform automated sensitive-data redaction and pattern detection, and restrict free-text writes to the case system until a human approves a sanitized summary."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"dataReads\": [ \"personal\", \"customer_financial\" ]",
+        "whyItMatters": "The agent reads highly sensitive personal and customer financial data; combined with its ability to write draft notes to the case management system, a compromised or manipulated agent could expose or mis-handle sensitive customer information. Scoped tokens reduce risk, but the profile does not show additional controls like field-level access limits or automated redaction.",
+        "recommendedControl": "Enforce least privilege and field-level access controls, require the agent token to be split so read access to raw documents is separated from any write permission, and apply automated redaction of PII and financial identifiers before any summaries are generated or stored."
+      },
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "A KYC analyst must review and accept the note before it is saved to the case.",
+        "whyItMatters": "The design relies on human review but also creates a risk that analysts will overtrust the agent and accept incorrect, incomplete, or manipulated summaries, leading to missed gaps in KYC or incorrect case decisions. Overreliance can convert model errors into business and regulatory failures.",
+        "recommendedControl": "Present provenance, extracted source snippets and confidence scores alongside each suggested gap, require a short mandatory checklist or justification from the analyst before accepting the draft, and log reviewer actions for audit."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent reads sensitive personal and financial onboarding documents and writes draft notes to the case system, creating risks of tool misuse and sensitive-data exposure from untrusted uploads, and human overreliance on agent outputs. Recommended mitigations include isolated file extraction and sanitization, stronger least-privilege controls and redaction, and UI/provenance controls plus mandatory reviewer checks before acceptance."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile clearly states the agent processes untrusted uploaded files, which is a direct vector for tool misuse and potential data exfiltration via the write access to the case management system."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The agent reads highly sensitive personal and customer financial data and has write access to the case management system, creating a risk of privilege abuse if compromised, even with scoped tokens."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The profile explicitly states a human must review and accept the note, which introduces the risk of human over-reliance on the agent's output, potentially leading to missed issues."
+      }
+    ],
+    "missedFindings": [],
+    "proposedTier": 3,
+    "summary": "The agent processes highly sensitive customer financial data and personal information, and writes draft notes to a case management system, placing it in Tier 3. The first reviewer's findings are accurate and highlight critical risks related to untrusted inputs, sensitive data handling, and human trust. No significant risks were missed in the initial review."
+  },
+  "costUsd": 0.00706735,
+  "seconds": 30.181
+}

@@ -1,0 +1,284 @@
+{
+  "profileId": "profile-06",
+  "tiers": {
+    "rule": 1,
+    "reviewer": 1,
+    "checker": 1,
+    "final": 1,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [\"chat\"]",
+      "whyItMatters": "User chat is treated as untrusted input while the agent keeps session memory, so malicious or malformed chat messages can poison the agent's session context and influence future answers or cause disclosure of internal information.",
+      "recommendedControl": "Disable reuse of untrusted chat content in session memory or apply strict sanitization and provenance tagging before any retention; limit session memory lifetime and log attempts to inject structured prompts for review.",
+      "modelSeverity": "medium",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent uses session memory and accepts untrusted chat input, creating a clear risk of memory poisoning.",
+      "contested": false
+    },
+    {
+      "category": "ASI04",
+      "severity": "high",
+      "evidenceQuote": "\"provider\": \"Anthropic\"",
+      "whyItMatters": "The model is a third-party hosted provider, so internal queries and derived context may be transmitted to an external service, creating a supply chain risk and the possibility of data exposure or model-layer compromise.",
+      "recommendedControl": "Document and enforce a data handling agreement with the provider, ensure model usage is covered by a DTA that forbids retention of internal content, and where possible use an on-prem or vetted private instance for sensitive internal data.",
+      "modelSeverity": "high",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "Using a third-party hosted model for internal company data introduces a supply chain risk for data exposure, even if the data is not personal.",
+      "contested": false
+    },
+    {
+      "category": "ASI10",
+      "severity": "medium",
+      "evidenceQuote": "\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"",
+      "whyItMatters": "The kill switch is a manual, untested process to disable a service account, which may be slow or fail during an incident, allowing a misbehaving agent to continue operating or propagating harm.",
+      "recommendedControl": "Implement an automated, tested emergency disable mechanism with an established runbook and periodic drills, and ensure the kill switch can be executed by multiple authorized operators.",
+      "modelSeverity": "medium",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "A manual kill switch without a tested runbook is a significant operational risk that could delay incident response.",
+      "contested": false
+    },
+    {
+      "category": "ASI03",
+      "severity": "low",
+      "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+      "whyItMatters": "The agent uses a long-lived scoped token; if that token is compromised it could be used to access the wiki or other resources beyond intended scope, enabling privilege abuse.",
+      "recommendedControl": "Use short-lived tokens with strict least-privilege scope, enforce automatic rotation and audit logging of token use, and store credentials in a secrets manager with access controls and monitoring.",
+      "modelSeverity": "low",
+      "id": "F4",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "An own_scoped_token, while better than shared credentials, can still be compromised and misused if it is long-lived and not frequently rotated.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI03",
+      "severity": "medium",
+      "evidenceQuote": "\"logging\": {\"enabled\": true,\"destination\": \"Application logs, not yet forwarded to the SIEM\"}",
+      "whyItMatters": "Logs not forwarded to a SIEM mean that security incidents, anomalous behavior, or attempted attacks might not be detected or investigated in a timely manner, hindering response capabilities.",
+      "recommendedControl": "Ensure all application logs are immediately forwarded to the central SIEM for real-time monitoring, alerting, and forensic analysis.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "\"tools\": [{\"name\": \"Internal wiki search\",\"permissions\": [\"read\"]}]",
+      "whyItMatters": "Even with read-only access, an agent could be manipulated to perform excessive or unauthorized searches, potentially exfiltrating sensitive internal information through its responses or causing a denial of service on the wiki.",
+      "recommendedControl": "Implement rate limiting and access controls on the 'Internal wiki search' tool to prevent abuse, and monitor search patterns for anomalies.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This agent is a read-only internal wiki responder, so Tier 1 is appropriate. Primary risks are session context poisoning from untrusted chat, use of a third-party model provider, an untested manual kill switch, and reliance on a scoped token without stated rotation; each should be mitigated before production rollout.",
+  "checkerSummary": "The agent is a read-only internal knowledge base assistant, which places it in Tier 1. The first reviewer identified several valid risks, including memory poisoning, supply chain vulnerabilities from the third-party model, and an inadequate kill switch. I concur with these findings and have added concerns regarding the lack of SIEM integration for logging and the potential for tool misuse through excessive search queries.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1830,
+      "inputTokenDetails": {
+        "noCacheTokens": 1830,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1586,
+      "outputTokenDetails": {
+        "textTokens": 626,
+        "reasoningTokens": 960
+      },
+      "totalTokens": 3416,
+      "raw": {
+        "input_tokens": 1830,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_12h_tokens": 0,
+            "ttl_30m_tokens": 0
+          },
+          "cached_tokens": 0
+        },
+        "output_tokens": 1586,
+        "output_tokens_details": {
+          "reasoning_tokens": 960
+        },
+        "total_tokens": 3416
+      }
+    },
+    "latencyMs": 19739,
+    "generationId": "gen_01M7EWQDK9VZXXZSCCEBCX9E21",
+    "provider": "openai",
+    "costUsd": 0.0036295
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2638,
+      "inputTokenDetails": {
+        "noCacheTokens": 960,
+        "cacheReadTokens": 1678
+      },
+      "outputTokens": 1433,
+      "outputTokenDetails": {
+        "textTokens": 595,
+        "reasoningTokens": 838
+      },
+      "totalTokens": 4071,
+      "raw": {
+        "cachedContentTokenCount": 1678,
+        "thoughtsTokenCount": 838,
+        "promptTokenCount": 2638,
+        "candidatesTokenCount": 595,
+        "totalTokenCount": 4071,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2638
+          }
+        ],
+        "cacheTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 1678
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 595
+          }
+        ]
+      }
+    },
+    "latencyMs": 6603,
+    "generationId": "gen_01M7EWR0YS21HCE6QSY3PPZEF1",
+    "provider": "vertex",
+    "costUsd": 0.00392084
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 1,
+    "findings": [
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [\"chat\"]",
+        "whyItMatters": "User chat is treated as untrusted input while the agent keeps session memory, so malicious or malformed chat messages can poison the agent's session context and influence future answers or cause disclosure of internal information.",
+        "recommendedControl": "Disable reuse of untrusted chat content in session memory or apply strict sanitization and provenance tagging before any retention; limit session memory lifetime and log attempts to inject structured prompts for review."
+      },
+      {
+        "category": "ASI04",
+        "severity": "high",
+        "evidenceQuote": "\"provider\": \"Anthropic\"",
+        "whyItMatters": "The model is a third-party hosted provider, so internal queries and derived context may be transmitted to an external service, creating a supply chain risk and the possibility of data exposure or model-layer compromise.",
+        "recommendedControl": "Document and enforce a data handling agreement with the provider, ensure model usage is covered by a DTA that forbids retention of internal content, and where possible use an on-prem or vetted private instance for sensitive internal data."
+      },
+      {
+        "category": "ASI10",
+        "severity": "medium",
+        "evidenceQuote": "\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"",
+        "whyItMatters": "The kill switch is a manual, untested process to disable a service account, which may be slow or fail during an incident, allowing a misbehaving agent to continue operating or propagating harm.",
+        "recommendedControl": "Implement an automated, tested emergency disable mechanism with an established runbook and periodic drills, and ensure the kill switch can be executed by multiple authorized operators."
+      },
+      {
+        "category": "ASI03",
+        "severity": "low",
+        "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+        "whyItMatters": "The agent uses a long-lived scoped token; if that token is compromised it could be used to access the wiki or other resources beyond intended scope, enabling privilege abuse.",
+        "recommendedControl": "Use short-lived tokens with strict least-privilege scope, enforce automatic rotation and audit logging of token use, and store credentials in a secrets manager with access controls and monitoring."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent is a read-only internal wiki responder, so Tier 1 is appropriate. Primary risks are session context poisoning from untrusted chat, use of a third-party model provider, an untested manual kill switch, and reliance on a scoped token without stated rotation; each should be mitigated before production rollout."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The agent uses session memory and accepts untrusted chat input, creating a clear risk of memory poisoning."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "Using a third-party hosted model for internal company data introduces a supply chain risk for data exposure, even if the data is not personal."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "A manual kill switch without a tested runbook is a significant operational risk that could delay incident response."
+      },
+      {
+        "findingId": "F4",
+        "verdict": "agree",
+        "reason": "An own_scoped_token, while better than shared credentials, can still be compromised and misused if it is long-lived and not frequently rotated."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"logging\": {\"enabled\": true,\"destination\": \"Application logs, not yet forwarded to the SIEM\"}",
+        "whyItMatters": "Logs not forwarded to a SIEM mean that security incidents, anomalous behavior, or attempted attacks might not be detected or investigated in a timely manner, hindering response capabilities.",
+        "recommendedControl": "Ensure all application logs are immediately forwarded to the central SIEM for real-time monitoring, alerting, and forensic analysis."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"tools\": [{\"name\": \"Internal wiki search\",\"permissions\": [\"read\"]}]",
+        "whyItMatters": "Even with read-only access, an agent could be manipulated to perform excessive or unauthorized searches, potentially exfiltrating sensitive internal information through its responses or causing a denial of service on the wiki.",
+        "recommendedControl": "Implement rate limiting and access controls on the 'Internal wiki search' tool to prevent abuse, and monitor search patterns for anomalies."
+      }
+    ],
+    "proposedTier": 1,
+    "summary": "The agent is a read-only internal knowledge base assistant, which places it in Tier 1. The first reviewer identified several valid risks, including memory poisoning, supply chain vulnerabilities from the third-party model, and an inadequate kill switch. I concur with these findings and have added concerns regarding the lack of SIEM integration for logging and the potential for tool misuse through excessive search queries."
+  },
+  "costUsd": 0.00755034,
+  "seconds": 26.342
+}

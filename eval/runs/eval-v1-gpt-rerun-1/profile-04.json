@@ -1,0 +1,308 @@
+{
+  "profileId": "profile-04",
+  "tiers": {
+    "rule": 4,
+    "reviewer": 3,
+    "checker": 3,
+    "final": 4,
+    "setBy": [
+      "rule"
+    ],
+    "ruleReasons": [
+      "Tier 4: acts with no person confirming (Claims management system)",
+      "Tier 2: can act beyond reading (Claims management system, Team chat notification)",
+      "Tier 2: reads confidential, personal data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI02",
+      "severity": "critical",
+      "evidenceQuote": "\"permissions\": [\"read\", \"write\"]",
+      "whyItMatters": "The agent has autonomous write access to the Claims management system and the profile lists untrusted inputs, so a malicious or malformed email or attachment could cause the agent to create, modify, or corrupt claim records without human review.",
+      "recommendedControl": "Require an approval step for any record-creating or record-modifying actions, or restrict the agent to create review-only drafts that a human must commit; add strict server-side validation and allow-listing of fields the agent may modify.",
+      "modelSeverity": "high",
+      "raisedByRule": "R1",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile clearly states the agent has write permissions to the Claims management system and acts autonomously on untrusted inputs, supporting the finding that data corruption is a high risk.",
+      "contested": false
+    },
+    {
+      "category": "ASI01",
+      "severity": "high",
+      "evidenceQuote": "\"untrustedInputs\": [\"email\",\"uploaded_files\"]",
+      "whyItMatters": "The agent ingests email bodies and uploaded files from untrusted sources and acts autonomously to set priorities and queues, so prompt-injection or crafted attachments could hijack the agent's decision logic and cause inappropriate prioritization or routing.",
+      "recommendedControl": "Sanitize and canonicalize inputs before processing, apply an extraction pipeline that uses deterministic parsers rather than heuristic LLM parsing for critical fields, and require human confirmation for changes that meet high-risk criteria (for example high priority or financial-impact claims).",
+      "modelSeverity": "high",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly lists email and uploaded files as untrusted inputs, confirming the risk of agent goal hijack through prompt injection or malicious attachments affecting triage decisions.",
+      "contested": false
+    },
+    {
+      "category": "ASI03",
+      "severity": "medium",
+      "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+      "whyItMatters": "The agent uses a persistent scoped token to access systems. If the token is leaked or overprivileged it could be used to escalate actions or be replayed by an attacker to impersonate the agent.",
+      "recommendedControl": "Apply least privilege to the token, enforce short TTLs and automatic rotation, bind tokens to specific hosts or IPs, and require per-action authorization checks logged to the SIEM.",
+      "modelSeverity": "medium",
+      "id": "F3",
+      "secondModelVerdict": "disagree",
+      "secondModelReason": "The use of an \"own_scoped_token\" is generally a more secure practice than shared credentials, and while any token can be leaked, the finding does not provide evidence that this specific token is overprivileged or inherently insecure beyond general token management best practices.",
+      "contested": false
+    },
+    {
+      "category": "ASI09",
+      "severity": "medium",
+      "evidenceQuote": "\"posts urgent claims to the adjusters' team channel.\"",
+      "whyItMatters": "The agent proactively notifies adjusters in a team channel about urgent claims, users may implicitly trust these automated alerts and act on them without verification, enabling social engineering or operational mistakes driven by manipulated agent outputs.",
+      "recommendedControl": "Add explicit provenance metadata to notifications (for example flagged as automated, include source fields and confidence scores), train staff to verify agent-generated urgencies, and require a fast human-in-the-loop confirmation workflow for high-impact alerts.",
+      "modelSeverity": "medium",
+      "id": "F4",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile states the agent posts urgent claims to a team channel, which creates a clear pathway for human-agent trust exploitation if these notifications are manipulated by untrusted input.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI05",
+      "severity": "high",
+      "evidenceQuote": "Reads each new email sent to the public claims address, including attached photos and PDFs",
+      "whyItMatters": "Processing untrusted PDF attachments without sandboxing or robust content disarming could expose the underlying system to vulnerabilities within the PDF parser, potentially leading to remote code execution or system compromise.",
+      "recommendedControl": "Implement a secure, sandboxed environment for processing all attachments, especially PDFs, and use content disarm and reconstruction (CDR) techniques before passing content to the agent or other systems.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI03",
+      "severity": "medium",
+      "evidenceQuote": "\"permissions\": [\"read\", \"write\"]",
+      "whyItMatters": "The agent has broad write permissions to the Claims management system, which, combined with autonomous operation, could allow an attacker to make unauthorized modifications to claim records if the agent's logic is compromised.",
+      "recommendedControl": "Implement fine-grained access controls for the agent's write permissions, restricting it to only the specific fields and operations necessary for triage, such as priority and queue assignment.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "It does not approve or pay claims. Adjusters can change any priority the agent sets.",
+      "whyItMatters": "While adjusters can correct priorities, a cascading failure could occur if the agent consistently misprioritizes a large volume of claims due to a systemic issue or poisoning, overwhelming human oversight and delaying critical claim processing.",
+      "recommendedControl": "Implement anomaly detection on the agent's output, such as monitoring for unusual patterns in priority assignments or a sudden increase in adjuster overrides, to detect and alert on potential cascading failures.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R1",
+      "severity": "critical",
+      "reason": "Lists Claims management system that can move money or change customer records, and no person confirms its actions.",
+      "field": "tools.permissions, humanConfirmsActions",
+      "category": "ASI02"
+    },
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (email, uploaded_files) and lists Claims management system that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This agent reads confidential personal claim data and autonomously writes prioritization and queue updates to the claims system and team channel without human confirmation. The main risks are unauthorized or malicious inputs changing agent decisions, write-capable credentials being abused, and staff overtrusting automated notifications. Mitigations should enforce human confirmation for high-risk actions, tighten token scope and rotation, harden input extraction, and flag agent-originated notifications for human review.",
+  "checkerSummary": "The Claims Intake Triage Agent handles confidential and personal customer data and has autonomous write access to the Claims management system, justifying a Tier 3 classification. While the first reviewer identified key risks related to untrusted inputs and tool misuse, additional concerns exist regarding potential code execution from attachment processing and overly broad write permissions. Stronger controls are needed for attachment handling and least privilege enforcement.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1907,
+      "inputTokenDetails": {
+        "noCacheTokens": 1907,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1475,
+      "outputTokenDetails": {
+        "textTokens": 643,
+        "reasoningTokens": 832
+      },
+      "totalTokens": 3382,
+      "raw": {
+        "input_tokens": 1907,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_12h_tokens": 0,
+            "ttl_30m_tokens": 0
+          },
+          "cached_tokens": 0
+        },
+        "output_tokens": 1475,
+        "output_tokens_details": {
+          "reasoning_tokens": 832
+        },
+        "total_tokens": 3382
+      }
+    },
+    "latencyMs": 18024,
+    "generationId": "gen_01M7ERF0R892ATHFMT5BVT7FWW",
+    "provider": "openai",
+    "costUsd": 0.00342675
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2778,
+      "inputTokenDetails": {
+        "noCacheTokens": 2778,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1538,
+      "outputTokenDetails": {
+        "textTokens": 796,
+        "reasoningTokens": 742
+      },
+      "totalTokens": 4316,
+      "raw": {
+        "thoughtsTokenCount": 742,
+        "promptTokenCount": 2778,
+        "candidatesTokenCount": 796,
+        "totalTokenCount": 4316,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2778
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 796
+          }
+        ]
+      }
+    },
+    "latencyMs": 11113,
+    "generationId": "gen_01M7ERFJB9KSXM7SGZJG1HHPDF",
+    "provider": "vertex",
+    "costUsd": 0.0046784
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "\"permissions\": [\"read\", \"write\"]",
+        "whyItMatters": "The agent has autonomous write access to the Claims management system and the profile lists untrusted inputs, so a malicious or malformed email or attachment could cause the agent to create, modify, or corrupt claim records without human review.",
+        "recommendedControl": "Require an approval step for any record-creating or record-modifying actions, or restrict the agent to create review-only drafts that a human must commit; add strict server-side validation and allow-listing of fields the agent may modify."
+      },
+      {
+        "category": "ASI01",
+        "severity": "high",
+        "evidenceQuote": "\"untrustedInputs\": [\"email\",\"uploaded_files\"]",
+        "whyItMatters": "The agent ingests email bodies and uploaded files from untrusted sources and acts autonomously to set priorities and queues, so prompt-injection or crafted attachments could hijack the agent's decision logic and cause inappropriate prioritization or routing.",
+        "recommendedControl": "Sanitize and canonicalize inputs before processing, apply an extraction pipeline that uses deterministic parsers rather than heuristic LLM parsing for critical fields, and require human confirmation for changes that meet high-risk criteria (for example high priority or financial-impact claims)."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+        "whyItMatters": "The agent uses a persistent scoped token to access systems. If the token is leaked or overprivileged it could be used to escalate actions or be replayed by an attacker to impersonate the agent.",
+        "recommendedControl": "Apply least privilege to the token, enforce short TTLs and automatic rotation, bind tokens to specific hosts or IPs, and require per-action authorization checks logged to the SIEM."
+      },
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "\"posts urgent claims to the adjusters' team channel.\"",
+        "whyItMatters": "The agent proactively notifies adjusters in a team channel about urgent claims, users may implicitly trust these automated alerts and act on them without verification, enabling social engineering or operational mistakes driven by manipulated agent outputs.",
+        "recommendedControl": "Add explicit provenance metadata to notifications (for example flagged as automated, include source fields and confidence scores), train staff to verify agent-generated urgencies, and require a fast human-in-the-loop confirmation workflow for high-impact alerts."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent reads confidential personal claim data and autonomously writes prioritization and queue updates to the claims system and team channel without human confirmation. The main risks are unauthorized or malicious inputs changing agent decisions, write-capable credentials being abused, and staff overtrusting automated notifications. Mitigations should enforce human confirmation for high-risk actions, tighten token scope and rotation, harden input extraction, and flag agent-originated notifications for human review."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile clearly states the agent has write permissions to the Claims management system and acts autonomously on untrusted inputs, supporting the finding that data corruption is a high risk."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The profile explicitly lists email and uploaded files as untrusted inputs, confirming the risk of agent goal hijack through prompt injection or malicious attachments affecting triage decisions."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "disagree",
+        "reason": "The use of an \"own_scoped_token\" is generally a more secure practice than shared credentials, and while any token can be leaked, the finding does not provide evidence that this specific token is overprivileged or inherently insecure beyond general token management best practices."
+      },
+      {
+        "findingId": "F4",
+        "verdict": "agree",
+        "reason": "The profile states the agent posts urgent claims to a team channel, which creates a clear pathway for human-agent trust exploitation if these notifications are manipulated by untrusted input."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI05",
+        "severity": "high",
+        "evidenceQuote": "Reads each new email sent to the public claims address, including attached photos and PDFs",
+        "whyItMatters": "Processing untrusted PDF attachments without sandboxing or robust content disarming could expose the underlying system to vulnerabilities within the PDF parser, potentially leading to remote code execution or system compromise.",
+        "recommendedControl": "Implement a secure, sandboxed environment for processing all attachments, especially PDFs, and use content disarm and reconstruction (CDR) techniques before passing content to the agent or other systems."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"permissions\": [\"read\", \"write\"]",
+        "whyItMatters": "The agent has broad write permissions to the Claims management system, which, combined with autonomous operation, could allow an attacker to make unauthorized modifications to claim records if the agent's logic is compromised.",
+        "recommendedControl": "Implement fine-grained access controls for the agent's write permissions, restricting it to only the specific fields and operations necessary for triage, such as priority and queue assignment."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "It does not approve or pay claims. Adjusters can change any priority the agent sets.",
+        "whyItMatters": "While adjusters can correct priorities, a cascading failure could occur if the agent consistently misprioritizes a large volume of claims due to a systemic issue or poisoning, overwhelming human oversight and delaying critical claim processing.",
+        "recommendedControl": "Implement anomaly detection on the agent's output, such as monitoring for unusual patterns in priority assignments or a sudden increase in adjuster overrides, to detect and alert on potential cascading failures."
+      }
+    ],
+    "proposedTier": 3,
+    "summary": "The Claims Intake Triage Agent handles confidential and personal customer data and has autonomous write access to the Claims management system, justifying a Tier 3 classification. While the first reviewer identified key risks related to untrusted inputs and tool misuse, additional concerns exist regarding potential code execution from attachment processing and overly broad write permissions. Stronger controls are needed for attachment handling and least privilege enforcement."
+  },
+  "costUsd": 0.00810515,
+  "seconds": 29.137
+}

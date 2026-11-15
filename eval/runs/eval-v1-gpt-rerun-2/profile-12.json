@@ -1,0 +1,285 @@
+{
+  "profileId": "profile-12",
+  "tiers": {
+    "rule": 2,
+    "reviewer": 3,
+    "checker": 3,
+    "final": 3,
+    "setBy": [
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 2: can act beyond reading (Team chat notification)",
+      "Tier 2: reads confidential data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "shared_token",
+      "whyItMatters": "A shared credential used by the agent and its sub-agents lets compromise of one component grant access to all delegated capabilities and any confidential data the agent reads. This enables lateral privilege escalation and persistent unauthorized access.",
+      "recommendedControl": "Replace the shared token with per-agent, short-lived scoped credentials and enforce automatic rotation and least-privilege scopes for each sub-agent.",
+      "modelSeverity": "high",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly states the use of a shared token, which presents a significant privilege abuse risk in a multi-agent system.",
+      "contested": false
+    },
+    {
+      "category": "ASI06",
+      "severity": "high",
+      "evidenceQuote": "An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations.",
+      "whyItMatters": "Shared persistent memory can be maliciously or accidentally poisoned by any sub-agent or by injected data, causing future recommendations to be biased, unsafe, or to leak confidential client data.",
+      "recommendedControl": "Implement memory integrity controls: isolate per-agent context, validate and sanitize inputs before persisting, maintain signed versioned memory entries, and add review/approval of memory updates.",
+      "modelSeverity": "high",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile clearly indicates shared and persistent memory among multiple agents, creating a vulnerability for memory poisoning and data corruption.",
+      "contested": false
+    },
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "\"send_messages\"",
+      "whyItMatters": "The agent has permission to send messages to team chat while it reads confidential data, so a compromised agent or prompt-based misuse could exfiltrate sensitive information via chat notifications.",
+      "recommendedControl": "Restrict messaging to sanitized summaries only, enforce content filtering and DLP on outgoing messages, and require human approval for any message that includes or references confidential data.",
+      "modelSeverity": "medium",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent's ability to send messages to team chat while processing confidential data creates a clear risk of data exfiltration if compromised.",
+      "contested": false
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "Manual: the on-call engineer disables the agent's service account. No tested runbook.",
+      "whyItMatters": "The kill switch is manual and untested, so in an incident the agent may continue harmful actions for an extended period and a single fault could cascade across subsystems before containment.",
+      "recommendedControl": "Provide an automated, tested emergency disable mechanism integrated with SIEM/alerting, document and rehearse the runbook, and ensure rapid automated isolation of the agent's network and credentials.",
+      "modelSeverity": "medium",
+      "id": "F4",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The kill switch is described as manual with no tested runbook, which is a significant weakness for containing cascading failures or malicious activity.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "persistent",
+      "whyItMatters": "Persistent memory retains context across sessions, making it susceptible to long-term poisoning or data leakage if not properly managed and purged, potentially influencing future recommendations with stale or malicious data.",
+      "recommendedControl": "Implement strict data retention policies for persistent memory, including regular purging of sensitive information and mechanisms to detect and mitigate memory poisoning.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "Application logs, not yet forwarded to the SIEM",
+      "whyItMatters": "Logs not being forwarded to a SIEM hinder real-time monitoring and incident detection, making it difficult to identify and respond to cascading failures or malicious activity promptly.",
+      "recommendedControl": "Configure immediate forwarding of all agent logs to the central SIEM for comprehensive monitoring, alerting, and forensic analysis.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This orchestrator handles confidential client data, uses persistent shared memory across sub-agents, and relies on a shared credential and chat messaging capability that could be abused to exfiltrate data. Recommend moving to per-agent scoped credentials, isolating and validating memory, enforcing DLP on outgoing messages, and implementing an automated tested kill switch before approval.",
+  "checkerSummary": "The agent handles confidential client data and uses shared, persistent memory across multiple sub-agents, posing risks of data leakage and memory poisoning. While human confirmation is required for actions, the shared token, manual kill switch, and lack of SIEM logging are significant security weaknesses. The proposed tier is 3 due to its handling of confidential customer financial data.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1895,
+      "inputTokenDetails": {
+        "noCacheTokens": 103,
+        "cacheReadTokens": 1792,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1842,
+      "outputTokenDetails": {
+        "textTokens": 626,
+        "reasoningTokens": 1216
+      },
+      "totalTokens": 3737,
+      "raw": {
+        "input_tokens": 1895,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_12h_tokens": 0,
+            "ttl_30m_tokens": 0
+          },
+          "cached_tokens": 1792
+        },
+        "output_tokens": 1842,
+        "output_tokens_details": {
+          "reasoning_tokens": 1216
+        },
+        "total_tokens": 3737
+      }
+    },
+    "latencyMs": 22081,
+    "generationId": "gen_01M7EX05MA0WK77MMNY29017KC",
+    "provider": "openai",
+    "costUsd": 0.00375455
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2703,
+      "inputTokenDetails": {
+        "noCacheTokens": 2703,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1289,
+      "outputTokenDetails": {
+        "textTokens": 552,
+        "reasoningTokens": 737
+      },
+      "totalTokens": 3992,
+      "raw": {
+        "thoughtsTokenCount": 737,
+        "promptTokenCount": 2703,
+        "candidatesTokenCount": 552,
+        "totalTokenCount": 3992,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2703
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 552
+          }
+        ]
+      }
+    },
+    "latencyMs": 9147,
+    "generationId": "gen_01M7EX0V6PR9T7712D768R6NA1",
+    "provider": "vertex",
+    "costUsd": 0.0040334
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "shared_token",
+        "whyItMatters": "A shared credential used by the agent and its sub-agents lets compromise of one component grant access to all delegated capabilities and any confidential data the agent reads. This enables lateral privilege escalation and persistent unauthorized access.",
+        "recommendedControl": "Replace the shared token with per-agent, short-lived scoped credentials and enforce automatic rotation and least-privilege scopes for each sub-agent."
+      },
+      {
+        "category": "ASI06",
+        "severity": "high",
+        "evidenceQuote": "An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations.",
+        "whyItMatters": "Shared persistent memory can be maliciously or accidentally poisoned by any sub-agent or by injected data, causing future recommendations to be biased, unsafe, or to leak confidential client data.",
+        "recommendedControl": "Implement memory integrity controls: isolate per-agent context, validate and sanitize inputs before persisting, maintain signed versioned memory entries, and add review/approval of memory updates."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"send_messages\"",
+        "whyItMatters": "The agent has permission to send messages to team chat while it reads confidential data, so a compromised agent or prompt-based misuse could exfiltrate sensitive information via chat notifications.",
+        "recommendedControl": "Restrict messaging to sanitized summaries only, enforce content filtering and DLP on outgoing messages, and require human approval for any message that includes or references confidential data."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "Manual: the on-call engineer disables the agent's service account. No tested runbook.",
+        "whyItMatters": "The kill switch is manual and untested, so in an incident the agent may continue harmful actions for an extended period and a single fault could cascade across subsystems before containment.",
+        "recommendedControl": "Provide an automated, tested emergency disable mechanism integrated with SIEM/alerting, document and rehearse the runbook, and ensure rapid automated isolation of the agent's network and credentials."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This orchestrator handles confidential client data, uses persistent shared memory across sub-agents, and relies on a shared credential and chat messaging capability that could be abused to exfiltrate data. Recommend moving to per-agent scoped credentials, isolating and validating memory, enforcing DLP on outgoing messages, and implementing an automated tested kill switch before approval."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile explicitly states the use of a shared token, which presents a significant privilege abuse risk in a multi-agent system."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The profile clearly indicates shared and persistent memory among multiple agents, creating a vulnerability for memory poisoning and data corruption."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The agent's ability to send messages to team chat while processing confidential data creates a clear risk of data exfiltration if compromised."
+      },
+      {
+        "findingId": "F4",
+        "verdict": "agree",
+        "reason": "The kill switch is described as manual with no tested runbook, which is a significant weakness for containing cascading failures or malicious activity."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "persistent",
+        "whyItMatters": "Persistent memory retains context across sessions, making it susceptible to long-term poisoning or data leakage if not properly managed and purged, potentially influencing future recommendations with stale or malicious data.",
+        "recommendedControl": "Implement strict data retention policies for persistent memory, including regular purging of sensitive information and mechanisms to detect and mitigate memory poisoning."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "Application logs, not yet forwarded to the SIEM",
+        "whyItMatters": "Logs not being forwarded to a SIEM hinder real-time monitoring and incident detection, making it difficult to identify and respond to cascading failures or malicious activity promptly.",
+        "recommendedControl": "Configure immediate forwarding of all agent logs to the central SIEM for comprehensive monitoring, alerting, and forensic analysis."
+      }
+    ],
+    "proposedTier": 3,
+    "summary": "The agent handles confidential client data and uses shared, persistent memory across multiple sub-agents, posing risks of data leakage and memory poisoning. While human confirmation is required for actions, the shared token, manual kill switch, and lack of SIEM logging are significant security weaknesses. The proposed tier is 3 due to its handling of confidential customer financial data."
+  },
+  "costUsd": 0.00778795,
+  "seconds": 31.228
+}

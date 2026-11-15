@@ -1,0 +1,245 @@
+{
+  "profileId": "profile-02",
+  "tiers": {
+    "rule": 1,
+    "reviewer": 1,
+    "checker": 1,
+    "final": 1,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI01",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [ \"chat\" ]",
+      "whyItMatters": "Untrusted chat inputs can contain prompt-injection or deceptive content that manipulates the agent's objectives or responses, causing it to give incorrect or harmful HR guidance even though it has read-only tool access.",
+      "recommendedControl": "Apply input sanitization and prompt-safety filters, implement a strict system prompt that forbids following user instructions that alter goals, and detect and refuse suspicious or out-of-domain queries with an escalation path to HR staff.",
+      "modelSeverity": "medium",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly lists untrusted chat inputs, which is a direct vector for prompt injection and potential agent goal hijacking.",
+      "contested": false
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "\"provider\": \"OpenAI\"",
+      "whyItMatters": "The model provider and model are external third-party components, creating supply-chain risk if the model, its updates, or integrations are compromised or provide manipulated outputs that affect many employees.",
+      "recommendedControl": "Use an approved, enterprise-vetted model or a vetted gateway with response integrity checks, maintain a model update review process, and log model responses for audit and anomaly detection.",
+      "modelSeverity": "medium",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile states the model provider is OpenAI, confirming the use of a third-party component that introduces supply chain risk.",
+      "contested": false
+    },
+    {
+      "category": "ASI06",
+      "severity": "low",
+      "evidenceQuote": "\"memory\": \"session\"",
+      "whyItMatters": "Keeping conversation history for the session lets a malicious user inject misleading context that will influence subsequent answers during that session, biasing future responses or causing escalation mistakes.",
+      "recommendedControl": "Limit retention of untrusted user-provided context by resetting context on sensitive topics, implement context validation rules, and clear session memory after defined inactivity or when switching topics.",
+      "modelSeverity": "low",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile specifies session memory, which allows for context poisoning within a single conversation session, influencing subsequent responses.",
+      "contested": false
+    },
+    {
+      "category": "ASI09",
+      "severity": "low",
+      "evidenceQuote": "\"Employees ask questions in the intranet chat window. The bot searches the published HR policy library and answers with links to the source policy.\"",
+      "whyItMatters": "Employees may place undue trust in the agent's answers and act on them without verification, which can lead to incorrect HR decisions or disclosure of sensitive information when the agent is mistaken or incomplete.",
+      "recommendedControl": "Display a clear, persistent disclaimer in the chat UI that the bot provides guidance only and include an easy, visible path to route the question to a human HR representative for confirmation.",
+      "modelSeverity": "low",
+      "id": "F4",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The description indicates the bot answers employee questions, which can lead to employees over-relying on its advice without human verification.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [],
+  "ruleHits": [],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This is a read-only internal HR policy Q&A agent, appropriate for Tier 1. Main risks are prompt-injection via chat inputs, external model supply-chain risks, session-context poisoning, and over-trust by employees. Mitigations include input sanitization and safety prompts, vetting or gatewaying the external model, stricter session context handling, and a UI disclaimer with easy human escalation.",
+  "checkerSummary": "The first reviewer's findings are accurate and well-supported by the profile. This agent is read-only, accesses internal documents, and does not handle sensitive customer data or take actions requiring confirmation. No significant risks were missed beyond those already identified.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1844,
+      "inputTokenDetails": {
+        "noCacheTokens": 1844,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1263,
+      "outputTokenDetails": {
+        "textTokens": 687,
+        "reasoningTokens": 576
+      },
+      "totalTokens": 3107,
+      "raw": {
+        "input_tokens": 1844,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_12h_tokens": 0,
+            "ttl_30m_tokens": 0
+          },
+          "cached_tokens": 0
+        },
+        "output_tokens": 1263,
+        "output_tokens_details": {
+          "reasoning_tokens": 576
+        },
+        "total_tokens": 3107
+      }
+    },
+    "latencyMs": 14966,
+    "generationId": "gen_01M7ERCTS9QCETCYERS4WWG5YZ",
+    "provider": "openai",
+    "costUsd": 0.002987
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2644,
+      "inputTokenDetails": {
+        "noCacheTokens": 2644,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1093,
+      "outputTokenDetails": {
+        "textTokens": 303,
+        "reasoningTokens": 790
+      },
+      "totalTokens": 3737,
+      "raw": {
+        "thoughtsTokenCount": 790,
+        "promptTokenCount": 2644,
+        "candidatesTokenCount": 303,
+        "totalTokenCount": 3737,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2644
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 303
+          }
+        ]
+      }
+    },
+    "latencyMs": 7716,
+    "generationId": "gen_01M7ERD9BRV70XYZ8BR6NGW6G7",
+    "provider": "vertex",
+    "costUsd": 0.0035257
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 1,
+    "findings": [
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [ \"chat\" ]",
+        "whyItMatters": "Untrusted chat inputs can contain prompt-injection or deceptive content that manipulates the agent's objectives or responses, causing it to give incorrect or harmful HR guidance even though it has read-only tool access.",
+        "recommendedControl": "Apply input sanitization and prompt-safety filters, implement a strict system prompt that forbids following user instructions that alter goals, and detect and refuse suspicious or out-of-domain queries with an escalation path to HR staff."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"provider\": \"OpenAI\"",
+        "whyItMatters": "The model provider and model are external third-party components, creating supply-chain risk if the model, its updates, or integrations are compromised or provide manipulated outputs that affect many employees.",
+        "recommendedControl": "Use an approved, enterprise-vetted model or a vetted gateway with response integrity checks, maintain a model update review process, and log model responses for audit and anomaly detection."
+      },
+      {
+        "category": "ASI06",
+        "severity": "low",
+        "evidenceQuote": "\"memory\": \"session\"",
+        "whyItMatters": "Keeping conversation history for the session lets a malicious user inject misleading context that will influence subsequent answers during that session, biasing future responses or causing escalation mistakes.",
+        "recommendedControl": "Limit retention of untrusted user-provided context by resetting context on sensitive topics, implement context validation rules, and clear session memory after defined inactivity or when switching topics."
+      },
+      {
+        "category": "ASI09",
+        "severity": "low",
+        "evidenceQuote": "\"Employees ask questions in the intranet chat window. The bot searches the published HR policy library and answers with links to the source policy.\"",
+        "whyItMatters": "Employees may place undue trust in the agent's answers and act on them without verification, which can lead to incorrect HR decisions or disclosure of sensitive information when the agent is mistaken or incomplete.",
+        "recommendedControl": "Display a clear, persistent disclaimer in the chat UI that the bot provides guidance only and include an easy, visible path to route the question to a human HR representative for confirmation."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This is a read-only internal HR policy Q&A agent, appropriate for Tier 1. Main risks are prompt-injection via chat inputs, external model supply-chain risks, session-context poisoning, and over-trust by employees. Mitigations include input sanitization and safety prompts, vetting or gatewaying the external model, stricter session context handling, and a UI disclaimer with easy human escalation."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile explicitly lists untrusted chat inputs, which is a direct vector for prompt injection and potential agent goal hijacking."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The profile states the model provider is OpenAI, confirming the use of a third-party component that introduces supply chain risk."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The profile specifies session memory, which allows for context poisoning within a single conversation session, influencing subsequent responses."
+      },
+      {
+        "findingId": "F4",
+        "verdict": "agree",
+        "reason": "The description indicates the bot answers employee questions, which can lead to employees over-relying on its advice without human verification."
+      }
+    ],
+    "missedFindings": [],
+    "proposedTier": 1,
+    "summary": "The first reviewer's findings are accurate and well-supported by the profile. This agent is read-only, accesses internal documents, and does not handle sensitive customer data or take actions requiring confirmation. No significant risks were missed beyond those already identified."
+  },
+  "costUsd": 0.0065127,
+  "seconds": 22.682
+}

@@ -1,0 +1,263 @@
+{
+  "profileId": "profile-11",
+  "tiers": {
+    "rule": 3,
+    "reviewer": 3,
+    "checker": 3,
+    "final": 3,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (KYC case management system)",
+      "Tier 2: reads personal, customer_financial data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI02",
+      "severity": "high",
+      "evidenceQuote": "\"permissions\": [ \"read\", \"write\" ]",
+      "whyItMatters": "The agent has write permission into the KYC case management system while also processing untrusted uploaded documents, so a malicious or crafted document could cause the agent to write sensitive or manipulated content into case records without robust mitigation.",
+      "recommendedControl": "Require strict input sanitization and structured extraction pipelines for uploaded files, add a server-side policy that rejects or flags content containing control sequences before the agent writes to the case system, and implement a mandatory secondary human review that prevents any agent-written content from being committed automatically.",
+      "modelSeverity": "high",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile clearly states the agent has write permissions to the KYC case management system and processes untrusted uploaded files, supporting the finding that tool misuse could lead to manipulated case records.",
+      "contested": false
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "\"provider\": \"OpenAI\"",
+      "whyItMatters": "The model provider is an external third party, so model updates or a compromised provider could change agent behavior or leak sensitive inputs processed during summarization.",
+      "recommendedControl": "Treat the model as an external supply chain component: enable model operation logging and retention for audits, restrict which data is sent to the provider using local pre-processing and redaction, and require vendor security attestations and contract clauses for data handling and incident notification.",
+      "modelSeverity": "medium",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly lists OpenAI as the model provider, confirming the use of a third-party service which introduces supply chain risks.",
+      "contested": false
+    },
+    {
+      "category": "ASI03",
+      "severity": "medium",
+      "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+      "whyItMatters": "The agent uses its own scoped token to access systems and data, so token compromise or misuse could allow unauthorized read or write access to customer financial and personal data.",
+      "recommendedControl": "Rotate and bind tokens to a least-privilege, short-lived credential service, enforce per-action authorization checks, log and alert on anomalous token activity, and require that any high-impact write actions be gated by an out-of-band human approval step.",
+      "modelSeverity": "medium",
+      "id": "F3",
+      "secondModelVerdict": "disagree",
+      "secondModelReason": "The use of an 'own_scoped_token' is generally a more secure practice than shared credentials, and the finding does not specify how this token is vulnerable to compromise or misuse beyond general credential risks.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI09",
+      "severity": "medium",
+      "evidenceQuote": "A KYC analyst must review and accept the note before it is saved to the case.",
+      "whyItMatters": "Even with human confirmation, analysts might become overly reliant on agent-generated summaries, potentially overlooking subtle errors or malicious content introduced by prompt injection or data poisoning in the draft.",
+      "recommendedControl": "Implement clear guidelines and training for analysts on critical review of agent outputs, including specific checks for anomalies, inconsistencies, or potential manipulation, rather than just superficial acceptance.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI01",
+      "severity": "high",
+      "evidenceQuote": "\"untrustedInputs\": [ \"uploaded_files\" ]",
+      "whyItMatters": "Processing untrusted uploaded files directly exposes the agent to prompt injection attacks, where malicious instructions embedded in documents could hijack the agent's goal to summarize or even attempt to manipulate the draft output.",
+      "recommendedControl": "Implement robust input sanitization and content filtering for all uploaded files before they are processed by the agent, specifically targeting known prompt injection patterns and control characters.",
+      "modelSeverity": "high"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (uploaded_files) and lists KYC case management system that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "Tier 3 is appropriate because the agent reads customer financial data. Key risks: the agent can write to case records while processing untrusted uploaded files, creating a high-risk path for data corruption or exfiltration; use of an external model provider introduces supply chain risk; and the agent-held scoped token is a target for privilege abuse. Mitigations include stricter input handling, supplier controls and short-lived least-privilege credentials with monitoring and enforced human gating for commits.",
+  "checkerSummary": "The KYC Document Summarizer processes customer financial data and writes draft notes to a case management system, placing it in Tier 3. While human confirmation mitigates direct write risks, the agent's exposure to untrusted inputs and potential for human-agent trust exploitation remain significant concerns.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1889,
+      "inputTokenDetails": {
+        "noCacheTokens": 97,
+        "cacheReadTokens": 1792,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1363,
+      "outputTokenDetails": {
+        "textTokens": 595,
+        "reasoningTokens": 768
+      },
+      "totalTokens": 3252,
+      "raw": {
+        "input_tokens": 1889,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_12h_tokens": 0,
+            "ttl_30m_tokens": 0
+          },
+          "cached_tokens": 1792
+        },
+        "output_tokens": 1363,
+        "output_tokens_details": {
+          "reasoning_tokens": 768
+        },
+        "total_tokens": 3252
+      }
+    },
+    "latencyMs": 17491,
+    "generationId": "gen_01M7EXEBMJCQ2J3S0T6MTCC9TF",
+    "provider": "openai",
+    "costUsd": 0.00279505
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2585,
+      "inputTokenDetails": {
+        "noCacheTokens": 2585,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1269,
+      "outputTokenDetails": {
+        "textTokens": 547,
+        "reasoningTokens": 722
+      },
+      "totalTokens": 3854,
+      "raw": {
+        "thoughtsTokenCount": 722,
+        "promptTokenCount": 2585,
+        "candidatesTokenCount": 547,
+        "totalTokenCount": 3854,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2585
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 547
+          }
+        ]
+      }
+    },
+    "latencyMs": 9110,
+    "generationId": "gen_01M7EXEWRRV8FPCV3RHP4TFJ74",
+    "provider": "vertex",
+    "costUsd": 0.003948
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "\"permissions\": [ \"read\", \"write\" ]",
+        "whyItMatters": "The agent has write permission into the KYC case management system while also processing untrusted uploaded documents, so a malicious or crafted document could cause the agent to write sensitive or manipulated content into case records without robust mitigation.",
+        "recommendedControl": "Require strict input sanitization and structured extraction pipelines for uploaded files, add a server-side policy that rejects or flags content containing control sequences before the agent writes to the case system, and implement a mandatory secondary human review that prevents any agent-written content from being committed automatically."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"provider\": \"OpenAI\"",
+        "whyItMatters": "The model provider is an external third party, so model updates or a compromised provider could change agent behavior or leak sensitive inputs processed during summarization.",
+        "recommendedControl": "Treat the model as an external supply chain component: enable model operation logging and retention for audits, restrict which data is sent to the provider using local pre-processing and redaction, and require vendor security attestations and contract clauses for data handling and incident notification."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+        "whyItMatters": "The agent uses its own scoped token to access systems and data, so token compromise or misuse could allow unauthorized read or write access to customer financial and personal data.",
+        "recommendedControl": "Rotate and bind tokens to a least-privilege, short-lived credential service, enforce per-action authorization checks, log and alert on anomalous token activity, and require that any high-impact write actions be gated by an out-of-band human approval step."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "Tier 3 is appropriate because the agent reads customer financial data. Key risks: the agent can write to case records while processing untrusted uploaded files, creating a high-risk path for data corruption or exfiltration; use of an external model provider introduces supply chain risk; and the agent-held scoped token is a target for privilege abuse. Mitigations include stricter input handling, supplier controls and short-lived least-privilege credentials with monitoring and enforced human gating for commits."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile clearly states the agent has write permissions to the KYC case management system and processes untrusted uploaded files, supporting the finding that tool misuse could lead to manipulated case records."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The profile explicitly lists OpenAI as the model provider, confirming the use of a third-party service which introduces supply chain risks."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "disagree",
+        "reason": "The use of an 'own_scoped_token' is generally a more secure practice than shared credentials, and the finding does not specify how this token is vulnerable to compromise or misuse beyond general credential risks."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "A KYC analyst must review and accept the note before it is saved to the case.",
+        "whyItMatters": "Even with human confirmation, analysts might become overly reliant on agent-generated summaries, potentially overlooking subtle errors or malicious content introduced by prompt injection or data poisoning in the draft.",
+        "recommendedControl": "Implement clear guidelines and training for analysts on critical review of agent outputs, including specific checks for anomalies, inconsistencies, or potential manipulation, rather than just superficial acceptance."
+      },
+      {
+        "category": "ASI01",
+        "severity": "high",
+        "evidenceQuote": "\"untrustedInputs\": [ \"uploaded_files\" ]",
+        "whyItMatters": "Processing untrusted uploaded files directly exposes the agent to prompt injection attacks, where malicious instructions embedded in documents could hijack the agent's goal to summarize or even attempt to manipulate the draft output.",
+        "recommendedControl": "Implement robust input sanitization and content filtering for all uploaded files before they are processed by the agent, specifically targeting known prompt injection patterns and control characters."
+      }
+    ],
+    "proposedTier": 3,
+    "summary": "The KYC Document Summarizer processes customer financial data and writes draft notes to a case management system, placing it in Tier 3. While human confirmation mitigates direct write risks, the agent's exposure to untrusted inputs and potential for human-agent trust exploitation remain significant concerns."
+  },
+  "costUsd": 0.00674305,
+  "seconds": 26.601
+}

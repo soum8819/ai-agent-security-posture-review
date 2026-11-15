@@ -1,0 +1,253 @@
+{
+  "profileId": "profile-06",
+  "tiers": {
+    "rule": 1,
+    "reviewer": 1,
+    "checker": 1,
+    "final": 1,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"memory\": \"session\"",
+      "whyItMatters": "The agent retains session memory while accepting untrusted chat input, so an attacker or malicious user could seed or poison session context and influence subsequent answers or retrievals. The profile also lists untrustedInputs as chat which increases the attack surface for context poisoning.",
+      "recommendedControl": "Disable persistent session memory or isolate and sanitize any content promoted into session memory, and apply strict input validation and provenance tagging for chat inputs before they are retained.",
+      "modelSeverity": "medium",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly states the agent uses session memory and accepts untrusted chat input, directly supporting the risk of memory poisoning.",
+      "contested": false
+    },
+    {
+      "category": "ASI03",
+      "severity": "medium",
+      "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+      "whyItMatters": "The agent uses its own scoped token to access internal resources, if that token is compromised or overly permissive it could be abused to access the wiki or other internal systems. The profile gives no detail on token lifetime, rotation, or vaulting.",
+      "recommendedControl": "Store the token in a secrets vault, enforce least privilege on the token, set short TTLs and automated rotation, and require per-environment scoped credentials with auditing enabled.",
+      "modelSeverity": "medium",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The use of an 'own_scoped_token' without further detail on its management or permissions presents a valid concern for privilege abuse if compromised.",
+      "contested": false
+    },
+    {
+      "category": "ASI08",
+      "severity": "low",
+      "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+      "whyItMatters": "Logs are collected but not forwarded to the SIEM, limiting centralized detection and response; this delay reduces ability to detect misuse, context poisoning, or credential compromise and allows failures to propagate unnoticed.",
+      "recommendedControl": "Forward logs and relevant telemetry to the enterprise SIEM with alerting for anomalous access patterns, and instrument agent actions and tool accesses with sufficient audit context.",
+      "modelSeverity": "low",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile states logs are not forwarded to the SIEM, which hinders centralized monitoring and detection of issues, supporting the finding.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"killSwitch\": {\"available\": true,\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"}",
+      "whyItMatters": "A manual kill switch without a tested runbook introduces significant delay and uncertainty in responding to a critical incident, increasing the risk of harm from a rogue agent or cascading failure. The lack of a tested procedure means the response might not be effective when needed most.",
+      "recommendedControl": "Develop and regularly test a runbook for the kill switch procedure to ensure rapid and effective agent shutdown in an emergency.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI09",
+      "severity": "low",
+      "evidenceQuote": "\"description\": \"Single-tenant internal chatbot that answers employee questions from a curated, access-controlled internal wiki.\"",
+      "whyItMatters": "As an internal chatbot, employees may place undue trust in its answers, potentially leading them to accept incorrect or manipulated information if the agent is compromised or misaligned. This could influence employee decisions or actions based on flawed advice.",
+      "recommendedControl": "Implement clear disclaimers that the agent's responses should be verified, especially for critical information, and ensure transparency about its capabilities and limitations.",
+      "modelSeverity": "low"
+    }
+  ],
+  "ruleHits": [],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "Tier 1: the agent only reads internal documents. Main risks are session memory combined with untrusted chat inputs enabling context poisoning, the presence of an agent-scoped token without described vaulting or rotation, and logs not yet forwarded to the SIEM which reduces detection capability. Apply input sanitization and provenance controls, vault and rotate credentials, and forward telemetry to the SIEM before launch.",
+  "checkerSummary": "The agent is a read-only internal knowledge base assistant, which places it in Tier 1. While the first reviewer's findings are accurate, I've identified additional risks related to the untested kill switch and the potential for human-agent trust exploitation.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1830,
+      "inputTokenDetails": {
+        "noCacheTokens": 1830,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1520,
+      "outputTokenDetails": {
+        "textTokens": 560,
+        "reasoningTokens": 960
+      },
+      "totalTokens": 3350,
+      "raw": {
+        "input_tokens": 1830,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_12h_tokens": 0,
+            "ttl_30m_tokens": 0
+          },
+          "cached_tokens": 0
+        },
+        "output_tokens": 1520,
+        "output_tokens_details": {
+          "reasoning_tokens": 960
+        },
+        "total_tokens": 3350
+      }
+    },
+    "latencyMs": 19580,
+    "generationId": "gen_01M7ERHDZX38F84BPE2K9TNTRH",
+    "provider": "openai",
+    "costUsd": 0.0034975
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2492,
+      "inputTokenDetails": {
+        "noCacheTokens": 2492,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1309,
+      "outputTokenDetails": {
+        "textTokens": 560,
+        "reasoningTokens": 749
+      },
+      "totalTokens": 3801,
+      "raw": {
+        "thoughtsTokenCount": 749,
+        "promptTokenCount": 2492,
+        "candidatesTokenCount": 560,
+        "totalTokenCount": 3801,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2492
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 560
+          }
+        ]
+      }
+    },
+    "latencyMs": 6042,
+    "generationId": "gen_01M7ERJ146AB0MT97M8DZTSB07",
+    "provider": "vertex",
+    "costUsd": 0.0040201
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 1,
+    "findings": [
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"memory\": \"session\"",
+        "whyItMatters": "The agent retains session memory while accepting untrusted chat input, so an attacker or malicious user could seed or poison session context and influence subsequent answers or retrievals. The profile also lists untrustedInputs as chat which increases the attack surface for context poisoning.",
+        "recommendedControl": "Disable persistent session memory or isolate and sanitize any content promoted into session memory, and apply strict input validation and provenance tagging for chat inputs before they are retained."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+        "whyItMatters": "The agent uses its own scoped token to access internal resources, if that token is compromised or overly permissive it could be abused to access the wiki or other internal systems. The profile gives no detail on token lifetime, rotation, or vaulting.",
+        "recommendedControl": "Store the token in a secrets vault, enforce least privilege on the token, set short TTLs and automated rotation, and require per-environment scoped credentials with auditing enabled."
+      },
+      {
+        "category": "ASI08",
+        "severity": "low",
+        "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+        "whyItMatters": "Logs are collected but not forwarded to the SIEM, limiting centralized detection and response; this delay reduces ability to detect misuse, context poisoning, or credential compromise and allows failures to propagate unnoticed.",
+        "recommendedControl": "Forward logs and relevant telemetry to the enterprise SIEM with alerting for anomalous access patterns, and instrument agent actions and tool accesses with sufficient audit context."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "Tier 1: the agent only reads internal documents. Main risks are session memory combined with untrusted chat inputs enabling context poisoning, the presence of an agent-scoped token without described vaulting or rotation, and logs not yet forwarded to the SIEM which reduces detection capability. Apply input sanitization and provenance controls, vault and rotate credentials, and forward telemetry to the SIEM before launch."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile explicitly states the agent uses session memory and accepts untrusted chat input, directly supporting the risk of memory poisoning."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The use of an 'own_scoped_token' without further detail on its management or permissions presents a valid concern for privilege abuse if compromised."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The profile states logs are not forwarded to the SIEM, which hinders centralized monitoring and detection of issues, supporting the finding."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"killSwitch\": {\"available\": true,\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"}",
+        "whyItMatters": "A manual kill switch without a tested runbook introduces significant delay and uncertainty in responding to a critical incident, increasing the risk of harm from a rogue agent or cascading failure. The lack of a tested procedure means the response might not be effective when needed most.",
+        "recommendedControl": "Develop and regularly test a runbook for the kill switch procedure to ensure rapid and effective agent shutdown in an emergency."
+      },
+      {
+        "category": "ASI09",
+        "severity": "low",
+        "evidenceQuote": "\"description\": \"Single-tenant internal chatbot that answers employee questions from a curated, access-controlled internal wiki.\"",
+        "whyItMatters": "As an internal chatbot, employees may place undue trust in its answers, potentially leading them to accept incorrect or manipulated information if the agent is compromised or misaligned. This could influence employee decisions or actions based on flawed advice.",
+        "recommendedControl": "Implement clear disclaimers that the agent's responses should be verified, especially for critical information, and ensure transparency about its capabilities and limitations."
+      }
+    ],
+    "proposedTier": 1,
+    "summary": "The agent is a read-only internal knowledge base assistant, which places it in Tier 1. While the first reviewer's findings are accurate, I've identified additional risks related to the untested kill switch and the potential for human-agent trust exploitation."
+  },
+  "costUsd": 0.007517600000000001,
+  "seconds": 25.622
+}

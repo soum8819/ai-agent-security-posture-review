@@ -1,0 +1,357 @@
+{
+  "profileId": "profile-08",
+  "tiers": {
+    "rule": 4,
+    "reviewer": 4,
+    "checker": 4,
+    "final": 4,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 4: acts with no person confirming (Kubernetes API, Shell on production nodes, On-call paging service)",
+      "Tier 2: can act beyond reading (Kubernetes API, Shell on production nodes, On-call paging service)",
+      "Tier 2: reads confidential data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI05",
+      "severity": "critical",
+      "evidenceQuote": "No action needs human approval, including destructive ones.",
+      "whyItMatters": "The agent can run arbitrary shell commands and Kubernetes writes without human confirmation, enabling immediate remote code execution and destructive changes in production with no intervening control.",
+      "recommendedControl": "Require an auditable human approval step for any action that runs code, modifies Kubernetes objects, or is labeled destructive; block direct run_code and write operations until approval is granted.",
+      "modelSeverity": "critical",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly states no human approval for destructive actions, which, combined with run_code and write permissions, makes RCE and system modification highly likely without control.",
+      "contested": false
+    },
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "running any shell command on nodes with admin Kubernetes permissions.",
+      "whyItMatters": "The profile describes high-privilege access to nodes and Kubernetes, so the agent's scoped token and delegated privileges could be abused to escalate access, modify credentials, or bypass controls.",
+      "recommendedControl": "Replace the broad token with least-privilege credentials, restrict Kubernetes RBAC so the agent cannot access node shells or admin-level APIs, and enforce short-lived tokens with strict audit and approval gates.",
+      "modelSeverity": "high",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent possesses broad administrative privileges on production systems, which, if compromised, could lead to significant privilege escalation and system takeover.",
+      "contested": false
+    },
+    {
+      "category": "ASI02",
+      "severity": "high",
+      "evidenceQuote": "\"untrustedInputs\": [\"logs_or_alerts\"]",
+      "whyItMatters": "The agent ingests untrusted logs and alerts and acts on them automatically, so specially crafted or poisoned log entries could trigger unsafe tool use, data exfiltration, or destructive remediation actions.",
+      "recommendedControl": "Implement input validation and allowlisting for actions triggered by logs, require human review for any remediation initiated from untrusted inputs, and quarantine suspicious inputs for analyst review.",
+      "modelSeverity": "high",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent's automatic actions based on untrusted inputs create a clear path for attackers to trigger malicious behavior through crafted logs or alerts.",
+      "contested": false
+    },
+    {
+      "category": "ASI06",
+      "severity": "high",
+      "evidenceQuote": "It coordinates with a separate log-analysis agent through shared memory.",
+      "whyItMatters": "Persistent shared memory between agents and a persistent memory store creates a vector for context or memory poisoning, where corrupted summaries or embeddings from one agent influence future decisions and actions.",
+      "recommendedControl": "Add integrity checks, provenance tagging, periodic memory purging, and validation of shared-memory artifacts before they can influence remediation decisions.",
+      "modelSeverity": "medium",
+      "raisedByRule": "R5",
+      "id": "F4",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "Persistent shared memory between agents and a persistent memory store creates a vector for context or memory poisoning, where corrupted summaries or embeddings from one agent influence future decisions and actions.",
+      "contested": false
+    },
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+      "whyItMatters": "Logging to local application logs that are not centrally managed risks leaking confidential production data and makes timely detection and forensic analysis harder.",
+      "recommendedControl": "Ensure logs are forwarded to the SIEM with access controls and retention policies, and redact or sanitize sensitive fields before they are written to application logs.",
+      "modelSeverity": "medium",
+      "id": "F5",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "Logging only to local application logs without SIEM forwarding hinders security monitoring, incident detection, and forensic analysis, especially for an agent with critical system access.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI08",
+      "severity": "high",
+      "evidenceQuote": "It coordinates with a separate log-analysis agent through shared memory.",
+      "whyItMatters": "The coordination between agents through shared memory creates a dependency where a failure or compromise in one agent could propagate and cause cascading failures in the remediation agent.",
+      "recommendedControl": "Implement robust validation and integrity checks on all data exchanged via shared memory, and design agents to operate with fault isolation to prevent single points of failure from propagating.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI01",
+      "severity": "high",
+      "evidenceQuote": "diagnoses incidents using runbooks it retrieves",
+      "whyItMatters": "If the retrieved runbooks are compromised or manipulated, the agent's diagnostic and remediation steps could be hijacked, leading to incorrect or malicious actions.",
+      "recommendedControl": "Implement strong integrity checks and access controls for the runbook repository, ensuring only authorized and verified runbooks can be retrieved and used by the agent.",
+      "modelSeverity": "medium",
+      "raisedByRule": "R3"
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "model\": {\"provider\": \"Anthropic\", \"name\": \"Claude Sonnet (version not specified)\"}",
+      "whyItMatters": "Using a model with an unspecified version introduces supply chain risk, as updates or changes to the model could introduce vulnerabilities or alter behavior without the team's awareness.",
+      "recommendedControl": "Specify and pin the exact model version used to ensure consistent behavior and allow for controlled updates and security vetting of new versions.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI03",
+      "severity": "medium",
+      "evidenceQuote": "killSwitch\": {\"available\": true, \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"}",
+      "whyItMatters": "A manual kill switch without a tested runbook introduces significant delay and potential for error during a critical incident, prolonging system compromise or outage.",
+      "recommendedControl": "Develop and regularly test a clear, automated, and easily accessible runbook for the kill switch to ensure rapid and effective agent deactivation during emergencies.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R2",
+      "severity": "critical",
+      "reason": "Lists Shell on production nodes with run_code permission, and the profile lists no sandbox.",
+      "field": "tools.permissions",
+      "category": "ASI05"
+    },
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (logs_or_alerts) and lists Kubernetes API, Shell on production nodes, On-call paging service that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    },
+    {
+      "ruleId": "R5",
+      "severity": "high",
+      "reason": "Keeps persistent memory and reads untrusted input (logs_or_alerts).",
+      "field": "memory, untrustedInputs",
+      "category": "ASI06"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This agent is high risk: it can run shell commands and perform Kubernetes writes in production without human approval, using high privileges and persistent shared memory with untrusted inputs. Require human-in-the-loop approvals for code execution and destructive actions, apply least-privilege credentials, validate untrusted inputs, and harden memory, logging, and auditing before deployment.",
+  "checkerSummary": "This agent is Tier 4 because it can move money or act on its own with power to write or run code, specifically by running shell commands on production nodes and making destructive Kubernetes changes without human confirmation. The agent's broad administrative privileges, untrusted inputs, and lack of human oversight for critical actions pose significant risks, including remote code execution and cascading failures.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1906,
+      "inputTokenDetails": {
+        "noCacheTokens": 1906,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1607,
+      "outputTokenDetails": {
+        "textTokens": 711,
+        "reasoningTokens": 896
+      },
+      "totalTokens": 3513,
+      "raw": {
+        "input_tokens": 1906,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cache_write_tokens_details": {
+            "ttl_12h_tokens": 0,
+            "ttl_30m_tokens": 0
+          },
+          "cached_tokens": 0
+        },
+        "output_tokens": 1607,
+        "output_tokens_details": {
+          "reasoning_tokens": 896
+        },
+        "total_tokens": 3513
+      }
+    },
+    "latencyMs": 22169,
+    "generationId": "gen_01M7EWAJPTMX2GB8RFK6M4A86W",
+    "provider": "openai",
+    "costUsd": 0.0036905
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2823,
+      "inputTokenDetails": {
+        "noCacheTokens": 2823,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1739,
+      "outputTokenDetails": {
+        "textTokens": 914,
+        "reasoningTokens": 825
+      },
+      "totalTokens": 4562,
+      "raw": {
+        "thoughtsTokenCount": 825,
+        "promptTokenCount": 2823,
+        "candidatesTokenCount": 914,
+        "totalTokenCount": 4562,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2823
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 914
+          }
+        ]
+      }
+    },
+    "latencyMs": 7444,
+    "generationId": "gen_01M7EWB8AWGNNA14ZZA0JBYM5C",
+    "provider": "vertex",
+    "costUsd": 0.0051944
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 4,
+    "findings": [
+      {
+        "category": "ASI05",
+        "severity": "critical",
+        "evidenceQuote": "No action needs human approval, including destructive ones.",
+        "whyItMatters": "The agent can run arbitrary shell commands and Kubernetes writes without human confirmation, enabling immediate remote code execution and destructive changes in production with no intervening control.",
+        "recommendedControl": "Require an auditable human approval step for any action that runs code, modifies Kubernetes objects, or is labeled destructive; block direct run_code and write operations until approval is granted."
+      },
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "running any shell command on nodes with admin Kubernetes permissions.",
+        "whyItMatters": "The profile describes high-privilege access to nodes and Kubernetes, so the agent's scoped token and delegated privileges could be abused to escalate access, modify credentials, or bypass controls.",
+        "recommendedControl": "Replace the broad token with least-privilege credentials, restrict Kubernetes RBAC so the agent cannot access node shells or admin-level APIs, and enforce short-lived tokens with strict audit and approval gates."
+      },
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "\"untrustedInputs\": [\"logs_or_alerts\"]",
+        "whyItMatters": "The agent ingests untrusted logs and alerts and acts on them automatically, so specially crafted or poisoned log entries could trigger unsafe tool use, data exfiltration, or destructive remediation actions.",
+        "recommendedControl": "Implement input validation and allowlisting for actions triggered by logs, require human review for any remediation initiated from untrusted inputs, and quarantine suspicious inputs for analyst review."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "It coordinates with a separate log-analysis agent through shared memory.",
+        "whyItMatters": "Persistent shared memory between agents and a persistent memory store creates a vector for context or memory poisoning, where corrupted summaries or embeddings from one agent influence future decisions and actions.",
+        "recommendedControl": "Add integrity checks, provenance tagging, periodic memory purging, and validation of shared-memory artifacts before they can influence remediation decisions."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"destination\": \"Application logs, not yet forwarded to the SIEM\"",
+        "whyItMatters": "Logging to local application logs that are not centrally managed risks leaking confidential production data and makes timely detection and forensic analysis harder.",
+        "recommendedControl": "Ensure logs are forwarded to the SIEM with access controls and retention policies, and redact or sanitize sensitive fields before they are written to application logs."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent is high risk: it can run shell commands and perform Kubernetes writes in production without human approval, using high privileges and persistent shared memory with untrusted inputs. Require human-in-the-loop approvals for code execution and destructive actions, apply least-privilege credentials, validate untrusted inputs, and harden memory, logging, and auditing before deployment."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile explicitly states no human approval for destructive actions, which, combined with run_code and write permissions, makes RCE and system modification highly likely without control."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The agent possesses broad administrative privileges on production systems, which, if compromised, could lead to significant privilege escalation and system takeover."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The agent's automatic actions based on untrusted inputs create a clear path for attackers to trigger malicious behavior through crafted logs or alerts."
+      },
+      {
+        "findingId": "F4",
+        "verdict": "agree",
+        "reason": "Persistent shared memory between agents and a persistent memory store creates a vector for context or memory poisoning, where corrupted summaries or embeddings from one agent influence future decisions and actions."
+      },
+      {
+        "findingId": "F5",
+        "verdict": "agree",
+        "reason": "Logging only to local application logs without SIEM forwarding hinders security monitoring, incident detection, and forensic analysis, especially for an agent with critical system access."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI08",
+        "severity": "high",
+        "evidenceQuote": "It coordinates with a separate log-analysis agent through shared memory.",
+        "whyItMatters": "The coordination between agents through shared memory creates a dependency where a failure or compromise in one agent could propagate and cause cascading failures in the remediation agent.",
+        "recommendedControl": "Implement robust validation and integrity checks on all data exchanged via shared memory, and design agents to operate with fault isolation to prevent single points of failure from propagating."
+      },
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "diagnoses incidents using runbooks it retrieves",
+        "whyItMatters": "If the retrieved runbooks are compromised or manipulated, the agent's diagnostic and remediation steps could be hijacked, leading to incorrect or malicious actions.",
+        "recommendedControl": "Implement strong integrity checks and access controls for the runbook repository, ensuring only authorized and verified runbooks can be retrieved and used by the agent."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "model\": {\"provider\": \"Anthropic\", \"name\": \"Claude Sonnet (version not specified)\"}",
+        "whyItMatters": "Using a model with an unspecified version introduces supply chain risk, as updates or changes to the model could introduce vulnerabilities or alter behavior without the team's awareness.",
+        "recommendedControl": "Specify and pin the exact model version used to ensure consistent behavior and allow for controlled updates and security vetting of new versions."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "killSwitch\": {\"available\": true, \"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"}",
+        "whyItMatters": "A manual kill switch without a tested runbook introduces significant delay and potential for error during a critical incident, prolonging system compromise or outage.",
+        "recommendedControl": "Develop and regularly test a clear, automated, and easily accessible runbook for the kill switch to ensure rapid and effective agent deactivation during emergencies."
+      }
+    ],
+    "proposedTier": 4,
+    "summary": "This agent is Tier 4 because it can move money or act on its own with power to write or run code, specifically by running shell commands on production nodes and making destructive Kubernetes changes without human confirmation. The agent's broad administrative privileges, untrusted inputs, and lack of human oversight for critical actions pose significant risks, including remote code execution and cascading failures."
+  },
+  "costUsd": 0.008884900000000001,
+  "seconds": 29.613
+}
