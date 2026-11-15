@@ -4,6 +4,7 @@
 import { generateText, Output } from "ai";
 import { checkEvidence, type KeptFinding } from "./analyze.ts";
 import { CHECK_PROMPT_VERSION, CHECK_SYSTEM_PROMPT, checkUserPrompt } from "./crosscheck-prompt.ts";
+import { checkerTextSchema, requireModelText } from "./model-text.ts";
 import { CHECKER_MODEL, CHECKER_PROVIDERS, gatewayOptions, resolvedProvider } from "./models.ts";
 import type { AgentProfile } from "./profile-schema.ts";
 import { crosscheckSchema, type Crosscheck, type ModelReview } from "./review-schema.ts";
@@ -75,6 +76,7 @@ export async function crosscheckReview(profile: AgentProfile, firstFindings: Kep
     output: Output.object({ name: "crosscheck", schema: crosscheckSchema }),
   });
   const check = result.output;
+  requireModelText(checkerTextSchema, check, "checker", result);
   const { kept, dropped } = checkEvidence(check.missedFindings, profile);
   const gateway = result.providerMetadata?.gateway as Record<string, unknown> | undefined;
   return {

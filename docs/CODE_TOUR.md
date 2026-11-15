@@ -86,6 +86,7 @@ step 6 and kept up to date since.
 - `lib/authz.ts`: the one check that decides who may decide a review: the right role for the stage, the right stage for the tier, never your own submission, a different person for the second tier 3 stage, a note, conditions when needed, and every contested finding resolved before approving.
 - `lib/review-access.ts`: the one rule for who may see a review, used by both the queue and the review page, and the rule for who may resubmit one (its own submitter, after Request changes, once).
 - `lib/evidence.ts`: the exact-match evidence check that drops findings whose quote is not in the profile, and the same check used on screen to tell verbatim profile excerpts in model text apart from everything else.
+- `lib/model-text.ts`: refuses a model answer whose summary, explanations, fixes or verdict reasons are under 20 characters (such as a summary of just "x"), failing the review the same way as an answer in the wrong format, so no empty text reaches a reviewer.
 - `lib/evidence-pack.ts`: writes the Tier 4 evidence pack in plain words: tiers and who set the final tier, the rules that fired, every finding with its quote and both models' views, and the profile as submitted.
 - `lib/review-view.ts`: turns stored review data into plain words: statuses, which tier set the final tier, model and provider names, what each rule requires, field values, finding order, badge colours and cost.
 - `lib/labels.ts`: plain words for the profile's fixed choices, shared by the submit form and the review screens.
@@ -122,6 +123,7 @@ step 6 and kept up to date since.
 
 - `tests/rules.test.ts`: one test for each rule, for tier assignment and for the severity floor, using made-up profiles; run with `npm test`.
 - `tests/analyze.test.ts`: proves the evidence check drops a made-up finding and the rule floor raises a severity that is too low; calls no model.
+- `tests/model-text.test.ts`: proves a summary of "x" or only spaces is refused, a real summary passes, and exactly 20 characters passes while 19 fails; calls no model.
 - `scripts/run-reviews.ts`: a developer tool that runs full reviews (both models) over the evaluation profiles and saves raw results and actual cost to `eval/runs`; run with `npm run reviews -- --set tuning` or `--set all`, or `--checker-only --from <run folder>` to test the checker on saved reviewer results.
 - `tests/evidence-pack.test.ts`: proves the evidence pack holds what the committee needs, keeps every quote exactly as stored, and has no JSON-looking text outside quotes.
 - `tests/design.test.ts`: reads the stylesheet and proves every text colour pair passes contrast of 4.5 to 1 in light and dark mode, and that focus and reduced motion are handled.

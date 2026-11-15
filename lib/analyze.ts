@@ -6,6 +6,7 @@ import { REVIEWER_MODEL, REVIEWER_PROVIDERS, gatewayOptions, resolvedProvider } 
 import type { AgentProfile } from "./profile-schema.ts";
 import { modelReviewSchema, type ModelReview } from "./review-schema.ts";
 import { quoteIsInProfile } from "./evidence.ts";
+import { requireModelText, reviewerTextSchema } from "./model-text.ts";
 import { PROMPT_VERSION, SYSTEM_PROMPT, userPrompt } from "./review-prompt.ts";
 import { assignTier, enforceFloor, runRules, type RuleHit, type Severity } from "./rules.ts";
 
@@ -68,6 +69,7 @@ export async function analyzeProfile(profile: AgentProfile) {
     output: Output.object({ name: "agent_review", schema: modelReviewSchema }),
   });
   const review = result.output;
+  requireModelText(reviewerTextSchema, review, "reviewer", result);
 
   const ruleHits = runRules(profile);
   const { kept, dropped } = checkEvidence(review.findings, profile);
