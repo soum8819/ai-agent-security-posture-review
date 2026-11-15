@@ -1,3 +1,5 @@
+> **Superseded in part:** see [results-v2-matched.md](results-v2-matched.md). The profile 07 claim below (the one change outside noise) was withdrawn: rerun on the same frozen code, gpt-5-mini gave Tier 3 in all 3 runs.
+
 # Evaluation results: eval-v2-claude-reviewer
 
 A model swap, compared with the eval-v1 freeze. Code: git tag
