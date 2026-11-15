@@ -1,0 +1,207 @@
+{
+  "profileId": "profile-11",
+  "tiers": {
+    "rule": 3,
+    "reviewer": 3,
+    "checker": 3,
+    "final": 3,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (KYC case management system)",
+      "Tier 2: reads personal, customer_financial data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI01",
+      "severity": "high",
+      "evidenceQuote": "\"untrustedInputs\": [\"uploaded_files\"]",
+      "whyItMatters": "Customer-uploaded documents are read by the model and could contain hidden instructions that skew the summary or hide gaps, misleading the analyst. A human reviews the note, which limits but does not remove the risk.",
+      "recommendedControl": "Treat uploaded file content as untrusted data, add prompt-injection filtering and have the analyst view source documents alongside the summary for key fields.",
+      "modelSeverity": "medium",
+      "raisedByRule": "R3",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile clearly states untrusted inputs, and the finding accurately describes the risk of prompt injection and its potential impact, with appropriate severity given the human review step.",
+      "contested": false
+    },
+    {
+      "category": "ASI02",
+      "severity": "low",
+      "evidenceQuote": "\"permissions\": [\"read\",\"write\"]",
+      "whyItMatters": "The agent has write access to the case management system, wider than needed for drafting notes, so a manipulated agent could alter case records beyond the summary note. The analyst acceptance step reduces this.",
+      "recommendedControl": "Restrict the write permission to creating draft notes only, enforced at the case system level, with no edit or delete rights on existing case data.",
+      "modelSeverity": "low",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile shows write permissions to the case management system, and the finding correctly identifies the risk of over-privileged access, even with human confirmation.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [],
+  "ruleHits": [
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (uploaded_files) and lists KYC case management system that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "The agent reads personal and customer financial data from KYC documents and drafts summary notes that a KYC analyst must accept, so it is Tier 3 because of the customer financial data. Controls are good: its own scoped token, no memory, SIEM logging and a kill switch. The main residual risks are prompt injection through uploaded files and write access broader than drafting needs.",
+  "checkerSummary": "The agent handles customer financial data and personal data, which places it in Tier 3. While it has write access to a case management system, all actions are confirmed by a human, mitigating the immediate risk of unapproved changes. The existing findings correctly identify risks related to untrusted inputs and overly broad write permissions.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "anthropic/claude-sonnet-5.5",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "anthropic/claude-sonnet-5.5",
+      "providers": [
+        "anthropic"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 3537,
+      "inputTokenDetails": {
+        "noCacheTokens": 3537,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 508,
+      "outputTokenDetails": {
+        "textTokens": 508,
+        "reasoningTokens": 0
+      },
+      "totalTokens": 4045,
+      "raw": {
+        "service_tier": "standard",
+        "input_tokens": 3537,
+        "output_tokens": 508,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "speed": "standard"
+      }
+    },
+    "latencyMs": 4635,
+    "generationId": "gen_01M7ENP58YJZSQ7RJZ2CMBFVQ8",
+    "provider": "anthropic",
+    "costUsd": 0.012154
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2394,
+      "inputTokenDetails": {
+        "noCacheTokens": 2394,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1058,
+      "outputTokenDetails": {
+        "textTokens": 222,
+        "reasoningTokens": 836
+      },
+      "totalTokens": 3452,
+      "raw": {
+        "thoughtsTokenCount": 836,
+        "promptTokenCount": 2394,
+        "candidatesTokenCount": 222,
+        "totalTokenCount": 3452,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2394
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 222
+          }
+        ]
+      }
+    },
+    "latencyMs": 7822,
+    "generationId": "gen_01M7ENP9RZ3MSQZF3W4CJ5K34X",
+    "provider": "vertex",
+    "costUsd": 0.0033632
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [\"uploaded_files\"]",
+        "whyItMatters": "Customer-uploaded documents are read by the model and could contain hidden instructions that skew the summary or hide gaps, misleading the analyst. A human reviews the note, which limits but does not remove the risk.",
+        "recommendedControl": "Treat uploaded file content as untrusted data, add prompt-injection filtering and have the analyst view source documents alongside the summary for key fields."
+      },
+      {
+        "category": "ASI02",
+        "severity": "low",
+        "evidenceQuote": "\"permissions\": [\"read\",\"write\"]",
+        "whyItMatters": "The agent has write access to the case management system, wider than needed for drafting notes, so a manipulated agent could alter case records beyond the summary note. The analyst acceptance step reduces this.",
+        "recommendedControl": "Restrict the write permission to creating draft notes only, enforced at the case system level, with no edit or delete rights on existing case data."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The agent reads personal and customer financial data from KYC documents and drafts summary notes that a KYC analyst must accept, so it is Tier 3 because of the customer financial data. Controls are good: its own scoped token, no memory, SIEM logging and a kill switch. The main residual risks are prompt injection through uploaded files and write access broader than drafting needs."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile clearly states untrusted inputs, and the finding accurately describes the risk of prompt injection and its potential impact, with appropriate severity given the human review step."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The profile shows write permissions to the case management system, and the finding correctly identifies the risk of over-privileged access, even with human confirmation."
+      }
+    ],
+    "missedFindings": [],
+    "proposedTier": 3,
+    "summary": "The agent handles customer financial data and personal data, which places it in Tier 3. While it has write access to a case management system, all actions are confirmed by a human, mitigating the immediate risk of unapproved changes. The existing findings correctly identify risks related to untrusted inputs and overly broad write permissions."
+  },
+  "costUsd": 0.0155172,
+  "seconds": 12.457
+}

@@ -1,0 +1,220 @@
+{
+  "profileId": "profile-06",
+  "tiers": {
+    "rule": 1,
+    "reviewer": 1,
+    "checker": 1,
+    "final": 1,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI10",
+      "severity": "low",
+      "evidenceQuote": "Manual: the on-call engineer disables the agent's service account. No tested runbook.",
+      "whyItMatters": "If the agent misbehaves, shutdown depends on a manual step with no tested procedure, so response may be slow or inconsistent.",
+      "recommendedControl": "Write and test a kill switch runbook, and run a periodic drill so the on-call engineer can disable the agent quickly.",
+      "modelSeverity": "low",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile clearly states there is no tested runbook for the manual kill switch, which is a valid operational risk for agent control.",
+      "contested": false
+    },
+    {
+      "category": "ASI01",
+      "severity": "low",
+      "evidenceQuote": "Application logs, not yet forwarded to the SIEM",
+      "whyItMatters": "Chat is an untrusted input, and without SIEM forwarding, attempts to manipulate the agent or odd behaviour may go unnoticed by security monitoring.",
+      "recommendedControl": "Forward the application logs to the SIEM and add alerts for suspected prompt injection and unusual query patterns.",
+      "modelSeverity": "low",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile confirms logs are not forwarded to the SIEM, which hinders detection of potential agent manipulation via untrusted chat input.",
+      "contested": false
+    },
+    {
+      "category": "ASI04",
+      "severity": "low",
+      "evidenceQuote": "Claude Sonnet (version not specified)",
+      "whyItMatters": "An unpinned model version means behaviour can change without review, which weakens supply chain assurance.",
+      "recommendedControl": "Pin a specific model version and re-review the agent when the version changes.",
+      "modelSeverity": "low",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly states the model version is not specified, which introduces supply chain risk as model behavior can change unexpectedly.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [],
+  "ruleHits": [],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This is a read-only assistant over an access-controlled internal wiki with no personal data, no write access and no external tool calls, so Tier 1 fits. Remaining gaps are minor: logs are not yet in the SIEM, the kill switch has no tested runbook, and the model version is not pinned. These should be closed but do not raise the tier.}",
+  "checkerSummary": "The agent is a read-only internal knowledge base assistant with limited capabilities, posing minimal direct risk. The first reviewer's findings are accurate and address valid concerns regarding operational controls, logging, and model versioning. No significant risks were missed given the agent's restricted scope.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "anthropic/claude-sonnet-5.5",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "anthropic/claude-sonnet-5.5",
+      "providers": [
+        "anthropic"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 3475,
+      "inputTokenDetails": {
+        "noCacheTokens": 3475,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 570,
+      "outputTokenDetails": {
+        "textTokens": 570,
+        "reasoningTokens": 0
+      },
+      "totalTokens": 4045,
+      "raw": {
+        "service_tier": "standard",
+        "input_tokens": 3475,
+        "output_tokens": 570,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "speed": "standard"
+      }
+    },
+    "latencyMs": 4534,
+    "generationId": "gen_01M7EN7YNVXYDJ0HKWR343DPGJ",
+    "provider": "anthropic",
+    "costUsd": 0.01265
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2407,
+      "inputTokenDetails": {
+        "noCacheTokens": 2407,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1102,
+      "outputTokenDetails": {
+        "textTokens": 259,
+        "reasoningTokens": 843
+      },
+      "totalTokens": 3509,
+      "raw": {
+        "thoughtsTokenCount": 843,
+        "promptTokenCount": 2407,
+        "candidatesTokenCount": 259,
+        "totalTokenCount": 3509,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2407
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 259
+          }
+        ]
+      }
+    },
+    "latencyMs": 8275,
+    "generationId": "gen_01M7EN833JVQPE2V6AVC0GP0FX",
+    "provider": "vertex",
+    "costUsd": 0.0034771
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 1,
+    "findings": [
+      {
+        "category": "ASI10",
+        "severity": "low",
+        "evidenceQuote": "Manual: the on-call engineer disables the agent's service account. No tested runbook.",
+        "whyItMatters": "If the agent misbehaves, shutdown depends on a manual step with no tested procedure, so response may be slow or inconsistent.",
+        "recommendedControl": "Write and test a kill switch runbook, and run a periodic drill so the on-call engineer can disable the agent quickly."
+      },
+      {
+        "category": "ASI01",
+        "severity": "low",
+        "evidenceQuote": "Application logs, not yet forwarded to the SIEM",
+        "whyItMatters": "Chat is an untrusted input, and without SIEM forwarding, attempts to manipulate the agent or odd behaviour may go unnoticed by security monitoring.",
+        "recommendedControl": "Forward the application logs to the SIEM and add alerts for suspected prompt injection and unusual query patterns."
+      },
+      {
+        "category": "ASI04",
+        "severity": "low",
+        "evidenceQuote": "Claude Sonnet (version not specified)",
+        "whyItMatters": "An unpinned model version means behaviour can change without review, which weakens supply chain assurance.",
+        "recommendedControl": "Pin a specific model version and re-review the agent when the version changes."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This is a read-only assistant over an access-controlled internal wiki with no personal data, no write access and no external tool calls, so Tier 1 fits. Remaining gaps are minor: logs are not yet in the SIEM, the kill switch has no tested runbook, and the model version is not pinned. These should be closed but do not raise the tier.}"
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile clearly states there is no tested runbook for the manual kill switch, which is a valid operational risk for agent control."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The profile confirms logs are not forwarded to the SIEM, which hinders detection of potential agent manipulation via untrusted chat input."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The profile explicitly states the model version is not specified, which introduces supply chain risk as model behavior can change unexpectedly."
+      }
+    ],
+    "missedFindings": [],
+    "proposedTier": 1,
+    "summary": "The agent is a read-only internal knowledge base assistant with limited capabilities, posing minimal direct risk. The first reviewer's findings are accurate and address valid concerns regarding operational controls, logging, and model versioning. No significant risks were missed given the agent's restricted scope."
+  },
+  "costUsd": 0.0161271,
+  "seconds": 12.809
+}

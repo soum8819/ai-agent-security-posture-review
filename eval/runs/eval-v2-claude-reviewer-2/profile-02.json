@@ -1,0 +1,195 @@
+{
+  "profileId": "profile-02",
+  "tiers": {
+    "rule": 1,
+    "reviewer": 1,
+    "checker": 1,
+    "final": 1,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "contested": [],
+  "findings": [],
+  "missedFindings": [
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "\"tools\": [ { \"name\": \"HR policy library search\", \"permissions\": [ \"read\" ] } ]",
+      "whyItMatters": "While the tool only has read permissions, a compromised agent could be manipulated to misuse the search functionality to enumerate or extract specific internal policy documents that might contain sensitive operational details. This could lead to the disclosure of internal-only information, even if not personal data.",
+      "recommendedControl": "Ensure the HR policy library search tool has fine-grained access controls, limiting what specific types of policies or sections can be accessed by the bot, and implement output filtering to prevent the bot from directly quoting highly sensitive internal policy details.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI09",
+      "severity": "medium",
+      "evidenceQuote": "\"businessPurpose\": \"Answer employee questions about HR policies such as leave, benefits and travel, so the HR helpdesk handles fewer routine tickets.\"",
+      "whyItMatters": "Employees may place high trust in the bot's answers regarding HR policies, and if the bot is compromised or misaligned, it could provide incorrect or subtly manipulated information. This could lead employees to make decisions based on flawed advice, potentially causing compliance issues or personal detriment.",
+      "recommendedControl": "Add a clear disclaimer to the bot's interface stating that its answers are for informational purposes only and that employees should always consult official policy documents or HR personnel for definitive guidance.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "Read-only agent over internal published HR policy documents, with no actions, its own scoped token, session-only memory, SIEM logging and an available kill switch. Chat is an untrusted input, but the bot has no write tools or personal data access, so no supported risks stand out. Tier 1 is proposed.",
+  "checkerSummary": "The HR Policy Q&A Bot is a read-only agent accessing internal documents, placing it in Tier 1. However, it accepts untrusted chat input and acts without human confirmation, creating a significant risk of prompt injection and tool misuse. This could lead to the disclosure of internal policy details or the provision of misleading information to employees.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [
+    {
+      "finding": {
+        "category": "ASI01",
+        "severity": "high",
+        "evidenceQuote": "\"untrustedInputs\": [\"chat\"], \"humanConfirmsActions\": false",
+        "whyItMatters": "The bot accepts untrusted input from chat and acts without human confirmation, making it vulnerable to prompt injection attacks that could hijack its goals or extract unintended information. An attacker could manipulate the bot to provide misleading policy interpretations or reveal internal information not intended for general employee consumption.",
+        "recommendedControl": "Implement robust input sanitization and prompt injection detection mechanisms, and consider adding guardrails to restrict the bot's responses to only direct policy excerpts or summaries."
+      },
+      "reason": "evidence quote not found in the profile"
+    }
+  ],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "anthropic/claude-sonnet-5.5",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "anthropic/claude-sonnet-5.5",
+      "providers": [
+        "anthropic"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 3476,
+      "inputTokenDetails": {
+        "noCacheTokens": 3476,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 144,
+      "outputTokenDetails": {
+        "textTokens": 144,
+        "reasoningTokens": 0
+      },
+      "totalTokens": 3620,
+      "raw": {
+        "service_tier": "standard",
+        "input_tokens": 3476,
+        "output_tokens": 144,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "speed": "standard"
+      }
+    },
+    "latencyMs": 2026,
+    "generationId": "gen_01M7ENF3XWYKGE0D5WXPTHED30",
+    "provider": "anthropic",
+    "costUsd": 0.008392
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2076,
+      "inputTokenDetails": {
+        "noCacheTokens": 2076,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1355,
+      "outputTokenDetails": {
+        "textTokens": 586,
+        "reasoningTokens": 769
+      },
+      "totalTokens": 3431,
+      "raw": {
+        "thoughtsTokenCount": 769,
+        "promptTokenCount": 2076,
+        "candidatesTokenCount": 586,
+        "totalTokenCount": 3431,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2076
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 586
+          }
+        ]
+      }
+    },
+    "latencyMs": 10117,
+    "generationId": "gen_01M7ENF5XZ3FJJBNBT8TXQ877V",
+    "provider": "vertex",
+    "costUsd": 0.0040103
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 1,
+    "findings": [],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "Read-only agent over internal published HR policy documents, with no actions, its own scoped token, session-only memory, SIEM logging and an available kill switch. Chat is an untrusted input, but the bot has no write tools or personal data access, so no supported risks stand out. Tier 1 is proposed."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [],
+    "missedFindings": [
+      {
+        "category": "ASI01",
+        "severity": "high",
+        "evidenceQuote": "\"untrustedInputs\": [\"chat\"], \"humanConfirmsActions\": false",
+        "whyItMatters": "The bot accepts untrusted input from chat and acts without human confirmation, making it vulnerable to prompt injection attacks that could hijack its goals or extract unintended information. An attacker could manipulate the bot to provide misleading policy interpretations or reveal internal information not intended for general employee consumption.",
+        "recommendedControl": "Implement robust input sanitization and prompt injection detection mechanisms, and consider adding guardrails to restrict the bot's responses to only direct policy excerpts or summaries."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"tools\": [ { \"name\": \"HR policy library search\", \"permissions\": [ \"read\" ] } ]",
+        "whyItMatters": "While the tool only has read permissions, a compromised agent could be manipulated to misuse the search functionality to enumerate or extract specific internal policy documents that might contain sensitive operational details. This could lead to the disclosure of internal-only information, even if not personal data.",
+        "recommendedControl": "Ensure the HR policy library search tool has fine-grained access controls, limiting what specific types of policies or sections can be accessed by the bot, and implement output filtering to prevent the bot from directly quoting highly sensitive internal policy details."
+      },
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "\"businessPurpose\": \"Answer employee questions about HR policies such as leave, benefits and travel, so the HR helpdesk handles fewer routine tickets.\"",
+        "whyItMatters": "Employees may place high trust in the bot's answers regarding HR policies, and if the bot is compromised or misaligned, it could provide incorrect or subtly manipulated information. This could lead employees to make decisions based on flawed advice, potentially causing compliance issues or personal detriment.",
+        "recommendedControl": "Add a clear disclaimer to the bot's interface stating that its answers are for informational purposes only and that employees should always consult official policy documents or HR personnel for definitive guidance."
+      }
+    ],
+    "proposedTier": 1,
+    "summary": "The HR Policy Q&A Bot is a read-only agent accessing internal documents, placing it in Tier 1. However, it accepts untrusted chat input and acts without human confirmation, creating a significant risk of prompt injection and tool misuse. This could lead to the disclosure of internal policy details or the provision of misleading information to employees."
+  },
+  "costUsd": 0.0124023,
+  "seconds": 12.143
+}

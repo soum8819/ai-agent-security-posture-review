@@ -1,0 +1,333 @@
+{
+  "profileId": "profile-12",
+  "tiers": {
+    "rule": 2,
+    "reviewer": 2,
+    "checker": 2,
+    "final": 2,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 2: can act beyond reading (Team chat notification)",
+      "Tier 2: reads confidential data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "shared_token",
+      "whyItMatters": "A shared token across the orchestrator and sub-agents means any one compromised agent inherits the access of all, and actions cannot be attributed to a single agent. This also contradicts the claim that each sub-agent has scoped access.",
+      "recommendedControl": "Issue each agent its own scoped, short-lived credential and log actions per agent identity.",
+      "modelSeverity": "high",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The shared token contradicts the claim of scoped access for sub-agents and increases the blast radius of a compromise.",
+      "contested": false
+    },
+    {
+      "category": "ASI06",
+      "severity": "high",
+      "evidenceQuote": "over shared memory to produce account strategy recommendations",
+      "whyItMatters": "Persistent memory shared by the orchestrator and all sub-agents lets one poisoned entry bias every later recommendation across all agents, and confidential client data may linger in it.",
+      "recommendedControl": "Partition memory per agent, validate entries before they are written, set retention limits and allow memory to be purged.",
+      "modelSeverity": "high",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "Persistent shared memory for confidential data across multiple agents is a significant risk for poisoning and data leakage.",
+      "contested": false
+    },
+    {
+      "category": "ASI07",
+      "severity": "medium",
+      "evidenceQuote": "An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst",
+      "whyItMatters": "The profile lists no authentication or integrity checks on messages between the orchestrator and sub-agents, so spoofed or tampered messages could steer recommendations.",
+      "recommendedControl": "Authenticate and sign inter-agent messages and enforce per-agent authorization on each exchange.",
+      "modelSeverity": "medium",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile describes inter-agent communication but does not specify any security controls for it, posing a risk of manipulation.",
+      "contested": false
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "over shared memory to produce account strategy recommendations",
+      "whyItMatters": "A fault such as a hallucination or poisoned memory entry from one sub-agent can propagate through the shared memory to the orchestrator and the other sub-agents, compounding into flawed client recommendations and chat posts.",
+      "recommendedControl": "Add validation checkpoints between agents and isolate sub-agent outputs before the orchestrator consumes them.",
+      "modelSeverity": "medium",
+      "id": "F4",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "Shared memory and inter-agent coordination without validation points create a clear path for cascading failures from a single fault.",
+      "contested": false
+    },
+    {
+      "category": "ASI10",
+      "severity": "medium",
+      "evidenceQuote": "Application logs, not yet forwarded to the SIEM",
+      "whyItMatters": "Without SIEM forwarding, a compromised or deviating agent may go unnoticed. The kill switch is manual with no tested runbook, so containment would be slow and unreliable.",
+      "recommendedControl": "Forward logs to the SIEM with alerts on anomalous agent behaviour, and write and test a kill switch runbook before launch.",
+      "modelSeverity": "medium",
+      "id": "F5",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "Lack of SIEM forwarding for logs and an untested manual kill switch significantly hinder detection and response to a rogue agent.",
+      "contested": false
+    },
+    {
+      "category": "ASI02",
+      "severity": "low",
+      "evidenceQuote": "send_messages",
+      "whyItMatters": "The orchestrator can post summaries to team chat while reading confidential data, so manipulated output could leak confidential details to a broader audience.",
+      "recommendedControl": "Restrict chat posts to approved channels and apply data loss prevention filtering on outgoing summaries.",
+      "modelSeverity": "low",
+      "id": "F6",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent can read confidential data and send messages to team chat, creating a risk of accidental or malicious data exfiltration if output is manipulated.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI01",
+      "severity": "high",
+      "evidenceQuote": "An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations.",
+      "whyItMatters": "The orchestrator's role in coordinating sub-agents and producing recommendations makes it highly susceptible to prompt injection or manipulation that could hijack its goals or decision-making process.",
+      "recommendedControl": "Implement robust input validation and output filtering for all prompts and inter-agent communications to prevent goal hijacking.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI09",
+      "severity": "medium",
+      "evidenceQuote": "Produce account strategy recommendations for large corporate clients by combining several specialist views.",
+      "whyItMatters": "The agent's purpose is to provide strategic recommendations, which could lead human users to place undue trust in its output, especially if it's compromised or provides flawed advice.",
+      "recommendedControl": "Clearly label agent-generated content and ensure human review processes are robust enough to critically evaluate recommendations before implementation.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "A multi-agent orchestrator that reads confidential data and can only post chat messages, with a person confirming actions, so Tier 2 fits. Main concerns are the shared token, shared persistent memory across agents, unprotected inter-agent messaging, and weak monitoring with an untested manual kill switch. Resolve the credential and memory isolation issues and SIEM forwarding before launch.",
+  "checkerSummary": "The agent reads confidential data and can send messages, but all actions are human-confirmed, placing it in Tier 2. Several high-severity risks remain, including shared credentials, shared persistent memory, and a lack of inter-agent communication security. The kill switch is manual and untested, and logs are not forwarded to the SIEM, hindering incident response.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "anthropic/claude-sonnet-5.5",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "anthropic/claude-sonnet-5.5",
+      "providers": [
+        "anthropic"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 3586,
+      "inputTokenDetails": {
+        "noCacheTokens": 3586,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1095,
+      "outputTokenDetails": {
+        "textTokens": 1095,
+        "reasoningTokens": 0
+      },
+      "totalTokens": 4681,
+      "raw": {
+        "service_tier": "standard",
+        "input_tokens": 3586,
+        "output_tokens": 1095,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "speed": "standard"
+      }
+    },
+    "latencyMs": 7651,
+    "generationId": "gen_01M7ENCQ9R3M197Y1YYZ9120E9",
+    "provider": "anthropic",
+    "costUsd": 0.018122
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2867,
+      "inputTokenDetails": {
+        "noCacheTokens": 2867,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1548,
+      "outputTokenDetails": {
+        "textTokens": 685,
+        "reasoningTokens": 863
+      },
+      "totalTokens": 4415,
+      "raw": {
+        "thoughtsTokenCount": 863,
+        "promptTokenCount": 2867,
+        "candidatesTokenCount": 685,
+        "totalTokenCount": 4415,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2867
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 685
+          }
+        ]
+      }
+    },
+    "latencyMs": 7369,
+    "generationId": "gen_01M7ENCYRFQJN11TYS6H16VEPK",
+    "provider": "vertex",
+    "costUsd": 0.0047301
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 2,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "shared_token",
+        "whyItMatters": "A shared token across the orchestrator and sub-agents means any one compromised agent inherits the access of all, and actions cannot be attributed to a single agent. This also contradicts the claim that each sub-agent has scoped access.",
+        "recommendedControl": "Issue each agent its own scoped, short-lived credential and log actions per agent identity."
+      },
+      {
+        "category": "ASI06",
+        "severity": "high",
+        "evidenceQuote": "over shared memory to produce account strategy recommendations",
+        "whyItMatters": "Persistent memory shared by the orchestrator and all sub-agents lets one poisoned entry bias every later recommendation across all agents, and confidential client data may linger in it.",
+        "recommendedControl": "Partition memory per agent, validate entries before they are written, set retention limits and allow memory to be purged."
+      },
+      {
+        "category": "ASI07",
+        "severity": "medium",
+        "evidenceQuote": "An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst",
+        "whyItMatters": "The profile lists no authentication or integrity checks on messages between the orchestrator and sub-agents, so spoofed or tampered messages could steer recommendations.",
+        "recommendedControl": "Authenticate and sign inter-agent messages and enforce per-agent authorization on each exchange."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "over shared memory to produce account strategy recommendations",
+        "whyItMatters": "A fault such as a hallucination or poisoned memory entry from one sub-agent can propagate through the shared memory to the orchestrator and the other sub-agents, compounding into flawed client recommendations and chat posts.",
+        "recommendedControl": "Add validation checkpoints between agents and isolate sub-agent outputs before the orchestrator consumes them."
+      },
+      {
+        "category": "ASI10",
+        "severity": "medium",
+        "evidenceQuote": "Application logs, not yet forwarded to the SIEM",
+        "whyItMatters": "Without SIEM forwarding, a compromised or deviating agent may go unnoticed. The kill switch is manual with no tested runbook, so containment would be slow and unreliable.",
+        "recommendedControl": "Forward logs to the SIEM with alerts on anomalous agent behaviour, and write and test a kill switch runbook before launch."
+      },
+      {
+        "category": "ASI02",
+        "severity": "low",
+        "evidenceQuote": "send_messages",
+        "whyItMatters": "The orchestrator can post summaries to team chat while reading confidential data, so manipulated output could leak confidential details to a broader audience.",
+        "recommendedControl": "Restrict chat posts to approved channels and apply data loss prevention filtering on outgoing summaries."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "A multi-agent orchestrator that reads confidential data and can only post chat messages, with a person confirming actions, so Tier 2 fits. Main concerns are the shared token, shared persistent memory across agents, unprotected inter-agent messaging, and weak monitoring with an untested manual kill switch. Resolve the credential and memory isolation issues and SIEM forwarding before launch."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The shared token contradicts the claim of scoped access for sub-agents and increases the blast radius of a compromise."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "Persistent shared memory for confidential data across multiple agents is a significant risk for poisoning and data leakage."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The profile describes inter-agent communication but does not specify any security controls for it, posing a risk of manipulation."
+      },
+      {
+        "findingId": "F4",
+        "verdict": "agree",
+        "reason": "Shared memory and inter-agent coordination without validation points create a clear path for cascading failures from a single fault."
+      },
+      {
+        "findingId": "F5",
+        "verdict": "agree",
+        "reason": "Lack of SIEM forwarding for logs and an untested manual kill switch significantly hinder detection and response to a rogue agent."
+      },
+      {
+        "findingId": "F6",
+        "verdict": "agree",
+        "reason": "The agent can read confidential data and send messages to team chat, creating a risk of accidental or malicious data exfiltration if output is manipulated."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI01",
+        "severity": "high",
+        "evidenceQuote": "An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst, over shared memory to produce account strategy recommendations.",
+        "whyItMatters": "The orchestrator's role in coordinating sub-agents and producing recommendations makes it highly susceptible to prompt injection or manipulation that could hijack its goals or decision-making process.",
+        "recommendedControl": "Implement robust input validation and output filtering for all prompts and inter-agent communications to prevent goal hijacking."
+      },
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "Produce account strategy recommendations for large corporate clients by combining several specialist views.",
+        "whyItMatters": "The agent's purpose is to provide strategic recommendations, which could lead human users to place undue trust in its output, especially if it's compromised or provides flawed advice.",
+        "recommendedControl": "Clearly label agent-generated content and ensure human review processes are robust enough to critically evaluate recommendations before implementation."
+      }
+    ],
+    "proposedTier": 2,
+    "summary": "The agent reads confidential data and can send messages, but all actions are human-confirmed, placing it in Tier 2. Several high-severity risks remain, including shared credentials, shared persistent memory, and a lack of inter-agent communication security. The kill switch is manual and untested, and logs are not forwarded to the SIEM, hindering incident response."
+  },
+  "costUsd": 0.0228521,
+  "seconds": 15.02
+}

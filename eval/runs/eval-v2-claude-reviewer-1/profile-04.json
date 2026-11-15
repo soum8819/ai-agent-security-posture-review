@@ -1,0 +1,268 @@
+{
+  "profileId": "profile-04",
+  "tiers": {
+    "rule": 4,
+    "reviewer": 3,
+    "checker": 3,
+    "final": 4,
+    "setBy": [
+      "rule"
+    ],
+    "ruleReasons": [
+      "Tier 4: acts with no person confirming (Claims management system)",
+      "Tier 2: can act beyond reading (Claims management system, Team chat notification)",
+      "Tier 2: reads confidential, personal data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI01",
+      "severity": "high",
+      "evidenceQuote": "Reads each new email sent to the public claims address, including attached photos and PDFs",
+      "whyItMatters": "Anyone can email the public address, so crafted text or files could steer the agent to mis-prioritise claims, bury urgent ones or push false urgent alerts. Writes to the claim record happen with no person confirming.",
+      "recommendedControl": "Treat email and attachment content as untrusted data, restrict the agent to fixed priority and queue values with schema validation, and sample-review its decisions.",
+      "modelSeverity": "high",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile clearly states the agent processes untrusted email and attachments and writes to claim records without human confirmation, supporting the risk of goal hijack and the severity.",
+      "contested": false
+    },
+    {
+      "category": "ASI02",
+      "severity": "critical",
+      "evidenceQuote": "\"name\": \"Claims management system\"",
+      "whyItMatters": "The agent has read and write access to the claims system and the chat tool. Injected instructions could misuse these to alter claim records or post misleading messages, and the profile shows humanConfirmsActions is false.",
+      "recommendedControl": "Limit write permission to the priority and queue fields only, and send chat posts using fixed templates that exclude raw email content.",
+      "modelSeverity": "medium",
+      "raisedByRule": "R1",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent has write access to the claims management system and send access to team chat, with no human confirmation, which directly supports the risk of tool misuse via injection.",
+      "contested": false
+    },
+    {
+      "category": "ASI08",
+      "severity": "low",
+      "evidenceQuote": "posts urgent claims to the adjusters' team channel",
+      "whyItMatters": "A poisoned or wrong priority can propagate into the team channel and adjuster workload, causing misrouted work or alert floods. Adjusters can change priorities, which limits the impact.",
+      "recommendedControl": "Rate-limit channel posts and alert on abnormal spikes in urgent classifications.",
+      "modelSeverity": "low",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The finding correctly identifies that mis-prioritization can propagate to the team channel, and the ability for adjusters to change priorities appropriately lowers the severity.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"permissions\": [\"read\", \"write\"]",
+      "whyItMatters": "The agent has broad write permissions to the 'Claims management system' without specifying which fields, which could allow an attacker to modify more than just priority and queue, potentially altering critical claim data.",
+      "recommendedControl": "Restrict the agent's write permissions to only the 'priority' and 'queue' fields within the claims management system.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI05",
+      "severity": "medium",
+      "evidenceQuote": "including attached photos and PDFs",
+      "whyItMatters": "Processing arbitrary file types like PDFs, especially from untrusted sources, introduces a risk of embedded malicious content or vulnerabilities in the parsing library that could lead to unexpected code execution or system compromise.",
+      "recommendedControl": "Implement robust content sanitization and scanning for all attachments, and consider converting PDFs to a safer format before processing.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R1",
+      "severity": "critical",
+      "reason": "Lists Claims management system that can move money or change customer records, and no person confirms its actions.",
+      "field": "tools.permissions, humanConfirmsActions",
+      "category": "ASI02"
+    },
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (email, uploaded_files) and lists Claims management system that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "The agent triages claim emails and handles confidential and personal data, so it is proposed as Tier 3. It takes small actions with no person confirming, but it cannot approve or pay claims, and it has a scoped token, SIEM logging and a kill switch. The main risk is untrusted public email and attachments steering its writes and alerts, so restrict the writable fields and validate its outputs.",
+  "checkerSummary": "The agent processes confidential and personal customer data from untrusted sources and writes to a claims management system without human confirmation. While it does not move money, its ability to alter claim records and post to team chats makes it a significant risk. The broad write permissions to the claims system and processing of untrusted attachments are notable concerns.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "anthropic/claude-sonnet-5.5",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "anthropic/claude-sonnet-5.5",
+      "providers": [
+        "anthropic"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 3577,
+      "inputTokenDetails": {
+        "noCacheTokens": 3577,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 664,
+      "outputTokenDetails": {
+        "textTokens": 664,
+        "reasoningTokens": 0
+      },
+      "totalTokens": 4241,
+      "raw": {
+        "service_tier": "standard",
+        "input_tokens": 3577,
+        "output_tokens": 664,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "speed": "standard"
+      }
+    },
+    "latencyMs": 6043,
+    "generationId": "gen_01M7EN6BMKNAV98Z9C8T5JMMRT",
+    "provider": "anthropic",
+    "costUsd": 0.013794
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2548,
+      "inputTokenDetails": {
+        "noCacheTokens": 2548,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1341,
+      "outputTokenDetails": {
+        "textTokens": 522,
+        "reasoningTokens": 819
+      },
+      "totalTokens": 3889,
+      "raw": {
+        "thoughtsTokenCount": 819,
+        "promptTokenCount": 2548,
+        "candidatesTokenCount": 522,
+        "totalTokenCount": 3889,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2548
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 522
+          }
+        ]
+      }
+    },
+    "latencyMs": 9399,
+    "generationId": "gen_01M7EN6HFXDVGFZW09WDGYV7NZ",
+    "provider": "vertex",
+    "costUsd": 0.0041169
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI01",
+        "severity": "high",
+        "evidenceQuote": "Reads each new email sent to the public claims address, including attached photos and PDFs",
+        "whyItMatters": "Anyone can email the public address, so crafted text or files could steer the agent to mis-prioritise claims, bury urgent ones or push false urgent alerts. Writes to the claim record happen with no person confirming.",
+        "recommendedControl": "Treat email and attachment content as untrusted data, restrict the agent to fixed priority and queue values with schema validation, and sample-review its decisions."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"name\": \"Claims management system\"",
+        "whyItMatters": "The agent has read and write access to the claims system and the chat tool. Injected instructions could misuse these to alter claim records or post misleading messages, and the profile shows humanConfirmsActions is false.",
+        "recommendedControl": "Limit write permission to the priority and queue fields only, and send chat posts using fixed templates that exclude raw email content."
+      },
+      {
+        "category": "ASI08",
+        "severity": "low",
+        "evidenceQuote": "posts urgent claims to the adjusters' team channel",
+        "whyItMatters": "A poisoned or wrong priority can propagate into the team channel and adjuster workload, causing misrouted work or alert floods. Adjusters can change priorities, which limits the impact.",
+        "recommendedControl": "Rate-limit channel posts and alert on abnormal spikes in urgent classifications."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The agent triages claim emails and handles confidential and personal data, so it is proposed as Tier 3. It takes small actions with no person confirming, but it cannot approve or pay claims, and it has a scoped token, SIEM logging and a kill switch. The main risk is untrusted public email and attachments steering its writes and alerts, so restrict the writable fields and validate its outputs."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile clearly states the agent processes untrusted email and attachments and writes to claim records without human confirmation, supporting the risk of goal hijack and the severity."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The agent has write access to the claims management system and send access to team chat, with no human confirmation, which directly supports the risk of tool misuse via injection."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The finding correctly identifies that mis-prioritization can propagate to the team channel, and the ability for adjusters to change priorities appropriately lowers the severity."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"permissions\": [\"read\", \"write\"]",
+        "whyItMatters": "The agent has broad write permissions to the 'Claims management system' without specifying which fields, which could allow an attacker to modify more than just priority and queue, potentially altering critical claim data.",
+        "recommendedControl": "Restrict the agent's write permissions to only the 'priority' and 'queue' fields within the claims management system."
+      },
+      {
+        "category": "ASI05",
+        "severity": "medium",
+        "evidenceQuote": "including attached photos and PDFs",
+        "whyItMatters": "Processing arbitrary file types like PDFs, especially from untrusted sources, introduces a risk of embedded malicious content or vulnerabilities in the parsing library that could lead to unexpected code execution or system compromise.",
+        "recommendedControl": "Implement robust content sanitization and scanning for all attachments, and consider converting PDFs to a safer format before processing."
+      }
+    ],
+    "proposedTier": 3,
+    "summary": "The agent processes confidential and personal customer data from untrusted sources and writes to a claims management system without human confirmation. While it does not move money, its ability to alter claim records and post to team chats makes it a significant risk. The broad write permissions to the claims system and processing of untrusted attachments are notable concerns."
+  },
+  "costUsd": 0.0179109,
+  "seconds": 15.442
+}

@@ -1,0 +1,212 @@
+{
+  "profileId": "profile-07",
+  "tiers": {
+    "rule": 3,
+    "reviewer": 3,
+    "checker": 3,
+    "final": 3,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (Payment exceptions queue, Payment release API)",
+      "Tier 2: reads confidential, customer_financial, personal data"
+    ]
+  },
+  "contested": [],
+  "findings": [],
+  "missedFindings": [
+    {
+      "category": "ASI01",
+      "severity": "high",
+      "evidenceQuote": "\"untrustedInputs\": []",
+      "whyItMatters": "The agent processes payment exception details, which are likely to contain untrusted data from external sources or human input, despite the profile stating no untrusted inputs. This oversight could allow malicious data to influence the agent's proposals or actions through prompt injection.",
+      "recommendedControl": "Update the profile to accurately reflect potential untrusted inputs, and implement robust input validation and sanitization for all data processed by the agent, especially from payment exception records.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI03",
+      "severity": "medium",
+      "evidenceQuote": "\"Payments above the analyst's own limit still need a second analyst.\"",
+      "whyItMatters": "The profile mentions a 'second analyst' for payments above a certain limit, but the mechanism for this secondary approval is not detailed. This lack of clarity could lead to an incomplete or bypassable control for high-value transactions.",
+      "recommendedControl": "Specify the exact workflow and technical controls for secondary analyst approval, ensuring it is a mandatory and auditable step before high-value payments are released.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"memory\": \"session\"",
+      "whyItMatters": "Using session memory means that malicious input or compromised data from one interaction could persist and influence subsequent agent decisions within the same session. This could lead to biased proposals or actions over time.",
+      "recommendedControl": "Implement strict context clearing mechanisms or re-evaluate the necessity of session memory, ensuring sensitive or critical decision-making contexts are reset or re-verified frequently.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "The agent reads customer financial and personal data, so it is Tier 3. It can move money through the release API, but only after an analyst confirms, with a second analyst required above the limit. It uses its own scoped token, logs to the SIEM, has session-only memory, and has a working kill switch. No supported risks were found, so no findings are reported.",
+  "checkerSummary": "The agent handles customer financial data and can initiate money movement, placing it in Tier 3. While human confirmation is required for payment release, the profile has several unaddressed risks, including potential untrusted inputs, write access to critical payment data, and an unclear secondary approval process for high-value transactions. These issues could lead to data manipulation or unauthorized payment proposals.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [
+    {
+      "finding": {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "\"permissions\": [\"write\"]",
+        "whyItMatters": "The agent has write access to the 'Payment exceptions queue' and proposes corrected fields, which could be exploited to introduce malicious or incorrect data into the system. If the agent is compromised, it could write fraudulent proposals that an analyst might inadvertently approve.",
+        "recommendedControl": "Implement strict validation and anomaly detection on the data written to the 'Payment exceptions queue' by the agent, and ensure human analysts have clear visibility and easy means to reject or correct proposals."
+      },
+      "reason": "evidence quote not found in the profile"
+    }
+  ],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "anthropic/claude-sonnet-5.5",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "anthropic/claude-sonnet-5.5",
+      "providers": [
+        "anthropic"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 3577,
+      "inputTokenDetails": {
+        "noCacheTokens": 3577,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 153,
+      "outputTokenDetails": {
+        "textTokens": 153,
+        "reasoningTokens": 0
+      },
+      "totalTokens": 3730,
+      "raw": {
+        "service_tier": "standard",
+        "input_tokens": 3577,
+        "output_tokens": 153,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "speed": "standard"
+      }
+    },
+    "latencyMs": 1750,
+    "generationId": "gen_01M7ENK0KFMNSQR3HDTB29VXRX",
+    "provider": "anthropic",
+    "costUsd": 0.008684
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2146,
+      "inputTokenDetails": {
+        "noCacheTokens": 2146,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1603,
+      "outputTokenDetails": {
+        "textTokens": 640,
+        "reasoningTokens": 963
+      },
+      "totalTokens": 3749,
+      "raw": {
+        "thoughtsTokenCount": 963,
+        "promptTokenCount": 2146,
+        "candidatesTokenCount": 640,
+        "totalTokenCount": 3749,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2146
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 640
+          }
+        ]
+      }
+    },
+    "latencyMs": 9823,
+    "generationId": "gen_01M7ENK2BXV50GY9TWSYEYSZ38",
+    "provider": "vertex",
+    "costUsd": 0.0046513
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 3,
+    "findings": [],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The agent reads customer financial and personal data, so it is Tier 3. It can move money through the release API, but only after an analyst confirms, with a second analyst required above the limit. It uses its own scoped token, logs to the SIEM, has session-only memory, and has a working kill switch. No supported risks were found, so no findings are reported."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [],
+    "missedFindings": [
+      {
+        "category": "ASI01",
+        "severity": "high",
+        "evidenceQuote": "\"untrustedInputs\": []",
+        "whyItMatters": "The agent processes payment exception details, which are likely to contain untrusted data from external sources or human input, despite the profile stating no untrusted inputs. This oversight could allow malicious data to influence the agent's proposals or actions through prompt injection.",
+        "recommendedControl": "Update the profile to accurately reflect potential untrusted inputs, and implement robust input validation and sanitization for all data processed by the agent, especially from payment exception records."
+      },
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "\"permissions\": [\"write\"]",
+        "whyItMatters": "The agent has write access to the 'Payment exceptions queue' and proposes corrected fields, which could be exploited to introduce malicious or incorrect data into the system. If the agent is compromised, it could write fraudulent proposals that an analyst might inadvertently approve.",
+        "recommendedControl": "Implement strict validation and anomaly detection on the data written to the 'Payment exceptions queue' by the agent, and ensure human analysts have clear visibility and easy means to reject or correct proposals."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"Payments above the analyst's own limit still need a second analyst.\"",
+        "whyItMatters": "The profile mentions a 'second analyst' for payments above a certain limit, but the mechanism for this secondary approval is not detailed. This lack of clarity could lead to an incomplete or bypassable control for high-value transactions.",
+        "recommendedControl": "Specify the exact workflow and technical controls for secondary analyst approval, ensuring it is a mandatory and auditable step before high-value payments are released."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"memory\": \"session\"",
+        "whyItMatters": "Using session memory means that malicious input or compromised data from one interaction could persist and influence subsequent agent decisions within the same session. This could lead to biased proposals or actions over time.",
+        "recommendedControl": "Implement strict context clearing mechanisms or re-evaluate the necessity of session memory, ensuring sensitive or critical decision-making contexts are reset or re-verified frequently."
+      }
+    ],
+    "proposedTier": 3,
+    "summary": "The agent handles customer financial data and can initiate money movement, placing it in Tier 3. While human confirmation is required for payment release, the profile has several unaddressed risks, including potential untrusted inputs, write access to critical payment data, and an unclear secondary approval process for high-value transactions. These issues could lead to data manipulation or unauthorized payment proposals."
+  },
+  "costUsd": 0.013335300000000001,
+  "seconds": 11.573
+}

@@ -1,0 +1,294 @@
+{
+  "profileId": "profile-03",
+  "tiers": {
+    "rule": 1,
+    "reviewer": 1,
+    "checker": 1,
+    "final": 1,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "A shared token means agent activity cannot be tied to a single identity, and a leak or misuse would expose every system and user sharing it. The CRM read access is then not scoped to this agent.",
+      "recommendedControl": "Issue the agent its own scoped, read-only service credential for each tool, with rotation and individual attribution.",
+      "modelSeverity": "medium",
+      "raisedByRule": "R4",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly states the use of a shared token, which is a clear security risk for identity and privilege abuse.",
+      "contested": false
+    },
+    {
+      "category": "ASI01",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [\"web\"]",
+      "whyItMatters": "Web content could contain injected instructions or false data that steer the agent or distort the brief, and the agent also has CRM context it could be tricked into including. A relationship manager might rely on a poisoned brief.",
+      "recommendedControl": "Treat web content as untrusted data, filter it before it reaches the model, and require citations to sources in every brief so the reader can verify claims.",
+      "modelSeverity": "medium",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent processes untrusted web input, which can lead to prompt injection and manipulation of its output, as described.",
+      "contested": false
+    },
+    {
+      "category": "ASI10",
+      "severity": "medium",
+      "evidenceQuote": "Application logs, not yet forwarded to the SIEM",
+      "whyItMatters": "Without SIEM forwarding, security teams cannot detect or investigate abnormal agent behavior or deviation from scope in a timely way.",
+      "recommendedControl": "Forward agent logs, including tool calls and CRM queries, to the SIEM before launch and add alerting.",
+      "modelSeverity": "medium",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The lack of SIEM forwarding for logs prevents timely detection and investigation of potential rogue agent behavior.",
+      "contested": false
+    },
+    {
+      "category": "ASI10",
+      "severity": "low",
+      "evidenceQuote": "Manual: the on-call engineer disables the agent's service account. No tested runbook.",
+      "whyItMatters": "A manual kill switch with no tested runbook may be slow or fail when the agent must be stopped urgently. Because the service account is shared, disabling it could also affect other users.",
+      "recommendedControl": "Write and test a kill-switch runbook, and give the agent a dedicated service account that can be disabled without side effects.",
+      "modelSeverity": "low",
+      "id": "F4",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "A manual kill switch without a tested runbook and a shared service account introduces significant operational risk and potential for delayed response.",
+      "contested": false
+    },
+    {
+      "category": "ASI04",
+      "severity": "low",
+      "evidenceQuote": "Claude Sonnet (version not specified)",
+      "whyItMatters": "An unpinned model version means behavior can change without review, and the third-party web and news sources feed unvetted content into the agent.",
+      "recommendedControl": "Pin the model to a specific reviewed version and re-run the security review when it changes.",
+      "modelSeverity": "low",
+      "id": "F5",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "An unpinned model version allows for unreviewed changes in agent behavior, which is a valid supply chain vulnerability.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "memory\": \"none\"",
+      "whyItMatters": "While the profile states no memory, the agent's purpose of summarizing information implies it processes and retains context for the duration of a request, which could be poisoned by untrusted input and lead to cascading failures in its output.",
+      "recommendedControl": "Implement robust input validation and sanitization for all data sources, especially untrusted web content, to prevent malicious data from influencing the agent's processing.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This agent only reads public and internal data and writes nothing, so it fits Tier 1. Weaknesses to fix before launch are the shared token, untrusted web input, logs not reaching the SIEM, and an untested manual kill switch. A person reads the brief before use, which limits the impact of a bad output.}",
+  "checkerSummary": "The agent is a read-only system that produces advisory briefs, placing it in Tier 1. Several medium-severity risks were identified, including shared credentials, untrusted web input, and inadequate logging and kill switch procedures. An additional concern is the potential for context poisoning despite the stated lack of memory, given its summarization function.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "anthropic/claude-sonnet-5.5",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "anthropic/claude-sonnet-5.5",
+      "providers": [
+        "anthropic"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 3529,
+      "inputTokenDetails": {
+        "noCacheTokens": 3529,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 897,
+      "outputTokenDetails": {
+        "textTokens": 897,
+        "reasoningTokens": 0
+      },
+      "totalTokens": 4426,
+      "raw": {
+        "service_tier": "standard",
+        "input_tokens": 3529,
+        "output_tokens": 897,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "speed": "standard"
+      }
+    },
+    "latencyMs": 8137,
+    "generationId": "gen_01M7ENFWC9VVVSFT3D681A43EE",
+    "provider": "anthropic",
+    "costUsd": 0.016028
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2756,
+      "inputTokenDetails": {
+        "noCacheTokens": 2756,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1312,
+      "outputTokenDetails": {
+        "textTokens": 500,
+        "reasoningTokens": 812
+      },
+      "totalTokens": 4068,
+      "raw": {
+        "thoughtsTokenCount": 812,
+        "promptTokenCount": 2756,
+        "candidatesTokenCount": 500,
+        "totalTokenCount": 4068,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2756
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 500
+          }
+        ]
+      }
+    },
+    "latencyMs": 9424,
+    "generationId": "gen_01M7ENG4A5V5H60B5GVW6NMZW4",
+    "provider": "vertex",
+    "costUsd": 0.0041068
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 1,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "A shared token means agent activity cannot be tied to a single identity, and a leak or misuse would expose every system and user sharing it. The CRM read access is then not scoped to this agent.",
+        "recommendedControl": "Issue the agent its own scoped, read-only service credential for each tool, with rotation and individual attribution."
+      },
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [\"web\"]",
+        "whyItMatters": "Web content could contain injected instructions or false data that steer the agent or distort the brief, and the agent also has CRM context it could be tricked into including. A relationship manager might rely on a poisoned brief.",
+        "recommendedControl": "Treat web content as untrusted data, filter it before it reaches the model, and require citations to sources in every brief so the reader can verify claims."
+      },
+      {
+        "category": "ASI10",
+        "severity": "medium",
+        "evidenceQuote": "Application logs, not yet forwarded to the SIEM",
+        "whyItMatters": "Without SIEM forwarding, security teams cannot detect or investigate abnormal agent behavior or deviation from scope in a timely way.",
+        "recommendedControl": "Forward agent logs, including tool calls and CRM queries, to the SIEM before launch and add alerting."
+      },
+      {
+        "category": "ASI10",
+        "severity": "low",
+        "evidenceQuote": "Manual: the on-call engineer disables the agent's service account. No tested runbook.",
+        "whyItMatters": "A manual kill switch with no tested runbook may be slow or fail when the agent must be stopped urgently. Because the service account is shared, disabling it could also affect other users.",
+        "recommendedControl": "Write and test a kill-switch runbook, and give the agent a dedicated service account that can be disabled without side effects."
+      },
+      {
+        "category": "ASI04",
+        "severity": "low",
+        "evidenceQuote": "Claude Sonnet (version not specified)",
+        "whyItMatters": "An unpinned model version means behavior can change without review, and the third-party web and news sources feed unvetted content into the agent.",
+        "recommendedControl": "Pin the model to a specific reviewed version and re-run the security review when it changes."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent only reads public and internal data and writes nothing, so it fits Tier 1. Weaknesses to fix before launch are the shared token, untrusted web input, logs not reaching the SIEM, and an untested manual kill switch. A person reads the brief before use, which limits the impact of a bad output.}"
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile explicitly states the use of a shared token, which is a clear security risk for identity and privilege abuse."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The agent processes untrusted web input, which can lead to prompt injection and manipulation of its output, as described."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The lack of SIEM forwarding for logs prevents timely detection and investigation of potential rogue agent behavior."
+      },
+      {
+        "findingId": "F4",
+        "verdict": "agree",
+        "reason": "A manual kill switch without a tested runbook and a shared service account introduces significant operational risk and potential for delayed response."
+      },
+      {
+        "findingId": "F5",
+        "verdict": "agree",
+        "reason": "An unpinned model version allows for unreviewed changes in agent behavior, which is a valid supply chain vulnerability."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "memory\": \"none\"",
+        "whyItMatters": "While the profile states no memory, the agent's purpose of summarizing information implies it processes and retains context for the duration of a request, which could be poisoned by untrusted input and lead to cascading failures in its output.",
+        "recommendedControl": "Implement robust input validation and sanitization for all data sources, especially untrusted web content, to prevent malicious data from influencing the agent's processing."
+      }
+    ],
+    "proposedTier": 1,
+    "summary": "The agent is a read-only system that produces advisory briefs, placing it in Tier 1. Several medium-severity risks were identified, including shared credentials, untrusted web input, and inadequate logging and kill switch procedures. An additional concern is the potential for context poisoning despite the stated lack of memory, given its summarization function."
+  },
+  "costUsd": 0.0201348,
+  "seconds": 17.561
+}

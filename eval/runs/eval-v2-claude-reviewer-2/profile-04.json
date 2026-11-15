@@ -1,0 +1,235 @@
+{
+  "profileId": "profile-04",
+  "tiers": {
+    "rule": 4,
+    "reviewer": 3,
+    "checker": 3,
+    "final": 4,
+    "setBy": [
+      "rule"
+    ],
+    "ruleReasons": [
+      "Tier 4: acts with no person confirming (Claims management system)",
+      "Tier 2: can act beyond reading (Claims management system, Team chat notification)",
+      "Tier 2: reads confidential, personal data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI01",
+      "severity": "high",
+      "evidenceQuote": "Reads each new email sent to the public claims address, including attached photos and PDFs",
+      "whyItMatters": "Anyone can email the public claims address, so crafted text in emails or attachments could steer the agent to set wrong priorities or queues, or push misleading posts to adjusters. Hidden instructions could also bury genuine urgent claims.",
+      "recommendedControl": "Treat email and attachment content as untrusted data, add input filtering and injection detection, and sample-check priority and queue decisions against rules.",
+      "modelSeverity": "high",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile clearly states the agent reads untrusted emails and attachments, which directly supports the risk of agent goal hijack as described.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI02",
+      "severity": "critical",
+      "evidenceQuote": "\"Claims management system\", \"permissions\": [\"read\", \"write\"]",
+      "whyItMatters": "The agent can autonomously write to the claims management system without human confirmation, meaning a successful exploit could lead to incorrect claim statuses, priorities, or other data manipulation that impacts business operations and customer service.",
+      "recommendedControl": "Implement strict validation and sanitization of all data written to the claims management system, and consider adding human review for critical changes or anomalies.",
+      "modelSeverity": "high",
+      "raisedByRule": "R1"
+    },
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"humanConfirmsActions\": false",
+      "whyItMatters": "The agent operates without human oversight for its actions, increasing the risk that any successful manipulation or error could directly impact operational systems and workflows without immediate detection or intervention.",
+      "recommendedControl": "Introduce a human confirmation step for any write actions to critical systems or for notifications that could significantly alter workflow, or implement robust anomaly detection and alerting.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI09",
+      "severity": "medium",
+      "evidenceQuote": "\"Team chat notification\", \"permissions\": [\"send_messages\"]",
+      "whyItMatters": "The agent can send messages to adjusters' team channels without human confirmation, which could be exploited to send misleading information, create false urgency, or distract adjusters, potentially impacting their trust and decision-making.",
+      "recommendedControl": "Implement clear labeling for agent-generated messages in team chat and consider a mechanism for adjusters to easily flag or verify agent notifications.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R1",
+      "severity": "critical",
+      "reason": "Lists Claims management system that can move money or change customer records, and no person confirms its actions.",
+      "field": "tools.permissions, humanConfirmsActions",
+      "category": "ASI02"
+    },
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (email, uploaded_files) and lists Claims management system that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "The agent reads confidential and personal claims data from a public inbox and writes to the claims system with no person confirming. It does not move money, so the tier is 3 for handling customer data. The main risk is goal hijack through untrusted emails and files. Scoped token, SIEM logging, a kill switch and adjuster override reduce the impact.",
+  "checkerSummary": "The Claims Intake Triage Agent processes confidential and personal customer data from untrusted sources and autonomously writes to the claims management system. While the first reviewer correctly identified the risk of goal hijack from untrusted inputs, the agent's unconfirmed write access to sensitive systems and its ability to send unconfirmed chat notifications pose additional significant risks. The agent's direct interaction with customer data and its ability to modify core business records without human confirmation places it in Tier 3.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "anthropic/claude-sonnet-5.5",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "anthropic/claude-sonnet-5.5",
+      "providers": [
+        "anthropic"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 3577,
+      "inputTokenDetails": {
+        "noCacheTokens": 3577,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 342,
+      "outputTokenDetails": {
+        "textTokens": 342,
+        "reasoningTokens": 0
+      },
+      "totalTokens": 3919,
+      "raw": {
+        "service_tier": "standard",
+        "input_tokens": 3577,
+        "output_tokens": 342,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "speed": "standard"
+      }
+    },
+    "latencyMs": 3562,
+    "generationId": "gen_01M7ENGT07E5MZ942AZ84ENERR",
+    "provider": "anthropic",
+    "costUsd": 0.010574
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2301,
+      "inputTokenDetails": {
+        "noCacheTokens": 2301,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1341,
+      "outputTokenDetails": {
+        "textTokens": 560,
+        "reasoningTokens": 781
+      },
+      "totalTokens": 3642,
+      "raw": {
+        "thoughtsTokenCount": 781,
+        "promptTokenCount": 2301,
+        "candidatesTokenCount": 560,
+        "totalTokenCount": 3642,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2301
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 560
+          }
+        ]
+      }
+    },
+    "latencyMs": 9602,
+    "generationId": "gen_01M7ENGXHE4P5YTR9VSRR8YD0K",
+    "provider": "vertex",
+    "costUsd": 0.0040428
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI01",
+        "severity": "high",
+        "evidenceQuote": "Reads each new email sent to the public claims address, including attached photos and PDFs",
+        "whyItMatters": "Anyone can email the public claims address, so crafted text in emails or attachments could steer the agent to set wrong priorities or queues, or push misleading posts to adjusters. Hidden instructions could also bury genuine urgent claims.",
+        "recommendedControl": "Treat email and attachment content as untrusted data, add input filtering and injection detection, and sample-check priority and queue decisions against rules."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The agent reads confidential and personal claims data from a public inbox and writes to the claims system with no person confirming. It does not move money, so the tier is 3 for handling customer data. The main risk is goal hijack through untrusted emails and files. Scoped token, SIEM logging, a kill switch and adjuster override reduce the impact."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile clearly states the agent reads untrusted emails and attachments, which directly supports the risk of agent goal hijack as described."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "\"Claims management system\", \"permissions\": [\"read\", \"write\"]",
+        "whyItMatters": "The agent can autonomously write to the claims management system without human confirmation, meaning a successful exploit could lead to incorrect claim statuses, priorities, or other data manipulation that impacts business operations and customer service.",
+        "recommendedControl": "Implement strict validation and sanitization of all data written to the claims management system, and consider adding human review for critical changes or anomalies."
+      },
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"humanConfirmsActions\": false",
+        "whyItMatters": "The agent operates without human oversight for its actions, increasing the risk that any successful manipulation or error could directly impact operational systems and workflows without immediate detection or intervention.",
+        "recommendedControl": "Introduce a human confirmation step for any write actions to critical systems or for notifications that could significantly alter workflow, or implement robust anomaly detection and alerting."
+      },
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "\"Team chat notification\", \"permissions\": [\"send_messages\"]",
+        "whyItMatters": "The agent can send messages to adjusters' team channels without human confirmation, which could be exploited to send misleading information, create false urgency, or distract adjusters, potentially impacting their trust and decision-making.",
+        "recommendedControl": "Implement clear labeling for agent-generated messages in team chat and consider a mechanism for adjusters to easily flag or verify agent notifications."
+      }
+    ],
+    "proposedTier": 3,
+    "summary": "The Claims Intake Triage Agent processes confidential and personal customer data from untrusted sources and autonomously writes to the claims management system. While the first reviewer correctly identified the risk of goal hijack from untrusted inputs, the agent's unconfirmed write access to sensitive systems and its ability to send unconfirmed chat notifications pose additional significant risks. The agent's direct interaction with customer data and its ability to modify core business records without human confirmation places it in Tier 3."
+  },
+  "costUsd": 0.0146168,
+  "seconds": 13.164
+}

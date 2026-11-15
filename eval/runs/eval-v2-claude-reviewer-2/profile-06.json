@@ -1,0 +1,239 @@
+{
+  "profileId": "profile-06",
+  "tiers": {
+    "rule": 1,
+    "reviewer": 1,
+    "checker": 1,
+    "final": 1,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI10",
+      "severity": "low",
+      "evidenceQuote": "Application logs, not yet forwarded to the SIEM",
+      "whyItMatters": "Logs that are not in the SIEM may go unmonitored, so unusual or off-scope agent behaviour could be missed or detected late.",
+      "recommendedControl": "Forward the agent's application logs to the SIEM and add alerts for unusual query volume or retrieval patterns before launch.",
+      "modelSeverity": "low",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile clearly states logs are not forwarded to the SIEM, which is a valid concern for detecting rogue agent behavior, and the severity is appropriate.",
+      "contested": false
+    },
+    {
+      "category": "ASI10",
+      "severity": "low",
+      "evidenceQuote": "Manual: the on-call engineer disables the agent's service account. No tested runbook.",
+      "whyItMatters": "A manual kill switch with no tested runbook may be slow or fail when the agent must be stopped quickly.",
+      "recommendedControl": "Write a runbook for disabling the service account and test it in a drill before launch.",
+      "modelSeverity": "low",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly mentions 'No tested runbook' for the kill switch, indicating a potential delay in stopping a misbehaving agent, and the severity is appropriate.",
+      "contested": false
+    },
+    {
+      "category": "ASI04",
+      "severity": "low",
+      "evidenceQuote": "Claude Sonnet (version not specified)",
+      "whyItMatters": "An unpinned model version means the provider could change model behaviour without review, which weakens supply chain control.",
+      "recommendedControl": "Pin a specific model version and re-run the security review when the version changes.",
+      "modelSeverity": "low",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile states 'version not specified' for the model, which is a direct supply chain risk if the model behavior changes unexpectedly, and the severity is appropriate.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [],
+  "ruleHits": [],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "Read-only assistant over an internal, access-controlled wiki with no personal data and its own scoped token, so Tier 1 fits. Remaining gaps are low severity: logs are not yet in the SIEM, the kill switch has no tested runbook, and the model version is not pinned.",
+  "checkerSummary": "The first reviewer's findings are accurate and well-supported by the profile. I've identified an additional medium-severity risk related to session memory, as sensitive data could persist within a session. The agent is read-only, handles internal documents, and requires human confirmation for actions, placing it in Tier 1.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [
+    {
+      "finding": {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "memory: session",
+        "whyItMatters": "While memory is cleared per session, sensitive information from a user's query or the wiki could persist within that session, potentially being exposed or misused if the session is compromised or the agent's context is manipulated.",
+        "recommendedControl": "Implement strict data sanitization and redaction policies for all information stored in session memory, especially before any logging or external communication."
+      },
+      "reason": "evidence quote not found in the profile"
+    }
+  ],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "anthropic/claude-sonnet-5.5",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "anthropic/claude-sonnet-5.5",
+      "providers": [
+        "anthropic"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 3475,
+      "inputTokenDetails": {
+        "noCacheTokens": 3475,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 524,
+      "outputTokenDetails": {
+        "textTokens": 524,
+        "reasoningTokens": 0
+      },
+      "totalTokens": 3999,
+      "raw": {
+        "service_tier": "standard",
+        "input_tokens": 3475,
+        "output_tokens": 524,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "speed": "standard"
+      }
+    },
+    "latencyMs": 4465,
+    "generationId": "gen_01M7ENJ9K9XPK1Z47SK76T7B41",
+    "provider": "anthropic",
+    "costUsd": 0.01219
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2405,
+      "inputTokenDetails": {
+        "noCacheTokens": 2405,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1218,
+      "outputTokenDetails": {
+        "textTokens": 411,
+        "reasoningTokens": 807
+      },
+      "totalTokens": 3623,
+      "raw": {
+        "thoughtsTokenCount": 807,
+        "promptTokenCount": 2405,
+        "candidatesTokenCount": 411,
+        "totalTokenCount": 3623,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2405
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 411
+          }
+        ]
+      }
+    },
+    "latencyMs": 6218,
+    "generationId": "gen_01M7ENJDY9N4SXQ8V84JST0KA0",
+    "provider": "vertex",
+    "costUsd": 0.0037665
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 1,
+    "findings": [
+      {
+        "category": "ASI10",
+        "severity": "low",
+        "evidenceQuote": "Application logs, not yet forwarded to the SIEM",
+        "whyItMatters": "Logs that are not in the SIEM may go unmonitored, so unusual or off-scope agent behaviour could be missed or detected late.",
+        "recommendedControl": "Forward the agent's application logs to the SIEM and add alerts for unusual query volume or retrieval patterns before launch."
+      },
+      {
+        "category": "ASI10",
+        "severity": "low",
+        "evidenceQuote": "Manual: the on-call engineer disables the agent's service account. No tested runbook.",
+        "whyItMatters": "A manual kill switch with no tested runbook may be slow or fail when the agent must be stopped quickly.",
+        "recommendedControl": "Write a runbook for disabling the service account and test it in a drill before launch."
+      },
+      {
+        "category": "ASI04",
+        "severity": "low",
+        "evidenceQuote": "Claude Sonnet (version not specified)",
+        "whyItMatters": "An unpinned model version means the provider could change model behaviour without review, which weakens supply chain control.",
+        "recommendedControl": "Pin a specific model version and re-run the security review when the version changes."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "Read-only assistant over an internal, access-controlled wiki with no personal data and its own scoped token, so Tier 1 fits. Remaining gaps are low severity: logs are not yet in the SIEM, the kill switch has no tested runbook, and the model version is not pinned."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile clearly states logs are not forwarded to the SIEM, which is a valid concern for detecting rogue agent behavior, and the severity is appropriate."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The profile explicitly mentions 'No tested runbook' for the kill switch, indicating a potential delay in stopping a misbehaving agent, and the severity is appropriate."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The profile states 'version not specified' for the model, which is a direct supply chain risk if the model behavior changes unexpectedly, and the severity is appropriate."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "memory: session",
+        "whyItMatters": "While memory is cleared per session, sensitive information from a user's query or the wiki could persist within that session, potentially being exposed or misused if the session is compromised or the agent's context is manipulated.",
+        "recommendedControl": "Implement strict data sanitization and redaction policies for all information stored in session memory, especially before any logging or external communication."
+      }
+    ],
+    "proposedTier": 1,
+    "summary": "The first reviewer's findings are accurate and well-supported by the profile. I've identified an additional medium-severity risk related to session memory, as sensitive data could persist within a session. The agent is read-only, handles internal documents, and requires human confirmation for actions, placing it in Tier 1."
+  },
+  "costUsd": 0.0159565,
+  "seconds": 10.683
+}

@@ -1,0 +1,226 @@
+{
+  "profileId": "profile-09",
+  "tiers": {
+    "rule": 4,
+    "reviewer": 2,
+    "checker": 2,
+    "final": 4,
+    "setBy": [
+      "rule"
+    ],
+    "ruleReasons": [
+      "Tier 4: acts with no person confirming (Contract repository)",
+      "Tier 2: can act beyond reading (Contract repository)",
+      "Tier 2: reads confidential data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI02",
+      "severity": "high",
+      "evidenceQuote": "\"permissions\": [\n        \"read\",\n        \"write\"\n      ]",
+      "whyItMatters": "The description says the assistant is read-only, but the contract repository grants write access. Under the riskier reading, an injected instruction in an uploaded file or chat message could alter or corrupt signed contracts with no person confirming.",
+      "recommendedControl": "Remove write permission from the contract repository tool so it is truly read-only, or require a person to confirm every write.",
+      "modelSeverity": "high",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly grants write permissions to the contract repository tool, contradicting the description and creating a high risk of tool misuse via untrusted inputs without human confirmation.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "Using a shared token means if this agent's credentials are compromised, other systems or agents using the same token could also be compromised, leading to broader access than intended.",
+      "recommendedControl": "Implement a unique, least-privilege scoped token for this agent to limit the blast radius of a compromise.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"logging\": {\n    \"enabled\": true,\n    \"destination\": \"Application logs, not yet forwarded to the SIEM\"\n  }",
+      "whyItMatters": "Logs not being forwarded to a SIEM means that security incidents, such as attempted prompt injections or unauthorized access, might not be detected or investigated in a timely manner.",
+      "recommendedControl": "Ensure all agent logs are immediately forwarded to the central SIEM for monitoring and alerting.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (uploaded_files, chat) and lists Contract repository that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    },
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    },
+    {
+      "ruleId": "R6",
+      "severity": "high",
+      "reason": "Its text claims it is read-only, but it lists Contract repository that can change things.",
+      "field": "description, tools.permissions",
+      "category": "ASI03"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "x",
+  "checkerSummary": "The agent has a critical contradiction between its stated read-only function and its actual write permissions, which is a high risk. Additionally, it uses a shared token and lacks SIEM integration for its logs, increasing the risk of undetected compromise and broader impact. I propose Tier 2 because it drafts changes (implied by write access) and handles confidential internal documents, but a person does not confirm its actions.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "anthropic/claude-sonnet-5.5",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "anthropic/claude-sonnet-5.5",
+      "providers": [
+        "anthropic"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 3530,
+      "inputTokenDetails": {
+        "noCacheTokens": 3530,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 226,
+      "outputTokenDetails": {
+        "textTokens": 226,
+        "reasoningTokens": 0
+      },
+      "totalTokens": 3756,
+      "raw": {
+        "service_tier": "standard",
+        "input_tokens": 3530,
+        "output_tokens": 226,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "speed": "standard"
+      }
+    },
+    "latencyMs": 2389,
+    "generationId": "gen_01M7ENAD9ME23ZD5KJ3BR3EBEN",
+    "provider": "anthropic",
+    "costUsd": 0.00932
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2254,
+      "inputTokenDetails": {
+        "noCacheTokens": 2254,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1122,
+      "outputTokenDetails": {
+        "textTokens": 420,
+        "reasoningTokens": 702
+      },
+      "totalTokens": 3376,
+      "raw": {
+        "thoughtsTokenCount": 702,
+        "promptTokenCount": 2254,
+        "candidatesTokenCount": 420,
+        "totalTokenCount": 3376,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2254
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 420
+          }
+        ]
+      }
+    },
+    "latencyMs": 6146,
+    "generationId": "gen_01M7ENAFK48WSPMHTY3CKTPX0X",
+    "provider": "vertex",
+    "costUsd": 0.0034812
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 2,
+    "findings": [
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "\"permissions\": [\n        \"read\",\n        \"write\"\n      ]",
+        "whyItMatters": "The description says the assistant is read-only, but the contract repository grants write access. Under the riskier reading, an injected instruction in an uploaded file or chat message could alter or corrupt signed contracts with no person confirming.",
+        "recommendedControl": "Remove write permission from the contract repository tool so it is truly read-only, or require a person to confirm every write."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "x"
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile explicitly grants write permissions to the contract repository tool, contradicting the description and creating a high risk of tool misuse via untrusted inputs without human confirmation."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "Using a shared token means if this agent's credentials are compromised, other systems or agents using the same token could also be compromised, leading to broader access than intended.",
+        "recommendedControl": "Implement a unique, least-privilege scoped token for this agent to limit the blast radius of a compromise."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"logging\": {\n    \"enabled\": true,\n    \"destination\": \"Application logs, not yet forwarded to the SIEM\"\n  }",
+        "whyItMatters": "Logs not being forwarded to a SIEM means that security incidents, such as attempted prompt injections or unauthorized access, might not be detected or investigated in a timely manner.",
+        "recommendedControl": "Ensure all agent logs are immediately forwarded to the central SIEM for monitoring and alerting."
+      }
+    ],
+    "proposedTier": 2,
+    "summary": "The agent has a critical contradiction between its stated read-only function and its actual write permissions, which is a high risk. Additionally, it uses a shared token and lacks SIEM integration for its logs, increasing the risk of undetected compromise and broader impact. I propose Tier 2 because it drafts changes (implied by write access) and handles confidential internal documents, but a person does not confirm its actions."
+  },
+  "costUsd": 0.0128012,
+  "seconds": 8.535
+}

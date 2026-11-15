@@ -1,0 +1,197 @@
+{
+  "profileId": "profile-07",
+  "tiers": {
+    "rule": 3,
+    "reviewer": 3,
+    "checker": 3,
+    "final": 3,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (Payment exceptions queue, Payment release API)",
+      "Tier 2: reads confidential, customer_financial, personal data"
+    ]
+  },
+  "contested": [],
+  "findings": [],
+  "missedFindings": [
+    {
+      "category": "ASI02",
+      "severity": "high",
+      "evidenceQuote": "For each held payment, the assistant looks up the beneficiary record, proposes a corrected field, and writes the proposal to the exception record. An analyst reviews the proposal, and after the analyst clicks confirm the assistant calls the release API to send the payment.",
+      "whyItMatters": "The agent writes proposed changes to the payment exception record before human review, allowing it to corrupt data or set up fraudulent payments without immediate human confirmation. This could lead to incorrect payment details being stored or processed, even if the final payment release is confirmed.",
+      "recommendedControl": "Require human confirmation before the agent writes any proposed changes to the 'Payment exceptions queue'.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "\"killSwitch\": {\"available\": true, \"description\": \"Payments Operations can disable the release API connection from the operations console.\"}",
+      "whyItMatters": "The kill switch only disables the 'move_money' capability, leaving the agent active and able to read sensitive data and write to the 'Payment exceptions queue'. This limits the ability to fully stop a rogue or compromised agent from causing harm beyond moving money.",
+      "recommendedControl": "Expand the kill switch functionality to disable the entire agent or all its tool access, not just the payment release API.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "The agent reads customer financial and personal data, so it is Tier 3. Money movement through the release API happens only after an analyst clicks confirm, with a second analyst for payments above the limit, so Tier 4 does not apply. It uses its own scoped token, session memory, SIEM logging and a working kill switch, and the profile supports no findings.",
+  "checkerSummary": "The agent handles customer financial data and can write to payment records before human confirmation, posing a risk of data corruption. While the final money movement is confirmed, the use of an external model with sensitive data introduces supply chain and data leakage concerns. The kill switch is also limited in scope.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [
+    {
+      "finding": {
+        "category": "ASI04",
+        "severity": "high",
+        "evidenceQuote": "\"model\": {\"provider\": \"OpenAI\", \"name\": \"gpt-5-mini\"}, \"dataReads\": [\"confidential\", \"customer_financial\", \"personal\"]",
+        "whyItMatters": "Using an external model provider like OpenAI for an agent that processes confidential, customer financial, and personal data introduces significant data leakage and supply chain risks. Sensitive information could be exposed to the third-party model provider.",
+        "recommendedControl": "Implement robust data anonymization or redaction for all sensitive data before it is sent to the external model, or use an internally hosted model."
+      },
+      "reason": "evidence quote not found in the profile"
+    }
+  ],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "anthropic/claude-sonnet-5.5",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "anthropic/claude-sonnet-5.5",
+      "providers": [
+        "anthropic"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 3577,
+      "inputTokenDetails": {
+        "noCacheTokens": 3577,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 157,
+      "outputTokenDetails": {
+        "textTokens": 157,
+        "reasoningTokens": 0
+      },
+      "totalTokens": 3734,
+      "raw": {
+        "service_tier": "standard",
+        "input_tokens": 3577,
+        "output_tokens": 157,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "speed": "standard"
+      }
+    },
+    "latencyMs": 1906,
+    "generationId": "gen_01M7EN8R0M9FDQTEGNXPHBWKAK",
+    "provider": "anthropic",
+    "costUsd": 0.008724
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2146,
+      "inputTokenDetails": {
+        "noCacheTokens": 2146,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1458,
+      "outputTokenDetails": {
+        "textTokens": 561,
+        "reasoningTokens": 897
+      },
+      "totalTokens": 3604,
+      "raw": {
+        "thoughtsTokenCount": 897,
+        "promptTokenCount": 2146,
+        "candidatesTokenCount": 561,
+        "totalTokenCount": 3604,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2146
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 561
+          }
+        ]
+      }
+    },
+    "latencyMs": 7392,
+    "generationId": "gen_01M7EN8STPSGDXK0VJ7PSF5WXH",
+    "provider": "vertex",
+    "costUsd": 0.0042888
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 3,
+    "findings": [],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The agent reads customer financial and personal data, so it is Tier 3. Money movement through the release API happens only after an analyst clicks confirm, with a second analyst for payments above the limit, so Tier 4 does not apply. It uses its own scoped token, session memory, SIEM logging and a working kill switch, and the profile supports no findings."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [],
+    "missedFindings": [
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "For each held payment, the assistant looks up the beneficiary record, proposes a corrected field, and writes the proposal to the exception record. An analyst reviews the proposal, and after the analyst clicks confirm the assistant calls the release API to send the payment.",
+        "whyItMatters": "The agent writes proposed changes to the payment exception record before human review, allowing it to corrupt data or set up fraudulent payments without immediate human confirmation. This could lead to incorrect payment details being stored or processed, even if the final payment release is confirmed.",
+        "recommendedControl": "Require human confirmation before the agent writes any proposed changes to the 'Payment exceptions queue'."
+      },
+      {
+        "category": "ASI04",
+        "severity": "high",
+        "evidenceQuote": "\"model\": {\"provider\": \"OpenAI\", \"name\": \"gpt-5-mini\"}, \"dataReads\": [\"confidential\", \"customer_financial\", \"personal\"]",
+        "whyItMatters": "Using an external model provider like OpenAI for an agent that processes confidential, customer financial, and personal data introduces significant data leakage and supply chain risks. Sensitive information could be exposed to the third-party model provider.",
+        "recommendedControl": "Implement robust data anonymization or redaction for all sensitive data before it is sent to the external model, or use an internally hosted model."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"killSwitch\": {\"available\": true, \"description\": \"Payments Operations can disable the release API connection from the operations console.\"}",
+        "whyItMatters": "The kill switch only disables the 'move_money' capability, leaving the agent active and able to read sensitive data and write to the 'Payment exceptions queue'. This limits the ability to fully stop a rogue or compromised agent from causing harm beyond moving money.",
+        "recommendedControl": "Expand the kill switch functionality to disable the entire agent or all its tool access, not just the payment release API."
+      }
+    ],
+    "proposedTier": 3,
+    "summary": "The agent handles customer financial data and can write to payment records before human confirmation, posing a risk of data corruption. While the final money movement is confirmed, the use of an external model with sensitive data introduces supply chain and data leakage concerns. The kill switch is also limited in scope."
+  },
+  "costUsd": 0.013012800000000001,
+  "seconds": 9.298
+}

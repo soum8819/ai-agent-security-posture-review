@@ -1,0 +1,209 @@
+{
+  "profileId": "profile-07",
+  "tiers": {
+    "rule": 3,
+    "reviewer": 3,
+    "checker": 3,
+    "final": 3,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (Payment exceptions queue, Payment release API)",
+      "Tier 2: reads confidential, customer_financial, personal data"
+    ]
+  },
+  "contested": [],
+  "findings": [],
+  "missedFindings": [
+    {
+      "category": "ASI02",
+      "severity": "high",
+      "evidenceQuote": "\"Payment release API\", \"permissions\": [\"move_money\"]",
+      "whyItMatters": "The agent has direct permission to move money, which is a critical function. While human confirmation is stated, a vulnerability in the confirmation process or a bypass could lead to unauthorized financial transactions.",
+      "recommendedControl": "Implement strict access controls and multi-factor authentication for the Payment release API, and ensure the human confirmation step is robust and auditable, with clear separation of duties.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI03",
+      "severity": "medium",
+      "evidenceQuote": "\"dataReads\": [\"confidential\", \"customer_financial\", \"personal\"]",
+      "whyItMatters": "The agent processes highly sensitive customer financial and personal data. Any compromise of the agent or its context could lead to unauthorized access or exfiltration of this data.",
+      "recommendedControl": "Ensure all data access is strictly on a need-to-know basis, and implement robust data encryption both in transit and at rest for all sensitive information handled by the agent.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "\"Payment exceptions queue\", \"permissions\": [\"read\", \"write\"]",
+      "whyItMatters": "The agent can write to the 'Payment exceptions queue', meaning it can modify payment exception records. Misuse could lead to incorrect payment repairs or the clearing of fraudulent exceptions.",
+      "recommendedControl": "Implement strict validation and auditing for all write operations to the payment exceptions queue, ensuring that changes are traceable and conform to business rules.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "\"model\": {\"provider\": \"OpenAI\", \"name\": \"gpt-5-mini\"}",
+      "whyItMatters": "Using an external model provider introduces a dependency on a third-party service. Vulnerabilities or compromises in the provider's infrastructure could impact the agent's security and data integrity.",
+      "recommendedControl": "Establish a robust third-party risk management process for the model provider, including security assessments, contractual agreements, and continuous monitoring for supply chain vulnerabilities.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "The agent reads customer financial and personal data, so it is Tier 3. Money movement is gated by analyst confirmation (with a second analyst above limits), and it uses its own scoped token, session memory, SIEM logging and a working kill switch. No supportable risks were found beyond the tier itself.",
+  "checkerSummary": "The agent handles customer financial data and has the ability to move money, albeit with human confirmation. This places it in Tier 3. Several risks were identified, including the agent's direct permission to move money, its access to sensitive customer data, and its ability to write to payment exception queues. Additionally, the use of an external model provider introduces supply chain risks.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "anthropic/claude-sonnet-5.5",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "anthropic/claude-sonnet-5.5",
+      "providers": [
+        "anthropic"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 3577,
+      "inputTokenDetails": {
+        "noCacheTokens": 3577,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 142,
+      "outputTokenDetails": {
+        "textTokens": 142,
+        "reasoningTokens": 0
+      },
+      "totalTokens": 3719,
+      "raw": {
+        "service_tier": "standard",
+        "input_tokens": 3577,
+        "output_tokens": 142,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "speed": "standard"
+      }
+    },
+    "latencyMs": 1862,
+    "generationId": "gen_01M7ENWPF1R28YJCGM60HFER86",
+    "provider": "anthropic",
+    "costUsd": 0.008574
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2146,
+      "inputTokenDetails": {
+        "noCacheTokens": 2146,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1493,
+      "outputTokenDetails": {
+        "textTokens": 626,
+        "reasoningTokens": 867
+      },
+      "totalTokens": 3639,
+      "raw": {
+        "thoughtsTokenCount": 867,
+        "promptTokenCount": 2146,
+        "candidatesTokenCount": 626,
+        "totalTokenCount": 3639,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2146
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 626
+          }
+        ]
+      }
+    },
+    "latencyMs": 8221,
+    "generationId": "gen_01M7ENWRC47GHZQX9WB60DFZAK",
+    "provider": "vertex",
+    "costUsd": 0.0043763
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 3,
+    "findings": [],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The agent reads customer financial and personal data, so it is Tier 3. Money movement is gated by analyst confirmation (with a second analyst above limits), and it uses its own scoped token, session memory, SIEM logging and a working kill switch. No supportable risks were found beyond the tier itself."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [],
+    "missedFindings": [
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "\"Payment release API\", \"permissions\": [\"move_money\"]",
+        "whyItMatters": "The agent has direct permission to move money, which is a critical function. While human confirmation is stated, a vulnerability in the confirmation process or a bypass could lead to unauthorized financial transactions.",
+        "recommendedControl": "Implement strict access controls and multi-factor authentication for the Payment release API, and ensure the human confirmation step is robust and auditable, with clear separation of duties."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"dataReads\": [\"confidential\", \"customer_financial\", \"personal\"]",
+        "whyItMatters": "The agent processes highly sensitive customer financial and personal data. Any compromise of the agent or its context could lead to unauthorized access or exfiltration of this data.",
+        "recommendedControl": "Ensure all data access is strictly on a need-to-know basis, and implement robust data encryption both in transit and at rest for all sensitive information handled by the agent."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"Payment exceptions queue\", \"permissions\": [\"read\", \"write\"]",
+        "whyItMatters": "The agent can write to the 'Payment exceptions queue', meaning it can modify payment exception records. Misuse could lead to incorrect payment repairs or the clearing of fraudulent exceptions.",
+        "recommendedControl": "Implement strict validation and auditing for all write operations to the payment exceptions queue, ensuring that changes are traceable and conform to business rules."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"model\": {\"provider\": \"OpenAI\", \"name\": \"gpt-5-mini\"}",
+        "whyItMatters": "Using an external model provider introduces a dependency on a third-party service. Vulnerabilities or compromises in the provider's infrastructure could impact the agent's security and data integrity.",
+        "recommendedControl": "Establish a robust third-party risk management process for the model provider, including security assessments, contractual agreements, and continuous monitoring for supply chain vulnerabilities."
+      }
+    ],
+    "proposedTier": 3,
+    "summary": "The agent handles customer financial data and has the ability to move money, albeit with human confirmation. This places it in Tier 3. Several risks were identified, including the agent's direct permission to move money, its access to sensitive customer data, and its ability to write to payment exception queues. Additionally, the use of an external model provider introduces supply chain risks."
+  },
+  "costUsd": 0.0129503,
+  "seconds": 10.083
+}

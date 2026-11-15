@@ -1,0 +1,349 @@
+{
+  "profileId": "profile-12",
+  "tiers": {
+    "rule": 2,
+    "reviewer": 2,
+    "checker": 3,
+    "final": 3,
+    "setBy": [
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 2: can act beyond reading (Team chat notification)",
+      "Tier 2: reads confidential data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "A shared token across the orchestrator and sub-agents means one compromised agent gains the access of all, and actions cannot be attributed to a single agent. This conflicts with the claim that each sub-agent has scoped access.",
+      "recommendedControl": "Issue a separate, least-privilege scoped token to the orchestrator and to each sub-agent, with short lifetimes and rotation.",
+      "modelSeverity": "high",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile clearly states \"shared_token\" which undermines the principle of least privilege and contradicts the description of scoped access for sub-agents.",
+      "contested": false
+    },
+    {
+      "category": "ASI06",
+      "severity": "high",
+      "evidenceQuote": "over shared memory to produce account strategy recommendations",
+      "whyItMatters": "Persistent memory shared by all sub-agents lets a poisoned or wrong entry bias later reasoning of every agent and carry over between sessions, and it holds confidential client data.",
+      "recommendedControl": "Partition memory per agent, validate and sign writes, set retention limits and expiry, and allow reviewers to inspect and purge memory.",
+      "modelSeverity": "high",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly mentions \"shared memory\" and \"persistent\" memory, which poses a significant risk for context poisoning across agents and sessions.",
+      "contested": false
+    },
+    {
+      "category": "ASI07",
+      "severity": "medium",
+      "evidenceQuote": "An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst",
+      "whyItMatters": "The profile lists no authentication or integrity checks on messages between the orchestrator and sub-agents, so a spoofed or tampered message could steer the whole group.",
+      "recommendedControl": "Require authenticated, signed inter-agent messages with per-agent authorization and schema validation.",
+      "modelSeverity": "medium",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile describes multiple sub-agents coordinated by an orchestrator but provides no details on inter-agent communication security, indicating a potential vulnerability.",
+      "contested": false
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "over shared memory to produce account strategy recommendations",
+      "whyItMatters": "A single hallucination or corrupted entry in shared memory can propagate through all sub-agents into the final recommendations and chat summaries, compounding errors.",
+      "recommendedControl": "Add validation checkpoints between agents and require a person to review recommendations before they are shared or acted on.",
+      "modelSeverity": "medium",
+      "id": "F4",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The use of \"shared memory\" among multiple agents creates a clear pathway for a single fault to propagate and compound errors across the system.",
+      "contested": false
+    },
+    {
+      "category": "ASI10",
+      "severity": "medium",
+      "evidenceQuote": "Manual: the on-call engineer disables the agent's service account. No tested runbook.",
+      "whyItMatters": "If an agent is compromised or deviates, shutdown depends on an untested manual process, and the logs are not in the SIEM, so detection and containment may be slow.",
+      "recommendedControl": "Write and test a kill switch runbook, and forward logs to the SIEM with alerts for abnormal agent behavior.",
+      "modelSeverity": "medium",
+      "id": "F5",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly states \"No tested runbook\" for the manual kill switch and that logs are \"not yet forwarded to the SIEM\", indicating weak incident response capabilities.",
+      "contested": false
+    },
+    {
+      "category": "ASI02",
+      "severity": "low",
+      "evidenceQuote": "The orchestrator can post summaries to team chat.",
+      "whyItMatters": "Team chat posting could leak confidential client information from memory or tool reads into a broad channel, especially if an agent is manipulated.",
+      "recommendedControl": "Restrict chat posting to approved private channels and apply data loss prevention filtering on outbound summaries.",
+      "modelSeverity": "low",
+      "id": "F6",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The ability to \"send_messages\" to \"Team chat notification\" combined with reading \"confidential\" data presents a clear risk of data leakage.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI01",
+      "severity": "high",
+      "evidenceQuote": "Produce account strategy recommendations for large corporate clients by combining several specialist views.",
+      "whyItMatters": "The agent's core purpose is to generate strategic recommendations, which, if manipulated by prompt injection or poisoned data, could lead to flawed or malicious advice given to clients.",
+      "recommendedControl": "Implement robust input validation and sanitization for all inputs, and require human review of all generated recommendations before dissemination.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI09",
+      "severity": "medium",
+      "evidenceQuote": "Produce account strategy recommendations for large corporate clients",
+      "whyItMatters": "The agent produces strategic recommendations, which could be perceived as authoritative by human users, making them susceptible to accepting flawed or manipulated advice if the agent is compromised.",
+      "recommendedControl": "Clearly label agent-generated content as AI-produced and implement a mandatory human review and approval process for all recommendations before client presentation.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "The agent reads confidential data, has read-only tools and can post chat messages, with a person confirming actions, so it fits Tier 2. Main concerns are the shared token, persistent shared memory across sub-agents, unauthenticated inter-agent messaging, and an untested kill switch with logs not yet in the SIEM. Recommend fixing credential scoping and memory isolation before launch.}",
+  "checkerSummary": "The agent handles confidential client data and produces strategic recommendations, placing it in Tier 3. While human confirmation is required for actions, significant risks remain due to shared credentials, persistent shared memory, and weak logging and kill switch procedures. Several critical vulnerabilities related to data integrity, privilege management, and potential for goal hijack need to be addressed.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [
+    {
+      "finding": {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "permissions: [\"read\"]",
+        "whyItMatters": "Even with read-only permissions, an agent can be manipulated to misuse tools by making excessive or targeted requests to exfiltrate sensitive data from the \"Engagement tooling API\" or \"Internal security knowledge base\".",
+        "recommendedControl": "Implement rate limiting and anomaly detection on tool usage, and monitor access patterns to sensitive data sources."
+      },
+      "reason": "evidence quote not found in the profile"
+    }
+  ],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "anthropic/claude-sonnet-5.5",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "anthropic/claude-sonnet-5.5",
+      "providers": [
+        "anthropic"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 3586,
+      "inputTokenDetails": {
+        "noCacheTokens": 3586,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1115,
+      "outputTokenDetails": {
+        "textTokens": 1115,
+        "reasoningTokens": 0
+      },
+      "totalTokens": 4701,
+      "raw": {
+        "service_tier": "standard",
+        "input_tokens": 3586,
+        "output_tokens": 1115,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "speed": "standard"
+      }
+    },
+    "latencyMs": 8043,
+    "generationId": "gen_01M7ENPY1GNA2V0DSK8DVA0V2H",
+    "provider": "anthropic",
+    "costUsd": 0.018322
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2885,
+      "inputTokenDetails": {
+        "noCacheTokens": 2885,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1500,
+      "outputTokenDetails": {
+        "textTokens": 811,
+        "reasoningTokens": 689
+      },
+      "totalTokens": 4385,
+      "raw": {
+        "thoughtsTokenCount": 689,
+        "promptTokenCount": 2885,
+        "candidatesTokenCount": 811,
+        "totalTokenCount": 4385,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2885
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 811
+          }
+        ]
+      }
+    },
+    "latencyMs": 10830,
+    "generationId": "gen_01M7ENQ5XD1EMP204GGE7KKZX4",
+    "provider": "vertex",
+    "costUsd": 0.0046155
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 2,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "A shared token across the orchestrator and sub-agents means one compromised agent gains the access of all, and actions cannot be attributed to a single agent. This conflicts with the claim that each sub-agent has scoped access.",
+        "recommendedControl": "Issue a separate, least-privilege scoped token to the orchestrator and to each sub-agent, with short lifetimes and rotation."
+      },
+      {
+        "category": "ASI06",
+        "severity": "high",
+        "evidenceQuote": "over shared memory to produce account strategy recommendations",
+        "whyItMatters": "Persistent memory shared by all sub-agents lets a poisoned or wrong entry bias later reasoning of every agent and carry over between sessions, and it holds confidential client data.",
+        "recommendedControl": "Partition memory per agent, validate and sign writes, set retention limits and expiry, and allow reviewers to inspect and purge memory."
+      },
+      {
+        "category": "ASI07",
+        "severity": "medium",
+        "evidenceQuote": "An orchestrator agent coordinates three specialist sub-agents, a tools expert, a network security expert and a strategy analyst",
+        "whyItMatters": "The profile lists no authentication or integrity checks on messages between the orchestrator and sub-agents, so a spoofed or tampered message could steer the whole group.",
+        "recommendedControl": "Require authenticated, signed inter-agent messages with per-agent authorization and schema validation."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "over shared memory to produce account strategy recommendations",
+        "whyItMatters": "A single hallucination or corrupted entry in shared memory can propagate through all sub-agents into the final recommendations and chat summaries, compounding errors.",
+        "recommendedControl": "Add validation checkpoints between agents and require a person to review recommendations before they are shared or acted on."
+      },
+      {
+        "category": "ASI10",
+        "severity": "medium",
+        "evidenceQuote": "Manual: the on-call engineer disables the agent's service account. No tested runbook.",
+        "whyItMatters": "If an agent is compromised or deviates, shutdown depends on an untested manual process, and the logs are not in the SIEM, so detection and containment may be slow.",
+        "recommendedControl": "Write and test a kill switch runbook, and forward logs to the SIEM with alerts for abnormal agent behavior."
+      },
+      {
+        "category": "ASI02",
+        "severity": "low",
+        "evidenceQuote": "The orchestrator can post summaries to team chat.",
+        "whyItMatters": "Team chat posting could leak confidential client information from memory or tool reads into a broad channel, especially if an agent is manipulated.",
+        "recommendedControl": "Restrict chat posting to approved private channels and apply data loss prevention filtering on outbound summaries."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The agent reads confidential data, has read-only tools and can post chat messages, with a person confirming actions, so it fits Tier 2. Main concerns are the shared token, persistent shared memory across sub-agents, unauthenticated inter-agent messaging, and an untested kill switch with logs not yet in the SIEM. Recommend fixing credential scoping and memory isolation before launch.}"
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile clearly states \"shared_token\" which undermines the principle of least privilege and contradicts the description of scoped access for sub-agents."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The profile explicitly mentions \"shared memory\" and \"persistent\" memory, which poses a significant risk for context poisoning across agents and sessions."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The profile describes multiple sub-agents coordinated by an orchestrator but provides no details on inter-agent communication security, indicating a potential vulnerability."
+      },
+      {
+        "findingId": "F4",
+        "verdict": "agree",
+        "reason": "The use of \"shared memory\" among multiple agents creates a clear pathway for a single fault to propagate and compound errors across the system."
+      },
+      {
+        "findingId": "F5",
+        "verdict": "agree",
+        "reason": "The profile explicitly states \"No tested runbook\" for the manual kill switch and that logs are \"not yet forwarded to the SIEM\", indicating weak incident response capabilities."
+      },
+      {
+        "findingId": "F6",
+        "verdict": "agree",
+        "reason": "The ability to \"send_messages\" to \"Team chat notification\" combined with reading \"confidential\" data presents a clear risk of data leakage."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI01",
+        "severity": "high",
+        "evidenceQuote": "Produce account strategy recommendations for large corporate clients by combining several specialist views.",
+        "whyItMatters": "The agent's core purpose is to generate strategic recommendations, which, if manipulated by prompt injection or poisoned data, could lead to flawed or malicious advice given to clients.",
+        "recommendedControl": "Implement robust input validation and sanitization for all inputs, and require human review of all generated recommendations before dissemination."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "permissions: [\"read\"]",
+        "whyItMatters": "Even with read-only permissions, an agent can be manipulated to misuse tools by making excessive or targeted requests to exfiltrate sensitive data from the \"Engagement tooling API\" or \"Internal security knowledge base\".",
+        "recommendedControl": "Implement rate limiting and anomaly detection on tool usage, and monitor access patterns to sensitive data sources."
+      },
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "Produce account strategy recommendations for large corporate clients",
+        "whyItMatters": "The agent produces strategic recommendations, which could be perceived as authoritative by human users, making them susceptible to accepting flawed or manipulated advice if the agent is compromised.",
+        "recommendedControl": "Clearly label agent-generated content as AI-produced and implement a mandatory human review and approval process for all recommendations before client presentation."
+      }
+    ],
+    "proposedTier": 3,
+    "summary": "The agent handles confidential client data and produces strategic recommendations, placing it in Tier 3. While human confirmation is required for actions, significant risks remain due to shared credentials, persistent shared memory, and weak logging and kill switch procedures. Several critical vulnerabilities related to data integrity, privilege management, and potential for goal hijack need to be addressed."
+  },
+  "costUsd": 0.0229375,
+  "seconds": 18.873
+}

@@ -1,0 +1,256 @@
+{
+  "profileId": "profile-06",
+  "tiers": {
+    "rule": 1,
+    "reviewer": 1,
+    "checker": 1,
+    "final": 1,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI10",
+      "severity": "low",
+      "evidenceQuote": "Manual: the on-call engineer disables the agent's service account. No tested runbook.",
+      "whyItMatters": "If the agent misbehaves, the shutdown depends on a manual step with no tested procedure, so response could be slow or error-prone.",
+      "recommendedControl": "Write and test a kill switch runbook, and run a periodic drill with the on-call team.",
+      "modelSeverity": "low",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile clearly states the kill switch is manual and lacks a tested runbook, which aligns with the finding's category, severity, and rationale.",
+      "contested": false
+    },
+    {
+      "category": "ASI10",
+      "severity": "low",
+      "evidenceQuote": "Application logs, not yet forwarded to the SIEM",
+      "whyItMatters": "Logs that stay in application storage are not monitored centrally, so misuse or abnormal behaviour could go unnoticed.",
+      "recommendedControl": "Forward the agent's logs to the SIEM and add alerts for unusual query volume or behaviour.",
+      "modelSeverity": "low",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly states logs are not forwarded to the SIEM, supporting the finding that monitoring is inadequate for detecting misuse.",
+      "contested": false
+    },
+    {
+      "category": "ASI04",
+      "severity": "low",
+      "evidenceQuote": "Claude Sonnet (version not specified)",
+      "whyItMatters": "An unpinned model version means behaviour can change without review, which weakens the supply chain assurance given at approval.",
+      "recommendedControl": "Pin the model to a specific version and re-run the review when the version changes.",
+      "modelSeverity": "low",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile specifies an unversioned model, which introduces supply chain risk as described in the finding.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [],
+  "ruleHits": [],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This is a read-only chatbot over an access-controlled internal wiki with no personal data, a scoped token and session-only memory, so Tier 1 fits. The remaining gaps are minor: logs are not yet in the SIEM, the kill switch is manual with no tested runbook, and the model version is not pinned. These should be fixed, but none raises the tier.",
+  "checkerSummary": "The agent is a read-only internal knowledge base assistant, which places it in Tier 1. The first reviewer's findings are accurate and well-supported by the profile. I've added findings regarding the risk of prompt injection from untrusted chat input and the potential for session memory poisoning.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [
+    {
+      "finding": {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "untrustedInputs: [\"chat\"]",
+        "whyItMatters": "Allowing untrusted chat input without explicit mention of input sanitization or prompt injection defenses means an attacker could manipulate the agent's goals or responses. This could lead to the agent providing incorrect or misleading information from the internal wiki.",
+        "recommendedControl": "Implement robust input sanitization and prompt injection defenses, and regularly test them with red-teaming exercises."
+      },
+      "reason": "evidence quote not found in the profile"
+    },
+    {
+      "finding": {
+        "category": "ASI06",
+        "severity": "low",
+        "evidenceQuote": "memory: \"session\"",
+        "whyItMatters": "While session memory limits the scope of poisoning, malicious input within a session could still bias the agent's responses or tool use for the duration of that session. This could lead to a user receiving incorrect information or being guided to irrelevant wiki articles.",
+        "recommendedControl": "Implement context validation and anomaly detection for session memory to identify and mitigate potential poisoning attempts."
+      },
+      "reason": "evidence quote not found in the profile"
+    }
+  ],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "anthropic/claude-sonnet-5.5",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "anthropic/claude-sonnet-5.5",
+      "providers": [
+        "anthropic"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 3475,
+      "inputTokenDetails": {
+        "noCacheTokens": 3475,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 552,
+      "outputTokenDetails": {
+        "textTokens": 552,
+        "reasoningTokens": 0
+      },
+      "totalTokens": 4027,
+      "raw": {
+        "service_tier": "standard",
+        "input_tokens": 3475,
+        "output_tokens": 552,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "speed": "standard"
+      }
+    },
+    "latencyMs": 4856,
+    "generationId": "gen_01M7ENVXV6V8VHQFE66K0W19K4",
+    "provider": "anthropic",
+    "costUsd": 0.01247
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2403,
+      "inputTokenDetails": {
+        "noCacheTokens": 2403,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1383,
+      "outputTokenDetails": {
+        "textTokens": 508,
+        "reasoningTokens": 875
+      },
+      "totalTokens": 3786,
+      "raw": {
+        "thoughtsTokenCount": 875,
+        "promptTokenCount": 2403,
+        "candidatesTokenCount": 508,
+        "totalTokenCount": 3786,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2403
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 508
+          }
+        ]
+      }
+    },
+    "latencyMs": 7478,
+    "generationId": "gen_01M7ENW2MDYNWERRC28DV5MBTD",
+    "provider": "vertex",
+    "costUsd": 0.0041784
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 1,
+    "findings": [
+      {
+        "category": "ASI10",
+        "severity": "low",
+        "evidenceQuote": "Manual: the on-call engineer disables the agent's service account. No tested runbook.",
+        "whyItMatters": "If the agent misbehaves, the shutdown depends on a manual step with no tested procedure, so response could be slow or error-prone.",
+        "recommendedControl": "Write and test a kill switch runbook, and run a periodic drill with the on-call team."
+      },
+      {
+        "category": "ASI10",
+        "severity": "low",
+        "evidenceQuote": "Application logs, not yet forwarded to the SIEM",
+        "whyItMatters": "Logs that stay in application storage are not monitored centrally, so misuse or abnormal behaviour could go unnoticed.",
+        "recommendedControl": "Forward the agent's logs to the SIEM and add alerts for unusual query volume or behaviour."
+      },
+      {
+        "category": "ASI04",
+        "severity": "low",
+        "evidenceQuote": "Claude Sonnet (version not specified)",
+        "whyItMatters": "An unpinned model version means behaviour can change without review, which weakens the supply chain assurance given at approval.",
+        "recommendedControl": "Pin the model to a specific version and re-run the review when the version changes."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This is a read-only chatbot over an access-controlled internal wiki with no personal data, a scoped token and session-only memory, so Tier 1 fits. The remaining gaps are minor: logs are not yet in the SIEM, the kill switch is manual with no tested runbook, and the model version is not pinned. These should be fixed, but none raises the tier."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile clearly states the kill switch is manual and lacks a tested runbook, which aligns with the finding's category, severity, and rationale."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The profile explicitly states logs are not forwarded to the SIEM, supporting the finding that monitoring is inadequate for detecting misuse."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The profile specifies an unversioned model, which introduces supply chain risk as described in the finding."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "untrustedInputs: [\"chat\"]",
+        "whyItMatters": "Allowing untrusted chat input without explicit mention of input sanitization or prompt injection defenses means an attacker could manipulate the agent's goals or responses. This could lead to the agent providing incorrect or misleading information from the internal wiki.",
+        "recommendedControl": "Implement robust input sanitization and prompt injection defenses, and regularly test them with red-teaming exercises."
+      },
+      {
+        "category": "ASI06",
+        "severity": "low",
+        "evidenceQuote": "memory: \"session\"",
+        "whyItMatters": "While session memory limits the scope of poisoning, malicious input within a session could still bias the agent's responses or tool use for the duration of that session. This could lead to a user receiving incorrect information or being guided to irrelevant wiki articles.",
+        "recommendedControl": "Implement context validation and anomaly detection for session memory to identify and mitigate potential poisoning attempts."
+      }
+    ],
+    "proposedTier": 1,
+    "summary": "The agent is a read-only internal knowledge base assistant, which places it in Tier 1. The first reviewer's findings are accurate and well-supported by the profile. I've added findings regarding the risk of prompt injection from untrusted chat input and the potential for session memory poisoning."
+  },
+  "costUsd": 0.0166484,
+  "seconds": 12.334
+}

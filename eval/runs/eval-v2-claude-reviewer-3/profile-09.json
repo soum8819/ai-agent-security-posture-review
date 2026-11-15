@@ -1,0 +1,272 @@
+{
+  "profileId": "profile-09",
+  "tiers": {
+    "rule": 4,
+    "reviewer": 2,
+    "checker": 3,
+    "final": 4,
+    "setBy": [
+      "rule"
+    ],
+    "ruleReasons": [
+      "Tier 4: acts with no person confirming (Contract repository)",
+      "Tier 2: can act beyond reading (Contract repository)",
+      "Tier 2: reads confidential data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI02",
+      "severity": "high",
+      "evidenceQuote": "\"permissions\": [\n        \"read\",\n        \"write\"\n      ]",
+      "whyItMatters": "The description says the assistant is read-only, but the contract repository grants write permission. With no person confirming, a prompt injection could alter or corrupt signed contracts.",
+      "recommendedControl": "Remove write permission from the contract repository tool, or require a person to confirm every write.",
+      "modelSeverity": "high",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly states the agent has write permissions to the contract repository while claiming it is read-only and has no human confirmation for actions.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI01",
+      "severity": "high",
+      "evidenceQuote": "\"untrustedInputs\": [\n    \"uploaded_files\",\n    \"chat\"\n  ]",
+      "whyItMatters": "The agent accepts untrusted inputs from both uploaded files and chat, which could allow an attacker to manipulate its objectives or decision pathways through prompt injection.",
+      "recommendedControl": "Implement robust input validation and prompt injection defenses, such as input sanitization and a human review step for sensitive queries.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "Using a shared token for authentication increases the risk of privilege abuse if the token is compromised, as it may grant access beyond the agent's intended scope.",
+      "recommendedControl": "Assign the agent its own scoped service account or API key with the minimum necessary permissions.",
+      "modelSeverity": "medium",
+      "raisedByRule": "R4"
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"memory\": \"none\"",
+      "whyItMatters": "While 'none' memory reduces some risks, the agent still processes and outputs confidential data from contracts into a chat, which could be logged or retained in the chat system, leading to context leakage.",
+      "recommendedControl": "Ensure that the chat system's retention policies and logging practices are aligned with the confidentiality requirements of the data being discussed.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"logging\": {\n    \"enabled\": true,\n    \"destination\": \"Application logs, not yet forwarded to the SIEM\"\n  }",
+      "whyItMatters": "Logs not being forwarded to a Security Information and Event Management (SIEM) system means that security incidents, agent misuse, or data exfiltration attempts may not be detected or responded to in a timely manner.",
+      "recommendedControl": "Integrate application logs with the central SIEM for real-time monitoring and alerting on suspicious activities.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI09",
+      "severity": "low",
+      "evidenceQuote": "\"description\": \"This assistant is strictly read-only. Staff ask it questions in the procurement team chat and it searches signed vendor contracts, including contracts vendors upload through the supplier portal, and replies with the matching clause and its location. It cannot change anything, so there is nothing for a person to confirm.\"",
+      "whyItMatters": "The description explicitly states the agent is 'strictly read-only' and 'cannot change anything', which contradicts its actual write permissions and could lead users to over-trust its capabilities and safety.",
+      "recommendedControl": "Correct the agent's description to accurately reflect its permissions and capabilities, including its ability to write to the contract repository.",
+      "modelSeverity": "low"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (uploaded_files, chat) and lists Contract repository that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    },
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    },
+    {
+      "ruleId": "R6",
+      "severity": "high",
+      "reason": "Its text claims it is read-only, but it lists Contract repository that can change things.",
+      "field": "description, tools.permissions",
+      "category": "ASI03"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "The profile claims to be read-only but lists write access to the contract repository with no human confirmation, so the riskier reading applies. Untrusted uploaded files and chat, a shared token and logs not yet in the SIEM add further weaknesses. Tier 2 is proposed because the agent can write, with no person confirming, but it handles no customer financial data and cannot write or run code or move money.}",
+  "checkerSummary": "The agent handles confidential vendor contracts, which places it in Tier 3. While the first reviewer correctly identified the critical write permission issue, I found additional risks related to untrusted inputs, shared credentials, and inadequate logging. The agent's description also misrepresents its capabilities, potentially leading to human trust exploitation.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "anthropic/claude-sonnet-5.5",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "anthropic/claude-sonnet-5.5",
+      "providers": [
+        "anthropic"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 3530,
+      "inputTokenDetails": {
+        "noCacheTokens": 3530,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 322,
+      "outputTokenDetails": {
+        "textTokens": 322,
+        "reasoningTokens": 0
+      },
+      "totalTokens": 3852,
+      "raw": {
+        "service_tier": "standard",
+        "input_tokens": 3530,
+        "output_tokens": 322,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "inference_geo": "global",
+        "speed": "standard"
+      }
+    },
+    "latencyMs": 3148,
+    "generationId": "gen_01M7ENYCTFCV263SRXR5Z8Q5NV",
+    "provider": "anthropic",
+    "costUsd": 0.01028
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2235,
+      "inputTokenDetails": {
+        "noCacheTokens": 2235,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1578,
+      "outputTokenDetails": {
+        "textTokens": 806,
+        "reasoningTokens": 772
+      },
+      "totalTokens": 3813,
+      "raw": {
+        "thoughtsTokenCount": 772,
+        "promptTokenCount": 2235,
+        "candidatesTokenCount": 806,
+        "totalTokenCount": 3813,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2235
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 806
+          }
+        ]
+      }
+    },
+    "latencyMs": 8434,
+    "generationId": "gen_01M7ENYFWX4DVHTYY56G5XYVAA",
+    "provider": "vertex",
+    "costUsd": 0.0046155
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 2,
+    "findings": [
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "\"permissions\": [\n        \"read\",\n        \"write\"\n      ]",
+        "whyItMatters": "The description says the assistant is read-only, but the contract repository grants write permission. With no person confirming, a prompt injection could alter or corrupt signed contracts.",
+        "recommendedControl": "Remove write permission from the contract repository tool, or require a person to confirm every write."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The profile claims to be read-only but lists write access to the contract repository with no human confirmation, so the riskier reading applies. Untrusted uploaded files and chat, a shared token and logs not yet in the SIEM add further weaknesses. Tier 2 is proposed because the agent can write, with no person confirming, but it handles no customer financial data and cannot write or run code or move money.}"
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile explicitly states the agent has write permissions to the contract repository while claiming it is read-only and has no human confirmation for actions."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI01",
+        "severity": "high",
+        "evidenceQuote": "\"untrustedInputs\": [\n    \"uploaded_files\",\n    \"chat\"\n  ]",
+        "whyItMatters": "The agent accepts untrusted inputs from both uploaded files and chat, which could allow an attacker to manipulate its objectives or decision pathways through prompt injection.",
+        "recommendedControl": "Implement robust input validation and prompt injection defenses, such as input sanitization and a human review step for sensitive queries."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "Using a shared token for authentication increases the risk of privilege abuse if the token is compromised, as it may grant access beyond the agent's intended scope.",
+        "recommendedControl": "Assign the agent its own scoped service account or API key with the minimum necessary permissions."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"memory\": \"none\"",
+        "whyItMatters": "While 'none' memory reduces some risks, the agent still processes and outputs confidential data from contracts into a chat, which could be logged or retained in the chat system, leading to context leakage.",
+        "recommendedControl": "Ensure that the chat system's retention policies and logging practices are aligned with the confidentiality requirements of the data being discussed."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"logging\": {\n    \"enabled\": true,\n    \"destination\": \"Application logs, not yet forwarded to the SIEM\"\n  }",
+        "whyItMatters": "Logs not being forwarded to a Security Information and Event Management (SIEM) system means that security incidents, agent misuse, or data exfiltration attempts may not be detected or responded to in a timely manner.",
+        "recommendedControl": "Integrate application logs with the central SIEM for real-time monitoring and alerting on suspicious activities."
+      },
+      {
+        "category": "ASI09",
+        "severity": "low",
+        "evidenceQuote": "\"description\": \"This assistant is strictly read-only. Staff ask it questions in the procurement team chat and it searches signed vendor contracts, including contracts vendors upload through the supplier portal, and replies with the matching clause and its location. It cannot change anything, so there is nothing for a person to confirm.\"",
+        "whyItMatters": "The description explicitly states the agent is 'strictly read-only' and 'cannot change anything', which contradicts its actual write permissions and could lead users to over-trust its capabilities and safety.",
+        "recommendedControl": "Correct the agent's description to accurately reflect its permissions and capabilities, including its ability to write to the contract repository."
+      }
+    ],
+    "proposedTier": 3,
+    "summary": "The agent handles confidential vendor contracts, which places it in Tier 3. While the first reviewer correctly identified the critical write permission issue, I found additional risks related to untrusted inputs, shared credentials, and inadequate logging. The agent's description also misrepresents its capabilities, potentially leading to human trust exploitation."
+  },
+  "costUsd": 0.014895499999999999,
+  "seconds": 11.582
+}
