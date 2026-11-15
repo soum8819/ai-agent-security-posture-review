@@ -1,0 +1,264 @@
+{
+  "profileId": "profile-07",
+  "tiers": {
+    "rule": 3,
+    "reviewer": 3,
+    "checker": 4,
+    "final": 4,
+    "setBy": [
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 3: reads customer financial data",
+      "Tier 2: can act beyond reading (Payment exceptions queue, Payment release API)",
+      "Tier 2: reads confidential, customer_financial, personal data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI02",
+      "severity": "high",
+      "evidenceQuote": "after the analyst clicks confirm the assistant calls the release API to send the payment.",
+      "whyItMatters": "The agent is integrated with a payment release API that performs money movement, so if the agent or its inputs are manipulated the agent could cause unauthorized transfers or trigger incorrect releases. Human confirmation reduces but does not eliminate the risk of misuse or confirmation bypass. ",
+      "recommendedControl": "Require out-of-band, cryptographic dual-approval for any payment release and enforce strict server-side authorization checks that validate the analyst action and limits before the API will execute any move_money operation.",
+      "modelSeverity": "high",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent has the `move_money` permission, and while human confirmation is present, the risk of tool misuse or manipulation leading to unintended financial transactions remains high.",
+      "contested": false
+    },
+    {
+      "category": "ASI01",
+      "severity": "medium",
+      "evidenceQuote": "For each held payment, the assistant looks up the beneficiary record, proposes a corrected field, and writes the proposal to the exception record.",
+      "whyItMatters": "Because the agent automatically writes proposed corrections into exception records, an attacker could manipulate inputs or tool outputs so the agent proposes and persists malicious or incorrect beneficiary data, increasing the chance of downstream payment errors or fraud. ",
+      "recommendedControl": "Restrict the agent to create proposals in a non-authoritative, audit-only field and require a human to transfer any proposed change into authoritative fields; log diffs and require escalation for changes above thresholds.",
+      "modelSeverity": "medium",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent's ability to write proposals to exception records without explicit human review of the *written* data introduces a risk of goal hijack or data corruption, even if the final action is confirmed.",
+      "contested": false
+    },
+    {
+      "category": "ASI03",
+      "severity": "medium",
+      "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+      "whyItMatters": "The agent holds its own scoped token which, if stolen or overly permissive, could be used to perform actions or be replayed by other components to escalate privileges or perform unauthorized operations. ",
+      "recommendedControl": "Apply least privilege to the scoped token, rotate it frequently, bind the token to the agent instance and network identity, and enforce short TTLs plus anomaly detection and immediate revocation on suspicious use.",
+      "modelSeverity": "medium",
+      "id": "F3",
+      "secondModelVerdict": "disagree",
+      "secondModelReason": "The use of an 'own_scoped_token' is generally a safer choice than shared credentials, and the finding describes general credential management best practices rather than a specific vulnerability in the profile.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "Payments above the analyst's own limit still need a second analyst.",
+      "whyItMatters": "The profile implies that the agent's actions are tied to the analyst's permissions, which could lead to privilege abuse if the agent is manipulated to act under a higher-privileged analyst's context or to bypass the second analyst requirement.",
+      "recommendedControl": "Implement strict server-side authorization checks for all agent actions, ensuring the agent's effective permissions are always the minimum necessary and that multi-analyst approvals are enforced independently of the agent's state.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"memory\": \"session\"",
+      "whyItMatters": "While session memory limits long-term poisoning, an attacker could still poison the agent's context within a single session, leading to biased reasoning, incorrect proposals, or tool misuse during that interaction.",
+      "recommendedControl": "Implement input validation and sanitization for all user inputs and tool outputs to prevent malicious data from entering and corrupting the agent's session memory.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": []",
+      "whyItMatters": "The profile states no untrusted inputs, which is a dangerous assumption for any agent interacting with external data or human users, potentially leading to prompt injection or other manipulation of the agent's tools.",
+      "recommendedControl": "Explicitly identify and categorize all inputs, implementing robust input validation, sanitization, and prompt engineering techniques to treat all external inputs as untrusted.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This agent reads customer financial data and can cause payments to be released, so it is Tier 3. Key risks are the integrated move_money capability, the agent writing proposed corrections into exception records, and the presence of a scoped token; each requires stronger authorization, auditing, and token controls before approval.",
+  "checkerSummary": "The Payments Operations Assistant is a Tier 4 agent because it has the capability to move money via the 'Payment release API' with human confirmation. While human confirmation is a control, the agent's direct access to financial transactions and customer data presents significant risks. Several findings highlight potential for tool misuse, privilege abuse, and memory poisoning.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1901,
+      "inputTokenDetails": {
+        "noCacheTokens": 109,
+        "cacheReadTokens": 1792,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1561,
+      "outputTokenDetails": {
+        "textTokens": 473,
+        "reasoningTokens": 1088
+      },
+      "totalTokens": 3462,
+      "raw": {
+        "input_tokens": 1901,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 1792
+        },
+        "output_tokens": 1561,
+        "output_tokens_details": {
+          "reasoning_tokens": 1088
+        },
+        "total_tokens": 3462
+      }
+    },
+    "latencyMs": 16183,
+    "generationId": "gen_01M5T8GF0XTAQERX7SFV04ZAVY",
+    "provider": "openai",
+    "costUsd": 0.00319405
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2617,
+      "inputTokenDetails": {
+        "noCacheTokens": 2617,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1524,
+      "outputTokenDetails": {
+        "textTokens": 701,
+        "reasoningTokens": 823
+      },
+      "totalTokens": 4141,
+      "raw": {
+        "thoughtsTokenCount": 823,
+        "promptTokenCount": 2617,
+        "candidatesTokenCount": 701,
+        "totalTokenCount": 4141,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2617
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 701
+          }
+        ]
+      }
+    },
+    "latencyMs": 8108,
+    "generationId": "gen_01M5T8GYSXJETJTNZAS9M19Y84",
+    "provider": "vertex",
+    "costUsd": 0.0045951
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "after the analyst clicks confirm the assistant calls the release API to send the payment.",
+        "whyItMatters": "The agent is integrated with a payment release API that performs money movement, so if the agent or its inputs are manipulated the agent could cause unauthorized transfers or trigger incorrect releases. Human confirmation reduces but does not eliminate the risk of misuse or confirmation bypass. ",
+        "recommendedControl": "Require out-of-band, cryptographic dual-approval for any payment release and enforce strict server-side authorization checks that validate the analyst action and limits before the API will execute any move_money operation."
+      },
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "For each held payment, the assistant looks up the beneficiary record, proposes a corrected field, and writes the proposal to the exception record.",
+        "whyItMatters": "Because the agent automatically writes proposed corrections into exception records, an attacker could manipulate inputs or tool outputs so the agent proposes and persists malicious or incorrect beneficiary data, increasing the chance of downstream payment errors or fraud. ",
+        "recommendedControl": "Restrict the agent to create proposals in a non-authoritative, audit-only field and require a human to transfer any proposed change into authoritative fields; log diffs and require escalation for changes above thresholds."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+        "whyItMatters": "The agent holds its own scoped token which, if stolen or overly permissive, could be used to perform actions or be replayed by other components to escalate privileges or perform unauthorized operations. ",
+        "recommendedControl": "Apply least privilege to the scoped token, rotate it frequently, bind the token to the agent instance and network identity, and enforce short TTLs plus anomaly detection and immediate revocation on suspicious use."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent reads customer financial data and can cause payments to be released, so it is Tier 3. Key risks are the integrated move_money capability, the agent writing proposed corrections into exception records, and the presence of a scoped token; each requires stronger authorization, auditing, and token controls before approval."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The agent has the `move_money` permission, and while human confirmation is present, the risk of tool misuse or manipulation leading to unintended financial transactions remains high."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The agent's ability to write proposals to exception records without explicit human review of the *written* data introduces a risk of goal hijack or data corruption, even if the final action is confirmed."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "disagree",
+        "reason": "The use of an 'own_scoped_token' is generally a safer choice than shared credentials, and the finding describes general credential management best practices rather than a specific vulnerability in the profile."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "Payments above the analyst's own limit still need a second analyst.",
+        "whyItMatters": "The profile implies that the agent's actions are tied to the analyst's permissions, which could lead to privilege abuse if the agent is manipulated to act under a higher-privileged analyst's context or to bypass the second analyst requirement.",
+        "recommendedControl": "Implement strict server-side authorization checks for all agent actions, ensuring the agent's effective permissions are always the minimum necessary and that multi-analyst approvals are enforced independently of the agent's state."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"memory\": \"session\"",
+        "whyItMatters": "While session memory limits long-term poisoning, an attacker could still poison the agent's context within a single session, leading to biased reasoning, incorrect proposals, or tool misuse during that interaction.",
+        "recommendedControl": "Implement input validation and sanitization for all user inputs and tool outputs to prevent malicious data from entering and corrupting the agent's session memory."
+      },
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": []",
+        "whyItMatters": "The profile states no untrusted inputs, which is a dangerous assumption for any agent interacting with external data or human users, potentially leading to prompt injection or other manipulation of the agent's tools.",
+        "recommendedControl": "Explicitly identify and categorize all inputs, implementing robust input validation, sanitization, and prompt engineering techniques to treat all external inputs as untrusted."
+      }
+    ],
+    "proposedTier": 4,
+    "summary": "The Payments Operations Assistant is a Tier 4 agent because it has the capability to move money via the 'Payment release API' with human confirmation. While human confirmation is a control, the agent's direct access to financial transactions and customer data presents significant risks. Several findings highlight potential for tool misuse, privilege abuse, and memory poisoning."
+  },
+  "costUsd": 0.00778915,
+  "seconds": 24.291
+}

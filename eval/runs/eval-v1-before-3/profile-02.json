@@ -1,0 +1,241 @@
+{
+  "profileId": "profile-02",
+  "tiers": {
+    "rule": 1,
+    "reviewer": 1,
+    "checker": 1,
+    "final": 1,
+    "setBy": [
+      "rule",
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [ \"chat\" ]",
+      "whyItMatters": "The agent accepts chat input that is retained for the session, so an attacker can supply malicious or misleading content that biases answers during that session, causing incorrect guidance or data exposure.",
+      "recommendedControl": "Apply input validation and content filtering on chat inputs, implement prompt sanitization and rate limits, and add detection and isolation for sessions that show suspicious or adversarial content.",
+      "modelSeverity": "medium",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The finding correctly identifies that untrusted chat input combined with session memory creates a risk of context poisoning, which aligns with ASI06.",
+      "contested": false
+    },
+    {
+      "category": "ASI01",
+      "severity": "medium",
+      "evidenceQuote": "\"humanConfirmsActions\": false",
+      "whyItMatters": "The agent acts without human confirmation, so prompt-based manipulation or crafted inputs could shift its behavior or goals within a session and lead to inappropriate or unsafe answers being returned to employees.",
+      "recommendedControl": "Require human review for responses that match high-risk patterns, add guardrails and a policy-verification step before issuing authoritative policy guidance, and log trigger conditions that cause escalations to an HR reviewer.",
+      "modelSeverity": "medium",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The finding accurately points out that the lack of human confirmation for actions, combined with untrusted input, allows for potential agent goal hijack through prompt manipulation, fitting ASI01.",
+      "contested": false
+    },
+    {
+      "category": "ASI09",
+      "severity": "low",
+      "evidenceQuote": "\"description\": \"Employees ask questions in the intranet chat window. The bot searches the published HR policy library and answers with links to the source policy.\"",
+      "whyItMatters": "The bot will be perceived as an authoritative HR source and could unintentionally persuade employees to act on incorrect or incomplete answers, leading to misinformed HR decisions or compliance issues.",
+      "recommendedControl": "Display clear provenance and confidence levels in every answer, add explicit disclaimers that the bot is advisory only and provide an easy path to escalate to an HR agent for confirmation.",
+      "modelSeverity": "low",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The finding correctly identifies the risk of human-agent trust exploitation given the bot's role as an HR policy source, which aligns with ASI09.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI02",
+      "severity": "medium",
+      "evidenceQuote": "\"tools\": [ { \"name\": \"HR policy library search\", \"permissions\": [ \"read\" ] } ]",
+      "whyItMatters": "The agent has access to a search tool, and untrusted input could be used to manipulate the tool's usage, potentially leading to unintended data exposure or misuse of the search functionality beyond its intended scope.",
+      "recommendedControl": "Implement strict input validation and sanitization for queries passed to the 'HR policy library search' tool, and monitor tool usage for anomalous patterns.",
+      "modelSeverity": "medium"
+    }
+  ],
+  "ruleHits": [],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This read-only HR Q&A agent is Tier 1. Main risks are session-based input poisoning and prompt-based manipulation because it accepts untrusted chat without human confirmation, and the bot may be trusted by employees. Mitigations: input sanitization and session isolation, stronger guardrails and escalation for high-risk answers, and UI provenance and disclaimers.",
+  "checkerSummary": "The HR Policy Q&A Bot is a read-only agent that accesses internal documents. While it has several well-identified risks related to untrusted input and autonomous operation, these are mitigated by its limited scope and read-only access to non-sensitive data. The proposed tier reflects its read-only nature and internal data access.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1844,
+      "inputTokenDetails": {
+        "noCacheTokens": 52,
+        "cacheReadTokens": 1792,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1159,
+      "outputTokenDetails": {
+        "textTokens": 519,
+        "reasoningTokens": 640
+      },
+      "totalTokens": 3003,
+      "raw": {
+        "input_tokens": 1844,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 1792
+        },
+        "output_tokens": 1159,
+        "output_tokens_details": {
+          "reasoning_tokens": 640
+        },
+        "total_tokens": 3003
+      }
+    },
+    "latencyMs": 10653,
+    "generationId": "gen_01M5T8FHQXD8NHCPF8AEGCW75B",
+    "provider": "openai",
+    "costUsd": 0.0023758
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2504,
+      "inputTokenDetails": {
+        "noCacheTokens": 842,
+        "cacheReadTokens": 1662
+      },
+      "outputTokens": 1296,
+      "outputTokenDetails": {
+        "textTokens": 432,
+        "reasoningTokens": 864
+      },
+      "totalTokens": 3800,
+      "raw": {
+        "cachedContentTokenCount": 1662,
+        "thoughtsTokenCount": 864,
+        "promptTokenCount": 2504,
+        "candidatesTokenCount": 432,
+        "totalTokenCount": 3800,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2504
+          }
+        ],
+        "cacheTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 1662
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 432
+          }
+        ]
+      }
+    },
+    "latencyMs": 6345,
+    "generationId": "gen_01M5T8FW0CY0WFQM5JHYQQYEKA",
+    "provider": "vertex",
+    "costUsd": 0.00354246
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 1,
+    "findings": [
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [ \"chat\" ]",
+        "whyItMatters": "The agent accepts chat input that is retained for the session, so an attacker can supply malicious or misleading content that biases answers during that session, causing incorrect guidance or data exposure.",
+        "recommendedControl": "Apply input validation and content filtering on chat inputs, implement prompt sanitization and rate limits, and add detection and isolation for sessions that show suspicious or adversarial content."
+      },
+      {
+        "category": "ASI01",
+        "severity": "medium",
+        "evidenceQuote": "\"humanConfirmsActions\": false",
+        "whyItMatters": "The agent acts without human confirmation, so prompt-based manipulation or crafted inputs could shift its behavior or goals within a session and lead to inappropriate or unsafe answers being returned to employees.",
+        "recommendedControl": "Require human review for responses that match high-risk patterns, add guardrails and a policy-verification step before issuing authoritative policy guidance, and log trigger conditions that cause escalations to an HR reviewer."
+      },
+      {
+        "category": "ASI09",
+        "severity": "low",
+        "evidenceQuote": "\"description\": \"Employees ask questions in the intranet chat window. The bot searches the published HR policy library and answers with links to the source policy.\"",
+        "whyItMatters": "The bot will be perceived as an authoritative HR source and could unintentionally persuade employees to act on incorrect or incomplete answers, leading to misinformed HR decisions or compliance issues.",
+        "recommendedControl": "Display clear provenance and confidence levels in every answer, add explicit disclaimers that the bot is advisory only and provide an easy path to escalate to an HR agent for confirmation."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This read-only HR Q&A agent is Tier 1. Main risks are session-based input poisoning and prompt-based manipulation because it accepts untrusted chat without human confirmation, and the bot may be trusted by employees. Mitigations: input sanitization and session isolation, stronger guardrails and escalation for high-risk answers, and UI provenance and disclaimers."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The finding correctly identifies that untrusted chat input combined with session memory creates a risk of context poisoning, which aligns with ASI06."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The finding accurately points out that the lack of human confirmation for actions, combined with untrusted input, allows for potential agent goal hijack through prompt manipulation, fitting ASI01."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The finding correctly identifies the risk of human-agent trust exploitation given the bot's role as an HR policy source, which aligns with ASI09."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI02",
+        "severity": "medium",
+        "evidenceQuote": "\"tools\": [ { \"name\": \"HR policy library search\", \"permissions\": [ \"read\" ] } ]",
+        "whyItMatters": "The agent has access to a search tool, and untrusted input could be used to manipulate the tool's usage, potentially leading to unintended data exposure or misuse of the search functionality beyond its intended scope.",
+        "recommendedControl": "Implement strict input validation and sanitization for queries passed to the 'HR policy library search' tool, and monitor tool usage for anomalous patterns."
+      }
+    ],
+    "proposedTier": 1,
+    "summary": "The HR Policy Q&A Bot is a read-only agent that accesses internal documents. While it has several well-identified risks related to untrusted input and autonomous operation, these are mitigated by its limited scope and read-only access to non-sensitive data. The proposed tier reflects its read-only nature and internal data access."
+  },
+  "costUsd": 0.00591826,
+  "seconds": 16.999
+}

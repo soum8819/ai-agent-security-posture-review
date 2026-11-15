@@ -1,0 +1,266 @@
+{
+  "profileId": "profile-04",
+  "tiers": {
+    "rule": 4,
+    "reviewer": 3,
+    "checker": 3,
+    "final": 4,
+    "setBy": [
+      "rule"
+    ],
+    "ruleReasons": [
+      "Tier 4: acts with no person confirming (Claims management system)",
+      "Tier 2: can act beyond reading (Claims management system, Team chat notification)",
+      "Tier 2: reads confidential, personal data"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI01",
+      "severity": "high",
+      "evidenceQuote": "\"untrustedInputs\": [ \"email\", \"uploaded_files\" ]",
+      "whyItMatters": "The agent processes untrusted emails and uploads but acts autonomously to set priorities and queues, so crafted inputs could manipulate its decision-making and cause misclassification or deliberate reprioritization of claims.",
+      "recommendedControl": "Require human confirmation for any priority or queue changes detected as high-risk by an adversarial-input detector, and add input sanitization and adversarial-example detection on emails and attachments before automated handling.",
+      "modelSeverity": "high",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent processes untrusted inputs and acts autonomously to triage claims, making it vulnerable to manipulation of its core function.",
+      "contested": false
+    },
+    {
+      "category": "ASI02",
+      "severity": "critical",
+      "evidenceQuote": "\"posts urgent claims to the adjusters' team channel.\"",
+      "whyItMatters": "The agent publicly posts urgent claim details to a team channel and reads confidential and personal data, so tool outputs or misclassification could leak sensitive customer data or be used to exfiltrate information via chat messages.",
+      "recommendedControl": "Restrict what fields are posted to chat to non-sensitive metadata only, redact personal/confidential fields automatically, and require an approval step or scrubber before any message is sent to external or broad channels.",
+      "modelSeverity": "high",
+      "raisedByRule": "R1",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent reads confidential and personal data and can post messages to a team chat, creating a risk of data leakage through tool misuse.",
+      "contested": false
+    },
+    {
+      "category": "ASI03",
+      "severity": "medium",
+      "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+      "whyItMatters": "The agent holds a scoped token that allows it to write to the claims management system, so credential compromise or excessive scope could let an attacker modify claim records at scale without additional authorization.",
+      "recommendedControl": "Enforce least privilege on the token, limit its write scope to only necessary fields, apply short TTLs and automatic rotation, and monitor and alert on anomalous write patterns from the agent account.",
+      "modelSeverity": "medium",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The agent's ability to write to the claims management system with its own scoped token presents a risk if the token's scope is overly permissive or compromised.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"humanConfirmsActions\": false",
+      "whyItMatters": "The agent acts autonomously to write to the claims management system and send chat notifications, meaning any compromise or misbehavior can directly impact operations without human oversight.",
+      "recommendedControl": "Implement a human-in-the-loop confirmation step for all write actions to the claims management system and for sending chat notifications.",
+      "modelSeverity": "high"
+    },
+    {
+      "category": "ASI02",
+      "severity": "critical",
+      "evidenceQuote": "\"permissions\": [\"read\", \"write\"]",
+      "whyItMatters": "The agent has write permissions to the Claims Management System, which, combined with untrusted input, could allow an attacker to manipulate claim records directly.",
+      "recommendedControl": "Restrict write permissions to the absolute minimum necessary fields and implement strict validation on all data written to the Claims Management System.",
+      "modelSeverity": "high",
+      "raisedByRule": "R1"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R1",
+      "severity": "critical",
+      "reason": "Lists Claims management system that can move money or change customer records, and no person confirms its actions.",
+      "field": "tools.permissions, humanConfirmsActions",
+      "category": "ASI02"
+    },
+    {
+      "ruleId": "R3",
+      "severity": "high",
+      "reason": "Reads untrusted input (email, uploaded_files) and lists Claims management system that can write or run code.",
+      "field": "untrustedInputs, tools.permissions",
+      "category": "ASI01"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "This agent reads confidential and personal claims emails and autonomously writes priorities and posts to team chat, without human confirmation. Major risks are untrusted input influencing agent goals, automated posting causing data leakage, and a scoped token that could be abused if compromised; implement input validation and adversarial detection, restrict and scrub chat outputs, and tighten credential scope and rotation before deployment.",
+  "checkerSummary": "The agent handles confidential and personal customer data and has write access to the claims management system, operating without human confirmation for its actions. While it does not move money, its ability to modify claim records and post sensitive information autonomously poses significant risks. The proposed tier reflects its access to sensitive customer financial data.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1907,
+      "inputTokenDetails": {
+        "noCacheTokens": 1907,
+        "cacheReadTokens": 0,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1910,
+      "outputTokenDetails": {
+        "textTokens": 566,
+        "reasoningTokens": 1344
+      },
+      "totalTokens": 3817,
+      "raw": {
+        "input_tokens": 1907,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1910,
+        "output_tokens_details": {
+          "reasoning_tokens": 1344
+        },
+        "total_tokens": 3817
+      }
+    },
+    "latencyMs": 16776,
+    "generationId": "gen_01M5T7VEBSRV1ATQ0111QDPZQ2",
+    "provider": "openai",
+    "costUsd": 0.00429675
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2593,
+      "inputTokenDetails": {
+        "noCacheTokens": 2593,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1300,
+      "outputTokenDetails": {
+        "textTokens": 492,
+        "reasoningTokens": 808
+      },
+      "totalTokens": 3893,
+      "raw": {
+        "thoughtsTokenCount": 808,
+        "promptTokenCount": 2593,
+        "candidatesTokenCount": 492,
+        "totalTokenCount": 3893,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2593
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 492
+          }
+        ]
+      }
+    },
+    "latencyMs": 9449,
+    "generationId": "gen_01M5T7VYSPDYS3VQR6KK7RVK7A",
+    "provider": "vertex",
+    "costUsd": 0.0040279
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI01",
+        "severity": "high",
+        "evidenceQuote": "\"untrustedInputs\": [ \"email\", \"uploaded_files\" ]",
+        "whyItMatters": "The agent processes untrusted emails and uploads but acts autonomously to set priorities and queues, so crafted inputs could manipulate its decision-making and cause misclassification or deliberate reprioritization of claims.",
+        "recommendedControl": "Require human confirmation for any priority or queue changes detected as high-risk by an adversarial-input detector, and add input sanitization and adversarial-example detection on emails and attachments before automated handling."
+      },
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "\"posts urgent claims to the adjusters' team channel.\"",
+        "whyItMatters": "The agent publicly posts urgent claim details to a team channel and reads confidential and personal data, so tool outputs or misclassification could leak sensitive customer data or be used to exfiltrate information via chat messages.",
+        "recommendedControl": "Restrict what fields are posted to chat to non-sensitive metadata only, redact personal/confidential fields automatically, and require an approval step or scrubber before any message is sent to external or broad channels."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"credentials\": \"own_scoped_token\"",
+        "whyItMatters": "The agent holds a scoped token that allows it to write to the claims management system, so credential compromise or excessive scope could let an attacker modify claim records at scale without additional authorization.",
+        "recommendedControl": "Enforce least privilege on the token, limit its write scope to only necessary fields, apply short TTLs and automatic rotation, and monitor and alert on anomalous write patterns from the agent account."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "This agent reads confidential and personal claims emails and autonomously writes priorities and posts to team chat, without human confirmation. Major risks are untrusted input influencing agent goals, automated posting causing data leakage, and a scoped token that could be abused if compromised; implement input validation and adversarial detection, restrict and scrub chat outputs, and tighten credential scope and rotation before deployment."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The agent processes untrusted inputs and acts autonomously to triage claims, making it vulnerable to manipulation of its core function."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The agent reads confidential and personal data and can post messages to a team chat, creating a risk of data leakage through tool misuse."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The agent's ability to write to the claims management system with its own scoped token presents a risk if the token's scope is overly permissive or compromised."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"humanConfirmsActions\": false",
+        "whyItMatters": "The agent acts autonomously to write to the claims management system and send chat notifications, meaning any compromise or misbehavior can directly impact operations without human oversight.",
+        "recommendedControl": "Implement a human-in-the-loop confirmation step for all write actions to the claims management system and for sending chat notifications."
+      },
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "\"permissions\": [\"read\", \"write\"]",
+        "whyItMatters": "The agent has write permissions to the Claims Management System, which, combined with untrusted input, could allow an attacker to manipulate claim records directly.",
+        "recommendedControl": "Restrict write permissions to the absolute minimum necessary fields and implement strict validation on all data written to the Claims Management System."
+      }
+    ],
+    "proposedTier": 3,
+    "summary": "The agent handles confidential and personal customer data and has write access to the claims management system, operating without human confirmation for its actions. While it does not move money, its ability to modify claim records and post sensitive information autonomously poses significant risks. The proposed tier reflects its access to sensitive customer financial data."
+  },
+  "costUsd": 0.00832465,
+  "seconds": 26.225
+}

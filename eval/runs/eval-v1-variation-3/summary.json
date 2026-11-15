@@ -1,0 +1,10 @@
+{
+  "runName": "eval-v1-variation-3",
+  "profiles": [
+    "01",
+    "03",
+    "10"
+  ],
+  "costUsd": 0.024274,
+  "createdAt": "2026-10-25T19:24:48.362Z"
+}

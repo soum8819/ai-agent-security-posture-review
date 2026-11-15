@@ -1,0 +1,320 @@
+{
+  "profileId": "profile-03",
+  "tiers": {
+    "rule": 1,
+    "reviewer": 3,
+    "checker": 3,
+    "final": 3,
+    "setBy": [
+      "reviewer",
+      "checker"
+    ],
+    "ruleReasons": [
+      "Tier 1: read-only, public or internal data only"
+    ]
+  },
+  "contested": [],
+  "findings": [
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"credentials\": \"shared_token\"",
+      "whyItMatters": "A shared credential can be used by multiple agents or services, so compromise of any one consumer or leakage could expose the Sales CRM read access to attackers and enable large-scale data access or pivoting.",
+      "recommendedControl": "Replace the shared_token with a scoped, per-agent credential with least privilege and audit logging, enforce short-lived tokens and automatic rotation.",
+      "modelSeverity": "high",
+      "id": "F1",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile explicitly states the use of a shared token, which is a clear security weakness for credential management.",
+      "contested": false
+    },
+    {
+      "category": "ASI02",
+      "severity": "high",
+      "evidenceQuote": "\"description\": \"Pulls public web and news data plus read-only CRM context about a client and summarizes it into a brief for the relationship manager.\"",
+      "whyItMatters": "The agent combines untrusted web content with internal CRM data to produce briefs, so malicious or crafted web content could manipulate the agent into disclosing sensitive CRM data or producing unsafe outputs.",
+      "recommendedControl": "Implement strict input sanitization and prompt-hardening for web-derived content, and add rules preventing inclusion of internal CRM fields in outputs unless explicitly approved by a human reviewer.",
+      "modelSeverity": "high",
+      "id": "F2",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile confirms the agent combines untrusted web data with internal CRM data, creating a risk of data exfiltration or manipulation.",
+      "contested": false
+    },
+    {
+      "category": "ASI04",
+      "severity": "medium",
+      "evidenceQuote": "\"provider\": \"Anthropic\",\"name\": \"Claude Sonnet (version not specified)\"",
+      "whyItMatters": "The model and its provider are third-party components and the profile does not specify a version, increasing exposure to supply chain risks such as model compromise or unvetted updates.",
+      "recommendedControl": "Record and pin an approved model version, require vendor security attestations and monitoring for model behavior changes, and route model telemetry to security review.",
+      "modelSeverity": "medium",
+      "id": "F3",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile states the model version is not specified, which introduces supply chain risk from unvetted changes or vulnerabilities.",
+      "contested": false
+    },
+    {
+      "category": "ASI06",
+      "severity": "medium",
+      "evidenceQuote": "\"untrustedInputs\": [ \"web\" ]",
+      "whyItMatters": "Although the agent has no persistent memory, it ingests web content at runtime, which can poison the agent's context for a session and bias or corrupt briefs produced for relationship managers.",
+      "recommendedControl": "Apply content validation, provenance checks, and allowlisting for external sources; tag and separate external content from internal CRM context so the agent treats it with lower trust.",
+      "modelSeverity": "medium",
+      "id": "F4",
+      "secondModelVerdict": "agree",
+      "secondModelReason": "The profile lists 'web' as an untrusted input, confirming the risk of context poisoning even without persistent memory.",
+      "contested": false
+    },
+    {
+      "category": "ASI09",
+      "severity": "medium",
+      "evidenceQuote": "\"The brief is advisory only and a person reads it before using it.\"",
+      "whyItMatters": "Stating that a human reads the brief may encourage over-reliance on the agent, while the profile shows no human confirmation step and the agent can influence decisions with potentially incorrect or biased summaries.",
+      "recommendedControl": "Introduce an explicit human-in-the-loop confirmation step for any recommendations that reference sensitive client data, and provide provenance and confidence indicators in the brief to help the human reviewer evaluate it.",
+      "modelSeverity": "medium",
+      "id": "F5",
+      "secondModelVerdict": "disagree",
+      "secondModelReason": "The profile explicitly states 'a person reads it before using it', which mitigates the risk of human-agent trust exploitation for advisory outputs.",
+      "contested": false
+    }
+  ],
+  "missedFindings": [
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"logging\": {\"enabled\": true,\"destination\": \"Application logs, not yet forwarded to the SIEM\"}",
+      "whyItMatters": "Logs not forwarded to the SIEM mean that security teams cannot monitor agent activity for anomalies or attacks, hindering incident detection and response.",
+      "recommendedControl": "Ensure all agent logs are immediately forwarded to the central SIEM for real-time monitoring and analysis.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI08",
+      "severity": "medium",
+      "evidenceQuote": "\"killSwitch\": {\"available\": true,\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"}",
+      "whyItMatters": "A manual kill switch without a tested runbook means that in an emergency, disabling the agent could be delayed or fail, allowing a rogue agent to continue operating.",
+      "recommendedControl": "Develop and regularly test a runbook for the kill switch to ensure it can be activated quickly and reliably in an emergency.",
+      "modelSeverity": "medium"
+    },
+    {
+      "category": "ASI03",
+      "severity": "high",
+      "evidenceQuote": "\"humanConfirmsActions\": false",
+      "whyItMatters": "The agent operates without human confirmation for its actions, which increases the risk of unintended or malicious outputs being delivered directly to relationship managers without an explicit human review step.",
+      "recommendedControl": "Implement a human-in-the-loop confirmation step for all generated briefs before they are finalized or delivered to relationship managers.",
+      "modelSeverity": "medium",
+      "raisedByRule": "R4"
+    }
+  ],
+  "ruleHits": [
+    {
+      "ruleId": "R4",
+      "severity": "high",
+      "reason": "Uses a shared token instead of its own scoped credentials.",
+      "field": "credentials",
+      "category": "ASI03"
+    }
+  ],
+  "manipulationAttempt": {
+    "detected": false,
+    "quote": "",
+    "quoteFound": true
+  },
+  "reviewerSummary": "The agent reads internal CRM data and untrusted web content while using a shared credential and a third-party model with no pinned version, which creates medium to high risks including privilege abuse, tool-based exfiltration via crafted web inputs, supply chain exposure, and context poisoning. Recommend per-agent scoped credentials, input sanitization and provenance controls, pinned model versions, and an explicit human confirmation step with provenance metadata before using briefs.",
+  "checkerSummary": "The Account Research Agent reads internal CRM data and combines it with untrusted public web content to generate client briefs. While it has no write access, the use of a shared token, lack of specified model version, and unconfirmed actions pose significant risks. Logging is not integrated with the SIEM, and the kill switch lacks a tested runbook, further increasing operational risk.",
+  "droppedFindings": [],
+  "droppedMissedFindings": [],
+  "unknownVerdicts": [],
+  "reviewer": {
+    "model": "openai/gpt-5-mini",
+    "promptVersion": "v4",
+    "settings": {
+      "model": "openai/gpt-5-mini",
+      "providers": [
+        "azure",
+        "openai"
+      ],
+      "disallowPromptTraining": true,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 1881,
+      "inputTokenDetails": {
+        "noCacheTokens": 89,
+        "cacheReadTokens": 1792,
+        "cacheWriteTokens": 0
+      },
+      "outputTokens": 1672,
+      "outputTokenDetails": {
+        "textTokens": 776,
+        "reasoningTokens": 896
+      },
+      "totalTokens": 3553,
+      "raw": {
+        "input_tokens": 1881,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 1792
+        },
+        "output_tokens": 1672,
+        "output_tokens_details": {
+          "reasoning_tokens": 896
+        },
+        "total_tokens": 3553
+      }
+    },
+    "latencyMs": 11694,
+    "generationId": "gen_01M5T86FT2D0MFJM308QMP0H7V",
+    "provider": "openai",
+    "costUsd": 0.00341105
+  },
+  "checker": {
+    "model": "google/gemini-2.5-flash",
+    "promptVersion": "c1",
+    "settings": {
+      "model": "google/gemini-2.5-flash",
+      "providers": [
+        "vertex"
+      ],
+      "disallowPromptTraining": true,
+      "temperature": 0.2,
+      "reasoning": "low",
+      "maxOutputTokens": 6000
+    },
+    "usage": {
+      "inputTokens": 2836,
+      "inputTokenDetails": {
+        "noCacheTokens": 2836,
+        "cacheReadTokens": 0
+      },
+      "outputTokens": 1610,
+      "outputTokenDetails": {
+        "textTokens": 752,
+        "reasoningTokens": 858
+      },
+      "totalTokens": 4446,
+      "raw": {
+        "thoughtsTokenCount": 858,
+        "promptTokenCount": 2836,
+        "candidatesTokenCount": 752,
+        "totalTokenCount": 4446,
+        "trafficType": "ON_DEMAND",
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 2836
+          }
+        ],
+        "candidatesTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 752
+          }
+        ]
+      }
+    },
+    "latencyMs": 7945,
+    "generationId": "gen_01M5T86V7XSYHTYFZEZYNWGFGZ",
+    "provider": "vertex",
+    "costUsd": 0.0048758
+  },
+  "rawReviewerOutput": {
+    "proposedTier": 3,
+    "findings": [
+      {
+        "category": "ASI03",
+        "severity": "high",
+        "evidenceQuote": "\"credentials\": \"shared_token\"",
+        "whyItMatters": "A shared credential can be used by multiple agents or services, so compromise of any one consumer or leakage could expose the Sales CRM read access to attackers and enable large-scale data access or pivoting.",
+        "recommendedControl": "Replace the shared_token with a scoped, per-agent credential with least privilege and audit logging, enforce short-lived tokens and automatic rotation."
+      },
+      {
+        "category": "ASI02",
+        "severity": "high",
+        "evidenceQuote": "\"description\": \"Pulls public web and news data plus read-only CRM context about a client and summarizes it into a brief for the relationship manager.\"",
+        "whyItMatters": "The agent combines untrusted web content with internal CRM data to produce briefs, so malicious or crafted web content could manipulate the agent into disclosing sensitive CRM data or producing unsafe outputs.",
+        "recommendedControl": "Implement strict input sanitization and prompt-hardening for web-derived content, and add rules preventing inclusion of internal CRM fields in outputs unless explicitly approved by a human reviewer."
+      },
+      {
+        "category": "ASI04",
+        "severity": "medium",
+        "evidenceQuote": "\"provider\": \"Anthropic\",\"name\": \"Claude Sonnet (version not specified)\"",
+        "whyItMatters": "The model and its provider are third-party components and the profile does not specify a version, increasing exposure to supply chain risks such as model compromise or unvetted updates.",
+        "recommendedControl": "Record and pin an approved model version, require vendor security attestations and monitoring for model behavior changes, and route model telemetry to security review."
+      },
+      {
+        "category": "ASI06",
+        "severity": "medium",
+        "evidenceQuote": "\"untrustedInputs\": [ \"web\" ]",
+        "whyItMatters": "Although the agent has no persistent memory, it ingests web content at runtime, which can poison the agent's context for a session and bias or corrupt briefs produced for relationship managers.",
+        "recommendedControl": "Apply content validation, provenance checks, and allowlisting for external sources; tag and separate external content from internal CRM context so the agent treats it with lower trust."
+      },
+      {
+        "category": "ASI09",
+        "severity": "medium",
+        "evidenceQuote": "\"The brief is advisory only and a person reads it before using it.\"",
+        "whyItMatters": "Stating that a human reads the brief may encourage over-reliance on the agent, while the profile shows no human confirmation step and the agent can influence decisions with potentially incorrect or biased summaries.",
+        "recommendedControl": "Introduce an explicit human-in-the-loop confirmation step for any recommendations that reference sensitive client data, and provide provenance and confidence indicators in the brief to help the human reviewer evaluate it."
+      }
+    ],
+    "manipulationAttempt": {
+      "detected": false,
+      "quote": ""
+    },
+    "summary": "The agent reads internal CRM data and untrusted web content while using a shared credential and a third-party model with no pinned version, which creates medium to high risks including privilege abuse, tool-based exfiltration via crafted web inputs, supply chain exposure, and context poisoning. Recommend per-agent scoped credentials, input sanitization and provenance controls, pinned model versions, and an explicit human confirmation step with provenance metadata before using briefs."
+  },
+  "rawCheckerOutput": {
+    "verdicts": [
+      {
+        "findingId": "F1",
+        "verdict": "agree",
+        "reason": "The profile explicitly states the use of a shared token, which is a clear security weakness for credential management."
+      },
+      {
+        "findingId": "F2",
+        "verdict": "agree",
+        "reason": "The profile confirms the agent combines untrusted web data with internal CRM data, creating a risk of data exfiltration or manipulation."
+      },
+      {
+        "findingId": "F3",
+        "verdict": "agree",
+        "reason": "The profile states the model version is not specified, which introduces supply chain risk from unvetted changes or vulnerabilities."
+      },
+      {
+        "findingId": "F4",
+        "verdict": "agree",
+        "reason": "The profile lists 'web' as an untrusted input, confirming the risk of context poisoning even without persistent memory."
+      },
+      {
+        "findingId": "F5",
+        "verdict": "disagree",
+        "reason": "The profile explicitly states 'a person reads it before using it', which mitigates the risk of human-agent trust exploitation for advisory outputs."
+      }
+    ],
+    "missedFindings": [
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"logging\": {\"enabled\": true,\"destination\": \"Application logs, not yet forwarded to the SIEM\"}",
+        "whyItMatters": "Logs not forwarded to the SIEM mean that security teams cannot monitor agent activity for anomalies or attacks, hindering incident detection and response.",
+        "recommendedControl": "Ensure all agent logs are immediately forwarded to the central SIEM for real-time monitoring and analysis."
+      },
+      {
+        "category": "ASI08",
+        "severity": "medium",
+        "evidenceQuote": "\"killSwitch\": {\"available\": true,\"description\": \"Manual: the on-call engineer disables the agent's service account. No tested runbook.\"}",
+        "whyItMatters": "A manual kill switch without a tested runbook means that in an emergency, disabling the agent could be delayed or fail, allowing a rogue agent to continue operating.",
+        "recommendedControl": "Develop and regularly test a runbook for the kill switch to ensure it can be activated quickly and reliably in an emergency."
+      },
+      {
+        "category": "ASI03",
+        "severity": "medium",
+        "evidenceQuote": "\"humanConfirmsActions\": false",
+        "whyItMatters": "The agent operates without human confirmation for its actions, which increases the risk of unintended or malicious outputs being delivered directly to relationship managers without an explicit human review step.",
+        "recommendedControl": "Implement a human-in-the-loop confirmation step for all generated briefs before they are finalized or delivered to relationship managers."
+      }
+    ],
+    "proposedTier": 3,
+    "summary": "The Account Research Agent reads internal CRM data and combines it with untrusted public web content to generate client briefs. While it has no write access, the use of a shared token, lack of specified model version, and unconfirmed actions pose significant risks. Logging is not integrated with the SIEM, and the kill switch lacks a tested runbook, further increasing operational risk."
+  },
+  "costUsd": 0.00828685,
+  "seconds": 19.639
+}

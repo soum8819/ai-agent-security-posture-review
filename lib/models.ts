@@ -1,5 +1,5 @@
 // The single place model names live. Change a model here, not in the routes.
-export const REVIEWER_MODEL = "openai/gpt-5-mini";
+export const REVIEWER_MODEL = "anthropic/claude-sonnet-5.5";
 export const CHECKER_MODEL = "google/gemini-2.5-flash";
 
 // Step 11d, data handling. Each model may only be served by these AI Gateway
@@ -8,10 +8,13 @@ export const CHECKER_MODEL = "google/gemini-2.5-flash";
 // capable", so turning on zero data retention later (it needs a Pro or
 // Enterprise plan) needs no provider change. Checked 2026-10-25:
 //   gpt-5-mini: azure and openai are both, so both are allowed.
+//   claude-sonnet-5.5 (eval-v2, checked 2026-11-14): anthropic, bedrock,
+//   claudeaws and vertexAnthropic are all both; only anthropic is allowed,
+//   so every eval-v2 call is served by the same provider.
 //   gemini-2.5-flash: vertex is both; google's zero data retention status is
 //   unknown, so it is left out. Cost: no fallback provider for the checker.
 // Zero data retention itself is not set: it is not available on this plan.
-export const REVIEWER_PROVIDERS = ["azure", "openai"];
+export const REVIEWER_PROVIDERS = ["anthropic"];
 export const CHECKER_PROVIDERS = ["vertex"];
 
 // Sent with every model call. disallowPromptTraining is free on every plan
