@@ -2,7 +2,7 @@
 // through AI Gateway, checks the evidence of any missed findings, and marks
 // contested findings. Server-side only: it uses the AI Gateway key.
 import { generateText, Output } from "ai";
-import { checkEvidence, type KeptFinding } from "./analyze.ts";
+import { MODEL_CALL_TIMEOUT_MS, checkEvidence, type KeptFinding } from "./analyze.ts";
 import { CHECK_PROMPT_VERSION, CHECK_SYSTEM_PROMPT, checkUserPrompt } from "./crosscheck-prompt.ts";
 import { CHECKER_MODEL, CHECKER_PROVIDERS, gatewayOptions, resolvedProvider } from "./models.ts";
 import type { AgentProfile } from "./profile-schema.ts";
@@ -16,6 +16,7 @@ export const CHECK_SETTINGS = {
   temperature: 0.2,
   reasoning: "low",
   maxOutputTokens: 6000,
+  timeoutMs: MODEL_CALL_TIMEOUT_MS,
 } as const;
 
 type ModelFinding = ModelReview["findings"][number];
@@ -69,6 +70,7 @@ export async function crosscheckReview(profile: AgentProfile, firstFindings: Kep
     temperature: CHECK_SETTINGS.temperature,
     reasoning: CHECK_SETTINGS.reasoning,
     maxOutputTokens: CHECK_SETTINGS.maxOutputTokens,
+    timeout: CHECK_SETTINGS.timeoutMs,
     providerOptions: gatewayOptions(CHECK_SETTINGS.providers),
     system: CHECK_SYSTEM_PROMPT,
     prompt: checkUserPrompt(profile, firstFindings.map(asFirstModelFinding)),

@@ -9,12 +9,22 @@ import { quoteIsInProfile } from "./evidence.ts";
 import { PROMPT_VERSION, SYSTEM_PROMPT, userPrompt } from "./review-prompt.ts";
 import { assignTier, enforceFloor, runRules, type RuleHit, type Severity } from "./rules.ts";
 
+// Time limit for one model call, AI SDK retries included. Recorded calls
+// (372 across eval/runs, checked 2026-11-15): slowest 80.2 s, medians 8 to
+// 17 s, plus one gpt-5-mini call that hung for 65 minutes. 180 s is over
+// twice the slowest real call and stays under the 300 s Vercel function
+// limit, so this trips first with a clear reason. When it trips the call
+// throws a TimeoutError: the workflow step retries once, then the review is
+// marked failed.
+export const MODEL_CALL_TIMEOUT_MS = 180_000;
+
 export const REVIEW_SETTINGS = {
   model: REVIEWER_MODEL,
   providers: REVIEWER_PROVIDERS,
   disallowPromptTraining: true,
   reasoning: "low",
   maxOutputTokens: 6000,
+  timeoutMs: MODEL_CALL_TIMEOUT_MS,
   // No temperature: openai/gpt-5-mini does not accept one (checked on the
   // AI Gateway model listing, step 8). Reasoning effort is fixed instead.
 } as const;
@@ -62,6 +72,7 @@ export async function analyzeProfile(profile: AgentProfile) {
     model: REVIEW_SETTINGS.model,
     reasoning: REVIEW_SETTINGS.reasoning,
     maxOutputTokens: REVIEW_SETTINGS.maxOutputTokens,
+    timeout: REVIEW_SETTINGS.timeoutMs,
     providerOptions: gatewayOptions(REVIEW_SETTINGS.providers),
     system: SYSTEM_PROMPT,
     prompt: userPrompt(profile),

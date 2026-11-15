@@ -122,6 +122,7 @@ step 6 and kept up to date since.
 
 - `tests/rules.test.ts`: one test for each rule, for tier assignment and for the severity floor, using made-up profiles; run with `npm test`.
 - `tests/analyze.test.ts`: proves the evidence check drops a made-up finding and the rule floor raises a severity that is too low; calls no model.
+- `tests/model-timeout.test.ts`: proves a reviewer or checker call that never answers is cut off by the 3-minute time limit and fails the review the normal way; calls no model.
 - `scripts/run-reviews.ts`: a developer tool that runs full reviews (both models) over the evaluation profiles and saves raw results and actual cost to `eval/runs`; run with `npm run reviews -- --set tuning` or `--set all`, or `--checker-only --from <run folder>` to test the checker on saved reviewer results.
 - `tests/evidence-pack.test.ts`: proves the evidence pack holds what the committee needs, keeps every quote exactly as stored, and has no JSON-looking text outside quotes.
 - `tests/design.test.ts`: reads the stylesheet and proves every text colour pair passes contrast of 4.5 to 1 in light and dark mode, and that focus and reduced motion are handled.
